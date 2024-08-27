@@ -8,6 +8,7 @@ numbered: 4
 ---
 
 preface/environ
+installation/index
 ```
 
 ## 索引と検索
