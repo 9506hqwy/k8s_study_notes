@@ -3,4 +3,5 @@
 ```{toctree}
 prepare
 cluster
+network_addon
 ```
