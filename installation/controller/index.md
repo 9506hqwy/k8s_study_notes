@@ -4,4 +4,5 @@
 prepare
 cluster
 network_addon
+kubernetes
 ```
