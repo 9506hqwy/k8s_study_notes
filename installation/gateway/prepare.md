@@ -11,26 +11,26 @@ hostnamectl set-hostname gateway.home.local
 ネットワークアダプタを設定する。
 
 ```sh
-nmcli connection modify eth1 \
+nmcli connection modify enp2s0 \
     ipv6.method disabled \
     ipv4.method manual \
     ipv4.dns-search home.local \
     ipv4.addresses 172.16.0.254/24 \
     connection.autoconnect yes
-nmcli connection up eth1
+nmcli connection up enp2s0
 
-nmcli connection modify eth0 \
+nmcli connection modify enp1s0 \
     ipv6.method disabled \
     ipv4.method auto \
     connection.autoconnect yes
-nmcli connection up eth0
+nmcli connection up enp1s0
 ```
 
 ファイアウォールを設定する。
 
 ```sh
-firewall-cmd --permanent --zone=external --change-interface=eth0
-firewall-cmd --permanent --zone=internal --change-interface=eth1
+firewall-cmd --permanent --zone=external --change-interface=enp1s0
+firewall-cmd --permanent --zone=internal --change-interface=enp2s0
 
 firewall-cmd --permanent --zone=external --add-masquerade
 firewall-cmd --permanent --zone=internal --add-forward

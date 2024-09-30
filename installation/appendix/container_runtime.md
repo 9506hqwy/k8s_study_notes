@@ -25,8 +25,8 @@ firewall-cmd --reload
 インストール対象を指定する。
 
 ```sh
-export KUBERNETES_VERSION=v1.30
-export PROJECT_PATH=prerelease:/main
+export KUBERNETES_VERSION=v1.31
+export CRIO_VERSION=v1.31
 ```
 
 kubernetes パッケージをインストールするためリポジトリを有効化する。
@@ -48,10 +48,10 @@ CRI-O パッケージをインストールするためリポジトリを有効�
 cat > /etc/yum.repos.d/cri-o.repo <<EOF
 [cri-o]
 name=CRI-O
-baseurl=https://pkgs.k8s.io/addons:/cri-o:/$PROJECT_PATH/rpm/
+baseurl=https://pkgs.k8s.io/addons:/cri-o:/stable:/$CRIO_VERSION/rpm/
 enabled=1
 gpgcheck=1
-gpgkey=https://pkgs.k8s.io/addons:/cri-o:/$PROJECT_PATH/rpm/repodata/repomd.xml.key
+gpgkey=https://pkgs.k8s.io/addons:/cri-o:/stable:/$CRIO_VERSION/rpm/repodata/repomd.xml.key
 EOF
 ```
 

@@ -40,5 +40,5 @@ chronyc sources
 ```
 MS Name/IP address         Stratum Poll Reach LastRx Last sample
 ===============================================================================
-^* ntp-a3.nict.go.jp             1   6     7     1   -549us[-2167us] +/-   13ms
+^? ntp-b3.nict.go.jp             1   6     3     2  -1275us[-1275us] +/-   18ms
 ```

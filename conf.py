@@ -38,3 +38,7 @@ numfig_secnum_depth = 0
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 html_style = 'css/styles.css'
+
+# -- MyST configuration-------------------------------------------------------
+
+myst_number_code_blocks = ["sh"]

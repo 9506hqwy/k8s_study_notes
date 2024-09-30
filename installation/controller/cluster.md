@@ -5,17 +5,18 @@
 コントロールプレーンを構築する。
 
 ```sh
-kubeadm init --control-plane-endpoint=controller.home.local --pod-network-cidr=192.168.0.0/16
+kubeadm init --control-plane-endpoint=controller.home.local --pod-network-cidr=172.17.0.0/16
 ```
 
 ```
-[init] Using Kubernetes version: v1.30.1
+[init] Using Kubernetes version: v1.31.0
 [preflight] Running pre-flight checks
         [WARNING Firewalld]: firewalld is active, please ensure ports [6443 10250] are open or your cluster may not function correctly
+        [WARNING FileExisting-socat]: socat not found in system path
         [WARNING Service-Kubelet]: kubelet service is not enabled, please run 'systemctl enable kubelet.service'
 [preflight] Pulling images required for setting up a Kubernetes cluster
 [preflight] This might take a minute or two, depending on the speed of your internet connection
-[preflight] You can also perform this action in beforehand using 'kubeadm config images pull'
+[preflight] You can also perform this action beforehand using 'kubeadm config images pull'
 [certs] Using certificateDir folder "/etc/kubernetes/pki"
 [certs] Generating "ca" certificate and key
 [certs] Generating "apiserver" certificate and key
@@ -46,16 +47,16 @@ kubeadm init --control-plane-endpoint=controller.home.local --pod-network-cidr=1
 [kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
 [kubelet-start] Starting the kubelet
 [wait-control-plane] Waiting for the kubelet to boot up the control plane as static Pods from directory "/etc/kubernetes/manifests"
-[kubelet-check] Waiting for a healthy kubelet. This can take up to 4m0s
-[kubelet-check] The kubelet is healthy after 1.061184605s
+[kubelet-check] Waiting for a healthy kubelet at http://127.0.0.1:10248/healthz. This can take up to 4m0s
+[kubelet-check] The kubelet is healthy after 10.501895878s
 [api-check] Waiting for a healthy API server. This can take up to 4m0s
-[api-check] The API server is healthy after 44.501711497s
+[api-check] The API server is healthy after 3.001288635s
 [upload-config] Storing the configuration used in ConfigMap "kubeadm-config" in the "kube-system" Namespace
 [kubelet] Creating a ConfigMap "kubelet-config" in namespace kube-system with the configuration for the kubelets in the cluster
 [upload-certs] Skipping phase. Please see --upload-certs
 [mark-control-plane] Marking the node controller.home.local as control-plane by adding the labels: [node-role.kubernetes.io/control-plane node.kubernetes.io/exclude-from-external-load-balancers]
 [mark-control-plane] Marking the node controller.home.local as control-plane by adding the taints [node-role.kubernetes.io/control-plane:NoSchedule]
-[bootstrap-token] Using token: 50xk2g.pgg67ykupqov7nrx
+[bootstrap-token] Using token: uko9ek.0g7wje5trztdsc8d
 [bootstrap-token] Configuring bootstrap tokens, cluster-info ConfigMap, RBAC Roles
 [bootstrap-token] Configured RBAC rules to allow Node Bootstrap tokens to get nodes
 [bootstrap-token] Configured RBAC rules to allow Node Bootstrap tokens to post CSRs in order for nodes to get long term certificate credentials
@@ -85,14 +86,14 @@ Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
 You can now join any number of control-plane nodes by copying certificate authorities
 and service account keys on each node and then running the following as root:
 
-  kubeadm join controller.home.local:6443 --token 50xk2g.pgg67ykupqov7nrx \
-        --discovery-token-ca-cert-hash sha256:8afa26c573f015cbd81c9e320d33111fbd9d6e0a43a1cf6024976de1529c6d8b \
+  kubeadm join controller.home.local:6443 --token uko9ek.0g7wje5trztdsc8d \
+        --discovery-token-ca-cert-hash sha256:a9e19ff35745b233a452c780fa4f73fbd6b1e7927ad4dfcd95d17ce40ba7b755 \
         --control-plane
 
 Then you can join any number of worker nodes by running the following on each as root:
 
-kubeadm join controller.home.local:6443 --token 50xk2g.pgg67ykupqov7nrx \
-        --discovery-token-ca-cert-hash sha256:8afa26c573f015cbd81c9e320d33111fbd9d6e0a43a1cf6024976de1529c6d8b
+kubeadm join controller.home.local:6443 --token uko9ek.0g7wje5trztdsc8d \
+        --discovery-token-ca-cert-hash sha256:a9e19ff35745b233a452c780fa4f73fbd6b1e7927ad4dfcd95d17ce40ba7b755
 ```
 
 マシン起動時の自動起動を設定する。
@@ -111,6 +112,10 @@ chown $(id -u):$(id -g) $HOME/.kube/config
 
 ## 環境確認
 
+Controller Node でネットワーク構成を確認する。
+
+![Controller ノードの構成](../../_static/image/controller_cluster.png "Controller ノードの構成")
+
 ### ネットワーク名前空間
 
 ネットワーク名前空間を確認する。
@@ -120,13 +125,13 @@ ip netns
 ```
 
 ```
-e3e2e0a1-062b-480a-a483-660254e2abe0 (id: 0)
-c1c0eace-08c5-4bdd-9420-6b215f3fefc5
-cb0e0d0a-ff37-4145-9b11-aca82942493d (id: 1)
-a99f9b7e-5f7c-4ec8-bf45-cb64d51456e0
-e7b1d7bb-4b7d-4ea6-8afd-8b24ee745b24
-322f5081-3c51-4541-a1dc-5ac30daa5713
-dfb4ea86-a48b-4ee0-bf68-62892c0f3838
+0a18661a-bf87-4b92-bf3a-02fd92e2f4ca
+19be561a-e22f-4e6d-8562-5abf81ac1183 (id: 0)
+4cfbb0ee-341e-4786-b6b7-3d9804b5979c (id: 1)
+c971a8f9-2335-4a7d-b5a8-acfb26417def
+b52eddf9-a979-4298-85d5-9537dcf99217
+a92692ef-63ca-4f51-ae44-a6d1a9beaaba
+8305da93-f5f6-4446-a2ef-1991904aca58
 ```
 
 ### デバイス
@@ -140,49 +145,49 @@ ip -d link show
 ```
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
-2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP mode DEFAULT group default qlen 1000
-    link/ether 00:15:5d:bf:ba:60 brd ff:ff:ff:ff:ff:ff promiscuity 0  allmulti 0 minmtu 68 maxmtu 65521 addrgenmode none numtxqueues 64 numrxqueues 64 gso_max_size 62780 gso_max_segs 65535 tso_max_size 62780 tso_max_segs 65535 gro_max_size 65536 parentbus vmbus parentdev 0ad645ee-5652-4cb9-8a61-d70dbad17ffe
-3: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP mode DEFAULT group default qlen 1000
-    link/ether 00:15:5d:bf:ba:63 brd ff:ff:ff:ff:ff:ff promiscuity 0  allmulti 0 minmtu 68 maxmtu 65521 addrgenmode none numtxqueues 64 numrxqueues 64 gso_max_size 62780 gso_max_segs 65535 tso_max_size 62780 tso_max_segs 65535 gro_max_size 65536 parentbus vmbus parentdev e64b23d6-2347-4eb9-9ab7-3274451a7178
+2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
+    link/ether 52:54:00:80:ad:b6 brd ff:ff:ff:ff:ff:ff promiscuity 0  allmulti 0 minmtu 68 maxmtu 65535 addrgenmode none numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 65536 tso_max_segs 65535 gro_max_size 65536 parentbus virtio parentdev virtio0
+3: enp2s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
+    link/ether 52:54:00:6a:9d:95 brd ff:ff:ff:ff:ff:ff promiscuity 0  allmulti 0 minmtu 68 maxmtu 65535 addrgenmode none numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 65536 tso_max_segs 65535 gro_max_size 65536 parentbus virtio parentdev virtio1
 4: cni0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default qlen 1000
-    link/ether 2e:ef:76:4d:74:2f brd ff:ff:ff:ff:ff:ff promiscuity 0  allmulti 0 minmtu 68 maxmtu 65535
-    bridge forward_delay 1500 hello_time 200 max_age 2000 ageing_time 30000 stp_state 0 priority 32768 vlan_filtering 0 vlan_protocol 802.1Q bridge_id 8000.2e:ef:76:4d:74:2f designated_root 8000.2e:ef:76:4d:74:2f root_port 0 root_path_cost 0 topology_change 0 topology_change_detected 0 hello_timer    0.00 tcn_timer    0.00 topology_change_timer    0.00 gc_timer  141.18 vlan_default_pvid 1 vlan_stats_enabled 0 vlan_stats_per_port 0 group_fwd_mask 0 group_address 01:80:c2:00:00:00 mcast_snooping 1 no_linklocal_learn 0 mcast_vlan_snooping 0 mcast_router 1 mcast_query_use_ifaddr 0 mcast_querier 0 mcast_hash_elasticity 16 mcast_hash_max 4096 mcast_last_member_count 2 mcast_startup_query_count 2 mcast_last_member_interval 100 mcast_membership_interval 26000 mcast_querier_interval 25500 mcast_query_interval 12500 mcast_query_response_interval 1000 mcast_startup_query_interval 3125 mcast_stats_enabled 0 mcast_igmp_version 2 mcast_mld_version 1 nf_call_iptables 0 nf_call_ip6tables 0 nf_call_arptables 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
-5: veth2c3744a3@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master cni0 state UP mode DEFAULT group default
-    link/ether 76:c7:d5:bb:81:33 brd ff:ff:ff:ff:ff:ff link-netns e3e2e0a1-062b-480a-a483-660254e2abe0 promiscuity 1  allmulti 1 minmtu 68 maxmtu 65535
+    link/ether 4a:74:1b:6d:d1:82 brd ff:ff:ff:ff:ff:ff promiscuity 0  allmulti 0 minmtu 68 maxmtu 65535
+    bridge forward_delay 1500 hello_time 200 max_age 2000 ageing_time 30000 stp_state 0 priority 32768 vlan_filtering 0 vlan_protocol 802.1Q bridge_id 8000.4a:74:1b:6d:d1:82 designated_root 8000.4a:74:1b:6d:d1:82 root_port 0 root_path_cost 0 topology_change 0 topology_change_detected 0 hello_timer    0.00 tcn_timer    0.00 topology_change_timer    0.00 gc_timer  104.46 vlan_default_pvid 1 vlan_stats_enabled 0 vlan_stats_per_port 0 group_fwd_mask 0 group_address 01:80:c2:00:00:00 mcast_snooping 1 no_linklocal_learn 0 mcast_vlan_snooping 0 mcast_router 1 mcast_query_use_ifaddr 0 mcast_querier 0 mcast_hash_elasticity 16 mcast_hash_max 4096 mcast_last_member_count 2 mcast_startup_query_count 2 mcast_last_member_interval 100 mcast_membership_interval 26000 mcast_querier_interval 25500 mcast_query_interval 12500 mcast_query_response_interval 1000 mcast_startup_query_interval 3125 mcast_stats_enabled 0 mcast_igmp_version 2 mcast_mld_version 1 nf_call_iptables 0 nf_call_ip6tables 0 nf_call_arptables 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
+5: veth5abaf068@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master cni0 state UP mode DEFAULT group default
+    link/ether d6:87:62:2a:3d:b6 brd ff:ff:ff:ff:ff:ff link-netns 19be561a-e22f-4e6d-8562-5abf81ac1183 promiscuity 1  allmulti 1 minmtu 68 maxmtu 65535
     veth
-    bridge_slave state forwarding priority 32 cost 2 hairpin on guard off root_block off fastleave off learning on flood on port_id 0x8002 port_no 0x2 designated_port 32770 designated_cost 0 designated_bridge 8000.2e:ef:76:4d:74:2f designated_root 8000.2e:ef:76:4d:74:2f hold_timer    0.00 message_age_timer    0.00 forward_delay_timer    0.00 topology_change_ack 0 config_pending 0 proxy_arp off proxy_arp_wifi off mcast_router 1 mcast_fast_leave off mcast_flood on bcast_flood on mcast_to_unicast off neigh_suppress off group_fwd_mask 0 group_fwd_mask_str 0x0 vlan_tunnel off isolated off locked off mab off addrgenmode eui64 numtxqueues 2 numrxqueues 2 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
-6: vethf3cf048b@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master cni0 state UP mode DEFAULT group default
-    link/ether 4a:9e:48:be:23:c9 brd ff:ff:ff:ff:ff:ff link-netns cb0e0d0a-ff37-4145-9b11-aca82942493d promiscuity 1  allmulti 1 minmtu 68 maxmtu 65535
+    bridge_slave state forwarding priority 32 cost 2 hairpin on guard off root_block off fastleave off learning on flood on port_id 0x8001 port_no 0x1 designated_port 32769 designated_cost 0 designated_bridge 8000.4a:74:1b:6d:d1:82 designated_root 8000.4a:74:1b:6d:d1:82 hold_timer    0.00 message_age_timer    0.00 forward_delay_timer    0.00 topology_change_ack 0 config_pending 0 proxy_arp off proxy_arp_wifi off mcast_router 1 mcast_fast_leave off mcast_flood on bcast_flood on mcast_to_unicast off neigh_suppress off group_fwd_mask 0 group_fwd_mask_str 0x0 vlan_tunnel off isolated off locked off mab off addrgenmode eui64 numtxqueues 4 numrxqueues 4 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
+6: veth0715fe81@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master cni0 state UP mode DEFAULT group default
+    link/ether c6:5a:dc:60:11:b7 brd ff:ff:ff:ff:ff:ff link-netns 4cfbb0ee-341e-4786-b6b7-3d9804b5979c promiscuity 1  allmulti 1 minmtu 68 maxmtu 65535
     veth
-    bridge_slave state forwarding priority 32 cost 2 hairpin on guard off root_block off fastleave off learning on flood on port_id 0x8001 port_no 0x1 designated_port 32769 designated_cost 0 designated_bridge 8000.2e:ef:76:4d:74:2f designated_root 8000.2e:ef:76:4d:74:2f hold_timer    0.00 message_age_timer    0.00 forward_delay_timer    0.00 topology_change_ack 0 config_pending 0 proxy_arp off proxy_arp_wifi off mcast_router 1 mcast_fast_leave off mcast_flood on bcast_flood on mcast_to_unicast off neigh_suppress off group_fwd_mask 0 group_fwd_mask_str 0x0 vlan_tunnel off isolated off locked off mab off addrgenmode eui64 numtxqueues 2 numrxqueues 2 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
+    bridge_slave state forwarding priority 32 cost 2 hairpin on guard off root_block off fastleave off learning on flood on port_id 0x8002 port_no 0x2 designated_port 32770 designated_cost 0 designated_bridge 8000.4a:74:1b:6d:d1:82 designated_root 8000.4a:74:1b:6d:d1:82 hold_timer    0.00 message_age_timer    0.00 forward_delay_timer    0.00 topology_change_ack 0 config_pending 0 proxy_arp off proxy_arp_wifi off mcast_router 1 mcast_fast_leave off mcast_flood on bcast_flood on mcast_to_unicast off neigh_suppress off group_fwd_mask 0 group_fwd_mask_str 0x0 vlan_tunnel off isolated off locked off mab off addrgenmode eui64 numtxqueues 4 numrxqueues 4 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
 ```
 
 ネットワーク名前空間内のデバイスを確認する。
 
 ```sh
-ip netns exec e3e2e0a1-062b-480a-a483-660254e2abe0 ip -d link show
+ip netns exec 19be561a-e22f-4e6d-8562-5abf81ac1183 ip -d link show
 ```
 
 ```
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
 2: eth0@if5: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default
-    link/ether 6e:ce:a9:a6:c0:4c brd ff:ff:ff:ff:ff:ff link-netns c1c0eace-08c5-4bdd-9420-6b215f3fefc5 promiscuity 0  allmulti 0 minmtu 68 maxmtu 65535
-    veth addrgenmode eui64 numtxqueues 2 numrxqueues 2 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
+    link/ether d6:69:ec:c0:c9:61 brd ff:ff:ff:ff:ff:ff link-netns 0a18661a-bf87-4b92-bf3a-02fd92e2f4ca promiscuity 0  allmulti 0 minmtu 68 maxmtu 65535
+    veth addrgenmode eui64 numtxqueues 4 numrxqueues 4 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
 ```
 
 ネットワーク名前空間内のデバイスを確認する。
 
 ```sh
-ip netns exec cb0e0d0a-ff37-4145-9b11-aca82942493d ip -d link show
+ip netns exec 4cfbb0ee-341e-4786-b6b7-3d9804b5979c ip -d link show
 ```
 
 ```
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
 2: eth0@if6: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default
-    link/ether ae:7b:c6:41:f1:08 brd ff:ff:ff:ff:ff:ff link-netns c1c0eace-08c5-4bdd-9420-6b215f3fefc5 promiscuity 0  allmulti 0 minmtu 68 maxmtu 65535
-    veth addrgenmode eui64 numtxqueues 2 numrxqueues 2 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
+    link/ether ba:da:46:14:24:10 brd ff:ff:ff:ff:ff:ff link-netns 0a18661a-bf87-4b92-bf3a-02fd92e2f4ca promiscuity 0  allmulti 0 minmtu 68 maxmtu 65535
+    veth addrgenmode eui64 numtxqueues 4 numrxqueues 4 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
 ```
 
 ### イーサネット
@@ -198,28 +203,28 @@ ip addr show
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
     inet 127.0.0.1/8 scope host lo
        valid_lft forever preferred_lft forever
-2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
-    link/ether 00:15:5d:bf:ba:60 brd ff:ff:ff:ff:ff:ff
-    inet 172.16.0.11/24 brd 172.16.0.255 scope global noprefixroute eth0
+2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 52:54:00:80:ad:b6 brd ff:ff:ff:ff:ff:ff
+    inet 172.16.0.11/24 brd 172.16.0.255 scope global noprefixroute enp1s0
        valid_lft forever preferred_lft forever
-3: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
-    link/ether 00:15:5d:bf:ba:63 brd ff:ff:ff:ff:ff:ff
-    inet 10.0.0.11/24 brd 10.0.0.255 scope global noprefixroute eth1
+3: enp2s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 52:54:00:6a:9d:95 brd ff:ff:ff:ff:ff:ff
+    inet 10.0.0.11/24 brd 10.0.0.255 scope global noprefixroute enp2s0
        valid_lft forever preferred_lft forever
 4: cni0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
-    link/ether 2e:ef:76:4d:74:2f brd ff:ff:ff:ff:ff:ff
+    link/ether 4a:74:1b:6d:d1:82 brd ff:ff:ff:ff:ff:ff
     inet 10.85.0.1/16 brd 10.85.255.255 scope global cni0
        valid_lft forever preferred_lft forever
-5: veth2c3744a3@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master cni0 state UP group default
-    link/ether 76:c7:d5:bb:81:33 brd ff:ff:ff:ff:ff:ff link-netns e3e2e0a1-062b-480a-a483-660254e2abe0
-6: vethf3cf048b@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master cni0 state UP group default
-    link/ether 4a:9e:48:be:23:c9 brd ff:ff:ff:ff:ff:ff link-netns cb0e0d0a-ff37-4145-9b11-aca82942493d
+5: veth5abaf068@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master cni0 state UP group default
+    link/ether d6:87:62:2a:3d:b6 brd ff:ff:ff:ff:ff:ff link-netns 19be561a-e22f-4e6d-8562-5abf81ac1183
+6: veth0715fe81@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master cni0 state UP group default
+    link/ether c6:5a:dc:60:11:b7 brd ff:ff:ff:ff:ff:ff link-netns 4cfbb0ee-341e-4786-b6b7-3d9804b5979c
 ```
 
 ネットワーク名前空間内のイーサネットの情報を確認する。
 
 ```sh
-ip netns exec e3e2e0a1-062b-480a-a483-660254e2abe0 ip addr show
+ip netns exec 19be561a-e22f-4e6d-8562-5abf81ac1183 ip addr show
 ```
 
 ```
@@ -230,17 +235,17 @@ ip netns exec e3e2e0a1-062b-480a-a483-660254e2abe0 ip addr show
     inet6 ::1/128 scope host
        valid_lft forever preferred_lft forever
 2: eth0@if5: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default
-    link/ether 6e:ce:a9:a6:c0:4c brd ff:ff:ff:ff:ff:ff link-netns c1c0eace-08c5-4bdd-9420-6b215f3fefc5
-    inet 10.85.0.4/16 brd 10.85.255.255 scope global eth0
+    link/ether d6:69:ec:c0:c9:61 brd ff:ff:ff:ff:ff:ff link-netns 0a18661a-bf87-4b92-bf3a-02fd92e2f4ca
+    inet 10.85.0.2/16 brd 10.85.255.255 scope global eth0
        valid_lft forever preferred_lft forever
-    inet6 fe80::6cce:a9ff:fea6:c04c/64 scope link
+    inet6 fe80::d469:ecff:fec0:c961/64 scope link
        valid_lft forever preferred_lft forever
 ```
 
 ネットワーク名前空間内のイーサネットの情報を確認する。
 
 ```sh
-ip netns exec cb0e0d0a-ff37-4145-9b11-aca82942493d ip addr show
+ip netns exec 4cfbb0ee-341e-4786-b6b7-3d9804b5979c ip addr show
 ```
 
 ```
@@ -251,10 +256,10 @@ ip netns exec cb0e0d0a-ff37-4145-9b11-aca82942493d ip addr show
     inet6 ::1/128 scope host
        valid_lft forever preferred_lft forever
 2: eth0@if6: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default
-    link/ether ae:7b:c6:41:f1:08 brd ff:ff:ff:ff:ff:ff link-netns c1c0eace-08c5-4bdd-9420-6b215f3fefc5
-    inet 10.85.0.5/16 brd 10.85.255.255 scope global eth0
+    link/ether ba:da:46:14:24:10 brd ff:ff:ff:ff:ff:ff link-netns 0a18661a-bf87-4b92-bf3a-02fd92e2f4ca
+    inet 10.85.0.3/16 brd 10.85.255.255 scope global eth0
        valid_lft forever preferred_lft forever
-    inet6 fe80::ac7b:c6ff:fe41:f108/64 scope link
+    inet6 fe80::b8da:46ff:fe14:2410/64 scope link
        valid_lft forever preferred_lft forever
 ```
 
@@ -267,210 +272,220 @@ ip route show
 ```
 
 ```
-default via 172.16.0.254 dev eth0 proto static metric 100
-10.0.0.0/24 dev eth1 proto kernel scope link src 10.0.0.11 metric 101
+default via 172.16.0.254 dev enp1s0 proto static metric 100
+10.0.0.0/24 dev enp2s0 proto kernel scope link src 10.0.0.11 metric 101
 10.85.0.0/16 dev cni0 proto kernel scope link src 10.85.0.1
-172.16.0.0/24 dev eth0 proto kernel scope link src 172.16.0.11 metric 100
+172.16.0.0/24 dev enp1s0 proto kernel scope link src 172.16.0.11 metric 100
 ```
 
 ネットワーク名前空間内のルーティングを確認する。
 
 ```sh
-ip netns exec e3e2e0a1-062b-480a-a483-660254e2abe0 ip route show
+ip netns exec 19be561a-e22f-4e6d-8562-5abf81ac1183 ip route show
 ```
 
 ```
 default via 10.85.0.1 dev eth0
-10.85.0.0/16 dev eth0 proto kernel scope link src 10.85.0.4
+10.85.0.0/16 dev eth0 proto kernel scope link src 10.85.0.2
 ```
 
 ネットワーク名前空間内のルーティングを確認する。
 
 ```sh
-ip netns exec cb0e0d0a-ff37-4145-9b11-aca82942493d ip route show
+ip netns exec 4cfbb0ee-341e-4786-b6b7-3d9804b5979c ip route show
 ```
 
 ```
 default via 10.85.0.1 dev eth0
-10.85.0.0/16 dev eth0 proto kernel scope link src 10.85.0.5
+10.85.0.0/16 dev eth0 proto kernel scope link src 10.85.0.3
 ```
 
-### iptables
+### nftables
 
-フィルタを確認する。
+ルールセットを確認する。
 
 ```sh
-iptables -n -L
+nft list ruleset ip
 ```
 
 ```
-Chain INPUT (policy ACCEPT)
-target     prot opt source               destination
-KUBE-PROXY-FIREWALL  0    --  0.0.0.0/0            0.0.0.0/0            ctstate NEW /* kubernetes load balancer firewall */
-KUBE-NODEPORTS  0    --  0.0.0.0/0            0.0.0.0/0            /* kubernetes health check service ports */
-KUBE-EXTERNAL-SERVICES  0    --  0.0.0.0/0            0.0.0.0/0            ctstate NEW /* kubernetes externally-visible service portals */
-KUBE-FIREWALL  0    --  0.0.0.0/0            0.0.0.0/0
+table ip mangle {
+        chain KUBE-IPTABLES-HINT {
+        }
 
-Chain FORWARD (policy ACCEPT)
-target     prot opt source               destination
-KUBE-PROXY-FIREWALL  0    --  0.0.0.0/0            0.0.0.0/0            ctstate NEW /* kubernetes load balancer firewall */
-KUBE-FORWARD  0    --  0.0.0.0/0            0.0.0.0/0            /* kubernetes forwarding rules */
-KUBE-SERVICES  0    --  0.0.0.0/0            0.0.0.0/0            ctstate NEW /* kubernetes service portals */
-KUBE-EXTERNAL-SERVICES  0    --  0.0.0.0/0            0.0.0.0/0            ctstate NEW /* kubernetes externally-visible service portals */
+        chain KUBE-KUBELET-CANARY {
+        }
 
-Chain OUTPUT (policy ACCEPT)
-target     prot opt source               destination
-KUBE-PROXY-FIREWALL  0    --  0.0.0.0/0            0.0.0.0/0            ctstate NEW /* kubernetes load balancer firewall */
-KUBE-SERVICES  0    --  0.0.0.0/0            0.0.0.0/0            ctstate NEW /* kubernetes service portals */
-KUBE-FIREWALL  0    --  0.0.0.0/0            0.0.0.0/0
+        chain KUBE-PROXY-CANARY {
+        }
+}
+# Warning: table ip filter is managed by iptables-nft, do not touch!
+table ip filter {
+        chain KUBE-FIREWALL {
+                ip saddr != 127.0.0.0/8 ip daddr 127.0.0.0/8  ct status dnat counter packets 0 bytes 0 drop
+        }
 
-Chain KUBE-EXTERNAL-SERVICES (2 references)
-target     prot opt source               destination
+        chain OUTPUT {
+                type filter hook output priority filter; policy accept;
+                ct state new  counter packets 4534 bytes 274172 jump KUBE-PROXY-FIREWALL
+                ct state new  counter packets 4534 bytes 274172 jump KUBE-SERVICES
+                counter packets 235191 bytes 37261620 jump KUBE-FIREWALL
+        }
 
-Chain KUBE-FIREWALL (2 references)
-target     prot opt source               destination
-DROP       0    -- !127.0.0.0/8          127.0.0.0/8          /* block incoming localnet connections */ ! ctstate RELATED,ESTABLISHED,DNAT
+        chain INPUT {
+                type filter hook input priority filter; policy accept;
+                ct state new  counter packets 3628 bytes 217680 jump KUBE-PROXY-FIREWALL
+                 counter packets 220405 bytes 32514993 jump KUBE-NODEPORTS
+                ct state new  counter packets 3628 bytes 217680 jump KUBE-EXTERNAL-SERVICES
+                counter packets 234620 bytes 36919770 jump KUBE-FIREWALL
+        }
 
-Chain KUBE-FORWARD (1 references)
-target     prot opt source               destination
-DROP       0    --  0.0.0.0/0            0.0.0.0/0            ctstate INVALID
-ACCEPT     0    --  0.0.0.0/0            0.0.0.0/0            /* kubernetes forwarding rules */ mark match 0x4000/0x4000
-ACCEPT     0    --  0.0.0.0/0            0.0.0.0/0            /* kubernetes forwarding conntrack rule */ ctstate RELATED,ESTABLISHED
+        chain KUBE-KUBELET-CANARY {
+        }
 
-Chain KUBE-KUBELET-CANARY (0 references)
-target     prot opt source               destination
+        chain KUBE-PROXY-CANARY {
+        }
 
-Chain KUBE-NODEPORTS (1 references)
-target     prot opt source               destination
+        chain KUBE-EXTERNAL-SERVICES {
+        }
 
-Chain KUBE-PROXY-CANARY (0 references)
-target     prot opt source               destination
+        chain FORWARD {
+                type filter hook forward priority filter; policy accept;
+                ct state new  counter packets 26 bytes 1609 jump KUBE-PROXY-FIREWALL
+                 counter packets 28 bytes 1928 jump KUBE-FORWARD
+                ct state new  counter packets 26 bytes 1609 jump KUBE-SERVICES
+                ct state new  counter packets 26 bytes 1609 jump KUBE-EXTERNAL-SERVICES
+        }
 
-Chain KUBE-PROXY-FIREWALL (3 references)
-target     prot opt source               destination
+        chain KUBE-NODEPORTS {
+        }
 
-Chain KUBE-SERVICES (2 references)
-target     prot opt source               destination
-```
+        chain KUBE-SERVICES {
+        }
 
-NAT を確認する。
+        chain KUBE-FORWARD {
+                ct state invalid counter packets 0 bytes 0 drop
+                 meta mark & 0x00004000 == 0x00004000 counter packets 0 bytes 0 accept
+                 ct state related,established counter packets 0 bytes 0 accept
+        }
 
-```sh
-iptables -t nat -n -L
-```
+        chain KUBE-PROXY-FIREWALL {
+        }
+}
+# Warning: table ip nat is managed by iptables-nft, do not touch!
+table ip nat {
+        chain KUBE-KUBELET-CANARY {
+        }
 
-```
-Chain PREROUTING (policy ACCEPT)
-target     prot opt source               destination
-KUBE-SERVICES  0    --  0.0.0.0/0            0.0.0.0/0            /* kubernetes service portals */
+        chain CNI-212a101fca52a5d9ec806890 {
+                ip daddr 10.85.0.0/16  counter packets 0 bytes 0 accept
+                ip daddr != 224.0.0.0/4  counter packets 4 bytes 265 masquerade
+        }
 
-Chain INPUT (policy ACCEPT)
-target     prot opt source               destination
+        chain CNI-4b6bc106fb7f5815bbb60748 {
+                ip daddr 10.85.0.0/16  counter packets 0 bytes 0 accept
+                ip daddr != 224.0.0.0/4  counter packets 4 bytes 264 masquerade
+        }
 
-Chain OUTPUT (policy ACCEPT)
-target     prot opt source               destination
-KUBE-SERVICES  0    --  0.0.0.0/0            0.0.0.0/0            /* kubernetes service portals */
+        chain POSTROUTING {
+                type nat hook postrouting priority srcnat; policy accept;
+                 counter packets 4382 bytes 264049 jump KUBE-POSTROUTING
+                ip saddr 10.85.0.2  counter packets 4 bytes 265 jump CNI-212a101fca52a5d9ec806890
+                ip saddr 10.85.0.3  counter packets 4 bytes 264 jump CNI-4b6bc106fb7f5815bbb60748
+        }
 
-Chain POSTROUTING (policy ACCEPT)
-target     prot opt source               destination
-KUBE-POSTROUTING  0    --  0.0.0.0/0            0.0.0.0/0            /* kubernetes postrouting rules */
-CNI-0753f7d0856b570d6e276401  0    --  10.85.0.4            0.0.0.0/0            /* name: "crio" id: "a0f922c5fc8fbe1a021f6a3fd300177b7334010970a661c086795c5e65f96708" */
-CNI-48a9f059df3e8ab377561c26  0    --  10.85.0.5            0.0.0.0/0            /* name: "crio" id: "b7a5dc968252fd5de9770f38c6a36abf44ac23779d07294a4c81babfe0ff66d2" */
+        chain KUBE-PROXY-CANARY {
+        }
 
-Chain CNI-0753f7d0856b570d6e276401 (1 references)
-target     prot opt source               destination
-ACCEPT     0    --  0.0.0.0/0            10.85.0.0/16         /* name: "crio" id: "a0f922c5fc8fbe1a021f6a3fd300177b7334010970a661c086795c5e65f96708" */
-MASQUERADE  0    --  0.0.0.0/0           !224.0.0.0/4          /* name: "crio" id: "a0f922c5fc8fbe1a021f6a3fd300177b7334010970a661c086795c5e65f96708" */
+        chain KUBE-SERVICES {
+                meta l4proto tcp ip daddr 10.96.0.1  tcp dport 443 counter packets 0 bytes 0 jump KUBE-SVC-NPX46M4PTMTKRN6Y
+                meta l4proto udp ip daddr 10.96.0.10  udp dport 53 counter packets 0 bytes 0 jump KUBE-SVC-TCOU7JCQXEZGVUNU
+                meta l4proto tcp ip daddr 10.96.0.10  tcp dport 53 counter packets 0 bytes 0 jump KUBE-SVC-ERIFXISQEP7F7OF4
+                meta l4proto tcp ip daddr 10.96.0.10  tcp dport 9153 counter packets 0 bytes 0 jump KUBE-SVC-JD5MR3NA4I4DYORP
+                 fib daddr type local counter packets 3538 bytes 212280 jump KUBE-NODEPORTS
+        }
 
-Chain CNI-48a9f059df3e8ab377561c26 (1 references)
-target     prot opt source               destination
-ACCEPT     0    --  0.0.0.0/0            10.85.0.0/16         /* name: "crio" id: "b7a5dc968252fd5de9770f38c6a36abf44ac23779d07294a4c81babfe0ff66d2" */
-MASQUERADE  0    --  0.0.0.0/0           !224.0.0.0/4          /* name: "crio" id: "b7a5dc968252fd5de9770f38c6a36abf44ac23779d07294a4c81babfe0ff66d2" */
+        chain OUTPUT {
+                type nat hook output priority dstnat; policy accept;
+                 counter packets 4380 bytes 263880 jump KUBE-SERVICES
+        }
 
-Chain KUBE-KUBELET-CANARY (0 references)
-target     prot opt source               destination
+        chain PREROUTING {
+                type nat hook prerouting priority dstnat; policy accept;
+                 counter packets 4 bytes 289 jump KUBE-SERVICES
+        }
 
-Chain KUBE-MARK-MASQ (11 references)
-target     prot opt source               destination
-MARK       0    --  0.0.0.0/0            0.0.0.0/0            MARK or 0x4000
+        chain KUBE-POSTROUTING {
+                meta mark & 0x00004000 != 0x00004000 counter packets 4277 bytes 257692 return
+                counter packets 0 bytes 0 meta mark set mark xor 0x4000
+                 counter packets 0 bytes 0 masquerade fully-random
+        }
 
-Chain KUBE-NODEPORTS (1 references)
-target     prot opt source               destination
+        chain KUBE-NODEPORTS {
+        }
 
-Chain KUBE-POSTROUTING (1 references)
-target     prot opt source               destination
-RETURN     0    --  0.0.0.0/0            0.0.0.0/0            mark match ! 0x4000/0x4000
-MARK       0    --  0.0.0.0/0            0.0.0.0/0            MARK xor 0x4000
-MASQUERADE  0    --  0.0.0.0/0            0.0.0.0/0            /* kubernetes service traffic requiring SNAT */ random-fully
+        chain KUBE-MARK-MASQ {
+                counter packets 0 bytes 0 meta mark set mark or 0x4000
+        }
 
-Chain KUBE-PROXY-CANARY (0 references)
-target     prot opt source               destination
+        chain KUBE-SVC-NPX46M4PTMTKRN6Y {
+                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.96.0.1  tcp dport 443 counter packets 2 bytes 120 jump KUBE-MARK-MASQ
+                 counter packets 2 bytes 120 jump KUBE-SEP-23Y66C2VAJ3WDEMI
+        }
 
-Chain KUBE-SEP-23Y66C2VAJ3WDEMI (1 references)
-target     prot opt source               destination
-KUBE-MARK-MASQ  0    --  172.16.0.11          0.0.0.0/0            /* default/kubernetes:https */
-DNAT       6    --  0.0.0.0/0            0.0.0.0/0            /* default/kubernetes:https */ tcp to:172.16.0.11:6443
+        chain KUBE-SEP-23Y66C2VAJ3WDEMI {
+                ip saddr 172.16.0.11  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto tcp   counter packets 2 bytes 120 dnat to 172.16.0.11:6443
+        }
 
-Chain KUBE-SEP-63Q3QMXTSXKJR2EZ (1 references)
-target     prot opt source               destination
-KUBE-MARK-MASQ  0    --  10.85.0.4            0.0.0.0/0            /* kube-system/kube-dns:dns-tcp */
-DNAT       6    --  0.0.0.0/0            0.0.0.0/0            /* kube-system/kube-dns:dns-tcp */ tcp to:10.85.0.4:53
+        chain KUBE-SVC-TCOU7JCQXEZGVUNU {
+                meta l4proto udp ip saddr != 172.17.0.0/16 ip daddr 10.96.0.10  udp dport 53 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                 meta random & 2147483647 < 1073741824 counter packets 0 bytes 0 jump KUBE-SEP-7SDR2WXD6EFFJZ42
+                 counter packets 0 bytes 0 jump KUBE-SEP-YQTUGCSRGBQ7MJXA
+        }
 
-Chain KUBE-SEP-A4KLBZUL4ZZDQPAH (1 references)
-target     prot opt source               destination
-KUBE-MARK-MASQ  0    --  10.85.0.5            0.0.0.0/0            /* kube-system/kube-dns:dns-tcp */
-DNAT       6    --  0.0.0.0/0            0.0.0.0/0            /* kube-system/kube-dns:dns-tcp */ tcp to:10.85.0.5:53
+        chain KUBE-SEP-7SDR2WXD6EFFJZ42 {
+                ip saddr 10.85.0.2  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto udp   counter packets 0 bytes 0 dnat to 10.85.0.2:53
+        }
 
-Chain KUBE-SEP-EI34DFWCIU6LMT63 (1 references)
-target     prot opt source               destination
-KUBE-MARK-MASQ  0    --  10.85.0.4            0.0.0.0/0            /* kube-system/kube-dns:metrics */
-DNAT       6    --  0.0.0.0/0            0.0.0.0/0            /* kube-system/kube-dns:metrics */ tcp to:10.85.0.4:9153
+        chain KUBE-SVC-ERIFXISQEP7F7OF4 {
+                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.96.0.10  tcp dport 53 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                 meta random & 2147483647 < 1073741824 counter packets 0 bytes 0 jump KUBE-SEP-BCWYETF6BYLYKE2H
+                 counter packets 0 bytes 0 jump KUBE-SEP-HMFIVQIFQZV23PVT
+        }
 
-Chain KUBE-SEP-HDNVQHEBMPSP33XA (1 references)
-target     prot opt source               destination
-KUBE-MARK-MASQ  0    --  10.85.0.5            0.0.0.0/0            /* kube-system/kube-dns:dns */
-DNAT       17   --  0.0.0.0/0            0.0.0.0/0            /* kube-system/kube-dns:dns */ udp to:10.85.0.5:53
+        chain KUBE-SEP-BCWYETF6BYLYKE2H {
+                ip saddr 10.85.0.2  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto tcp   counter packets 0 bytes 0 dnat to 10.85.0.2:53
+        }
 
-Chain KUBE-SEP-KTM2MCEYUDOLTZBE (1 references)
-target     prot opt source               destination
-KUBE-MARK-MASQ  0    --  10.85.0.5            0.0.0.0/0            /* kube-system/kube-dns:metrics */
-DNAT       6    --  0.0.0.0/0            0.0.0.0/0            /* kube-system/kube-dns:metrics */ tcp to:10.85.0.5:9153
+        chain KUBE-SVC-JD5MR3NA4I4DYORP {
+                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.96.0.10  tcp dport 9153 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                 meta random & 2147483647 < 1073741824 counter packets 0 bytes 0 jump KUBE-SEP-55JPH7H2U4SL23HX
+                 counter packets 0 bytes 0 jump KUBE-SEP-GNLGM655BVXRF66F
+        }
 
-Chain KUBE-SEP-WAIILD3LBHUAKL5L (1 references)
-target     prot opt source               destination
-KUBE-MARK-MASQ  0    --  10.85.0.4            0.0.0.0/0            /* kube-system/kube-dns:dns */
-DNAT       17   --  0.0.0.0/0            0.0.0.0/0            /* kube-system/kube-dns:dns */ udp to:10.85.0.4:53
+        chain KUBE-SEP-55JPH7H2U4SL23HX {
+                ip saddr 10.85.0.2  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto tcp   counter packets 0 bytes 0 dnat to 10.85.0.2:9153
+        }
 
-Chain KUBE-SERVICES (2 references)
-target     prot opt source               destination
-KUBE-SVC-NPX46M4PTMTKRN6Y  6    --  0.0.0.0/0            10.96.0.1            /* default/kubernetes:https cluster IP */ tcp dpt:443
-KUBE-SVC-ERIFXISQEP7F7OF4  6    --  0.0.0.0/0            10.96.0.10           /* kube-system/kube-dns:dns-tcp cluster IP */ tcp dpt:53
-KUBE-SVC-JD5MR3NA4I4DYORP  6    --  0.0.0.0/0            10.96.0.10           /* kube-system/kube-dns:metrics cluster IP */ tcp dpt:9153
-KUBE-SVC-TCOU7JCQXEZGVUNU  17   --  0.0.0.0/0            10.96.0.10           /* kube-system/kube-dns:dns cluster IP */ udp dpt:53
-KUBE-NODEPORTS  0    --  0.0.0.0/0            0.0.0.0/0            /* kubernetes service nodeports; NOTE: this must be the last rule in this chain */ ADDRTYPE match dst-type LOCAL
+        chain KUBE-SEP-YQTUGCSRGBQ7MJXA {
+                ip saddr 10.85.0.3  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto udp   counter packets 0 bytes 0 dnat to 10.85.0.3:53
+        }
 
-Chain KUBE-SVC-ERIFXISQEP7F7OF4 (1 references)
-target     prot opt source               destination
-KUBE-MARK-MASQ  6    -- !192.168.0.0/16       10.96.0.10           /* kube-system/kube-dns:dns-tcp cluster IP */ tcp dpt:53
-KUBE-SEP-63Q3QMXTSXKJR2EZ  0    --  0.0.0.0/0            0.0.0.0/0            /* kube-system/kube-dns:dns-tcp -> 10.85.0.4:53 */ statistic mode random probability 0.50000000000
-KUBE-SEP-A4KLBZUL4ZZDQPAH  0    --  0.0.0.0/0            0.0.0.0/0            /* kube-system/kube-dns:dns-tcp -> 10.85.0.5:53 */
+        chain KUBE-SEP-HMFIVQIFQZV23PVT {
+                ip saddr 10.85.0.3  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto tcp   counter packets 0 bytes 0 dnat to 10.85.0.3:53
+        }
 
-Chain KUBE-SVC-JD5MR3NA4I4DYORP (1 references)
-target     prot opt source               destination
-KUBE-MARK-MASQ  6    -- !192.168.0.0/16       10.96.0.10           /* kube-system/kube-dns:metrics cluster IP */ tcp dpt:9153
-KUBE-SEP-EI34DFWCIU6LMT63  0    --  0.0.0.0/0            0.0.0.0/0            /* kube-system/kube-dns:metrics -> 10.85.0.4:9153 */ statistic mode random probability 0.50000000000
-KUBE-SEP-KTM2MCEYUDOLTZBE  0    --  0.0.0.0/0            0.0.0.0/0            /* kube-system/kube-dns:metrics -> 10.85.0.5:9153 */
-
-Chain KUBE-SVC-NPX46M4PTMTKRN6Y (1 references)
-target     prot opt source               destination
-KUBE-MARK-MASQ  6    -- !192.168.0.0/16       10.96.0.1            /* default/kubernetes:https cluster IP */ tcp dpt:443
-KUBE-SEP-23Y66C2VAJ3WDEMI  0    --  0.0.0.0/0            0.0.0.0/0            /* default/kubernetes:https -> 172.16.0.11:6443 */
-
-Chain KUBE-SVC-TCOU7JCQXEZGVUNU (1 references)
-target     prot opt source               destination
-KUBE-MARK-MASQ  17   -- !192.168.0.0/16       10.96.0.10           /* kube-system/kube-dns:dns cluster IP */ udp dpt:53
-KUBE-SEP-WAIILD3LBHUAKL5L  0    --  0.0.0.0/0            0.0.0.0/0            /* kube-system/kube-dns:dns -> 10.85.0.4:53 */ statistic mode random probability 0.50000000000
-KUBE-SEP-HDNVQHEBMPSP33XA  0    --  0.0.0.0/0            0.0.0.0/0            /* kube-system/kube-dns:dns -> 10.85.0.5:53 */
+        chain KUBE-SEP-GNLGM655BVXRF66F {
+                ip saddr 10.85.0.3  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto tcp   counter packets 0 bytes 0 dnat to 10.85.0.3:9153
+        }
+}
 ```
 
 ### Kubernetes リソース
@@ -478,31 +493,31 @@ KUBE-SEP-HDNVQHEBMPSP33XA  0    --  0.0.0.0/0            0.0.0.0/0            /*
 クラスタにあるリソースを確認する。
 
 ```sh
-kubectl get all --all-namespaces
+kubectl get all --all-namespaces -o wide
 ```
 
 ```
-NAMESPACE     NAME                                                READY   STATUS    RESTARTS   AGE
-kube-system   pod/coredns-7db6d8ff4d-p4kzt                        1/1     Running   1          68m
-kube-system   pod/coredns-7db6d8ff4d-slnrj                        1/1     Running   1          68m
-kube-system   pod/etcd-controller.home.local                      1/1     Running   1          69m
-kube-system   pod/kube-apiserver-controller.home.local            1/1     Running   1          69m
-kube-system   pod/kube-controller-manager-controller.home.local   1/1     Running   1          69m
-kube-system   pod/kube-proxy-skh2j                                1/1     Running   1          68m
-kube-system   pod/kube-scheduler-controller.home.local            1/1     Running   1          69m
+NAMESPACE     NAME                                                READY   STATUS    RESTARTS   AGE   IP            NODE                    NOMINATED NODE   READINESS GATES
+kube-system   pod/coredns-7c65d6cfc9-sr5mk                        1/1     Running   0          28m   10.85.0.2     controller.home.local   <none>           <none>
+kube-system   pod/coredns-7c65d6cfc9-zczmd                        1/1     Running   0          28m   10.85.0.3     controller.home.local   <none>           <none>
+kube-system   pod/etcd-controller.home.local                      1/1     Running   0          28m   172.16.0.11   controller.home.local   <none>           <none>
+kube-system   pod/kube-apiserver-controller.home.local            1/1     Running   0          28m   172.16.0.11   controller.home.local   <none>           <none>
+kube-system   pod/kube-controller-manager-controller.home.local   1/1     Running   0          28m   172.16.0.11   controller.home.local   <none>           <none>
+kube-system   pod/kube-proxy-7zqsq                                1/1     Running   0          28m   172.16.0.11   controller.home.local   <none>           <none>
+kube-system   pod/kube-scheduler-controller.home.local            1/1     Running   0          28m   172.16.0.11   controller.home.local   <none>           <none>
 
-NAMESPACE     NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)                  AGE
-default       service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP                  69m
-kube-system   service/kube-dns     ClusterIP   10.96.0.10   <none>        53/UDP,53/TCP,9153/TCP   69m
+NAMESPACE     NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)                  AGE   SELECTOR
+default       service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP                  28m   <none>
+kube-system   service/kube-dns     ClusterIP   10.96.0.10   <none>        53/UDP,53/TCP,9153/TCP   28m   k8s-app=kube-dns
 
-NAMESPACE     NAME                        DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE
-kube-system   daemonset.apps/kube-proxy   1         1         1       1            1           kubernetes.io/os=linux   69m
+NAMESPACE     NAME                        DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE   CONTAINERS   IMAGES                               SELECTOR
+kube-system   daemonset.apps/kube-proxy   1         1         1       1            1           kubernetes.io/os=linux   28m   kube-proxy   registry.k8s.io/kube-proxy:v1.31.0   k8s-app=kube-proxy
 
-NAMESPACE     NAME                      READY   UP-TO-DATE   AVAILABLE   AGE
-kube-system   deployment.apps/coredns   2/2     2            2           69m
+NAMESPACE     NAME                      READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                                    SELECTOR
+kube-system   deployment.apps/coredns   2/2     2            2           28m   coredns      registry.k8s.io/coredns/coredns:v1.11.3   k8s-app=kube-dns
 
-NAMESPACE     NAME                                 DESIRED   CURRENT   READY   AGE
-kube-system   replicaset.apps/coredns-7db6d8ff4d   2         2         2       68m
+NAMESPACE     NAME                                 DESIRED   CURRENT   READY   AGE   CONTAINERS   IMAGES                                    SELECTOR
+kube-system   replicaset.apps/coredns-7c65d6cfc9   2         2         2       28m   coredns      registry.k8s.io/coredns/coredns:v1.11.3   k8s-app=kube-dns,pod-template-hash=7c65d6cfc9
 ```
 
 ノードを確認する。
@@ -513,7 +528,7 @@ kubectl get nodes
 
 ```
 NAME                    STATUS   ROLES           AGE   VERSION
-controller.home.local   Ready    control-plane   72m   v1.30.1
+controller.home.local   Ready    control-plane   27m   v1.31.1
 ```
 
 ### コンテナ
@@ -526,13 +541,81 @@ crictl ps -a
 
 ```
 CONTAINER           IMAGE                                                              CREATED             STATE               NAME                      ATTEMPT             POD ID              POD
-e0b950eafce8b       cbb01a7bd410dc08ba382018ab909a674fb0e48687f0c00797ed5bc34fcc6bb4   18 minutes ago      Running             coredns                   1                   b7a5dc968252f       coredns-7db6d8ff4d-p4kzt
-45a457c47a13f       cbb01a7bd410dc08ba382018ab909a674fb0e48687f0c00797ed5bc34fcc6bb4   18 minutes ago      Running             coredns                   1                   a0f922c5fc8fb       coredns-7db6d8ff4d-slnrj
-2c8ef1733279d       747097150317f99937cabea484cff90097a2dbd79e7eb348b71dc0af879883cd   18 minutes ago      Running             kube-proxy                1                   cd4e57dfd4400       kube-proxy-skh2j
-1c7d83fbe5c01       a52dc94f0a91256bde86a1c3027a16336bb8fea9304f9311987066307996f035   18 minutes ago      Running             kube-scheduler            1                   77c0488ed357a       kube-scheduler-controller.home.local
-e24f682800ae7       25a1387cdab82166df829c0b70761c10e2d2afce21a7bcf9ae4e9d71fe34ef2c   18 minutes ago      Running             kube-controller-manager   1                   fff5a0bd1bad8       kube-controller-manager-controller.home.local
-892abdc3f86ba       91be9408031725d89ff709fdf75a7666cedbf0d8831be4581310a879a096c71a   18 minutes ago      Running             kube-apiserver            1                   31f69e32c888a       kube-apiserver-controller.home.local
-e9164e8444789       3861cfcd7c04ccac1f062788eca39487248527ef0c0cfd477a83d7691a75a899   19 minutes ago      Running             etcd                      1                   fee47cf00de95       etcd-controller.home.local
+8517fb7aa7f80       ad83b2ca7b09e6162f96f933eecded731cbebf049c78f941fd0ce560a86b6494   28 minutes ago      Running             kube-proxy                0                   a0f9bfca47a19       kube-proxy-7zqsq
+92d23a6b648bf       c69fa2e9cbf5f42dc48af631e956d3f95724c13f91596bc567591790e5e36db6   28 minutes ago      Running             coredns                   0                   457293a70d58c       coredns-7c65d6cfc9-sr5mk
+f78ec2ba93f77       c69fa2e9cbf5f42dc48af631e956d3f95724c13f91596bc567591790e5e36db6   28 minutes ago      Running             coredns                   0                   27889e984d144       coredns-7c65d6cfc9-zczmd
+a45d43d324275       2e96e5913fc06e3d26915af3d0f2ca5048cc4b6327e661e80da792cbf8d8d9d4   28 minutes ago      Running             etcd                      0                   fbaabcf1ff22d       etcd-controller.home.local
+142c67043270c       1766f54c897f0e57040741e6741462f2e3a7d754705f446c9f729c7e1230fb94   28 minutes ago      Running             kube-scheduler            0                   00da5f84eb9dc       kube-scheduler-controller.home.local
+c84f3fd628818       604f5db92eaa823d11c141d8825f1460206f6bf29babca2a909a698dc22055d3   28 minutes ago      Running             kube-apiserver            0                   dd872d4361d33       kube-apiserver-controller.home.local
+38a538aefb127       045733566833c40b15806c9b87d27f08e455e069833752e0e6ad7a76d37cb2b1   28 minutes ago      Running             kube-controller-manager   0                   58f5ec39069fd       kube-controller-manager-controller.home.local
+```
+
+kube-proxy が属するネットワーク名前空間を確認する。
+
+```sh
+ip netns identify $(crictl inspect 8517fb7aa7f80 | jq '.info.pid')
+```
+
+```
+8305da93-f5f6-4446-a2ef-1991904aca58
+```
+
+coredns が属するネットワーク名前空間を確認する。
+
+```sh
+ip netns identify $(crictl inspect 92d23a6b648bf | jq '.info.pid')
+```
+
+```
+19be561a-e22f-4e6d-8562-5abf81ac1183
+```
+
+```sh
+ip netns identify $(crictl inspect f78ec2ba93f77 | jq '.info.pid')
+```
+
+```
+4cfbb0ee-341e-4786-b6b7-3d9804b5979c
+```
+
+etcd が属するネットワーク名前空間を確認する。
+
+```sh
+ip netns identify $(crictl inspect a45d43d324275 | jq '.info.pid')
+```
+
+```
+8305da93-f5f6-4446-a2ef-1991904aca58
+```
+
+kube-scheduler が属するネットワーク名前空間を確認する。
+
+```sh
+ip netns identify $(crictl inspect 142c67043270c | jq '.info.pid')
+```
+
+```
+8305da93-f5f6-4446-a2ef-1991904aca58
+```
+
+kube-apiserver が属するネットワーク名前空間を確認する。
+
+```sh
+ip netns identify $(crictl inspect c84f3fd628818 | jq '.info.pid')
+```
+
+```
+8305da93-f5f6-4446-a2ef-1991904aca58
+```
+
+kube-controller-manager が属するネットワーク名前空間を確認する。
+
+```sh
+ip netns identify $(crictl inspect 38a538aefb127 | jq '.info.pid')
+```
+
+```
+8305da93-f5f6-4446-a2ef-1991904aca58
 ```
 
 コンテナイメージを確認する。
@@ -543,11 +626,11 @@ crictl images
 
 ```
 IMAGE                                     TAG                 IMAGE ID            SIZE
-registry.k8s.io/coredns/coredns           v1.11.1             cbb01a7bd410d       61.2MB
-registry.k8s.io/etcd                      3.5.12-0            3861cfcd7c04c       151MB
-registry.k8s.io/kube-apiserver            v1.30.1             91be940803172       118MB
-registry.k8s.io/kube-controller-manager   v1.30.1             25a1387cdab82       112MB
-registry.k8s.io/kube-proxy                v1.30.1             747097150317f       85.9MB
-registry.k8s.io/kube-scheduler            v1.30.1             a52dc94f0a912       63MB
-registry.k8s.io/pause                     3.9                 e6f1816883972       750kB
+registry.k8s.io/coredns/coredns           v1.11.3             c69fa2e9cbf5f       63.3MB
+registry.k8s.io/etcd                      3.5.15-0            2e96e5913fc06       152MB
+registry.k8s.io/kube-apiserver            v1.31.0             604f5db92eaa8       95.2MB
+registry.k8s.io/kube-controller-manager   v1.31.0             045733566833c       89.4MB
+registry.k8s.io/kube-proxy                v1.31.0             ad83b2ca7b09e       92.7MB
+registry.k8s.io/kube-scheduler            v1.31.0             1766f54c897f0       68.4MB
+registry.k8s.io/pause                     3.10                873ed75102791       742kB
 ```

@@ -18,7 +18,7 @@ sed \
     \
     -e 's/^#\(bogus-priv\)/\1/ #プライベート IP アドレスは上位サーバに逆引きを要求しない。' \
     \
-    -e 's/^#\(interface=\).*/\1eth1/1 #機能を有効にするインターフェースを指定する。' \
+    -e 's/^#\(interface=\).*/\1enp2s0/1 #機能を有効にするインターフェースを指定する。' \
     \
     -e 's/^#\(expand-hosts\)/\1/ #/etc/hosts のホスト名にドメイン名を自動的に付与する。' \
     -e "s/^#\(domain=\)thekelleys.org.uk/\1$(hostname -d)/1" \
