@@ -6,4 +6,5 @@ cluster
 network_addon
 kubernetes
 ingress
+loadbalancer
 ```
