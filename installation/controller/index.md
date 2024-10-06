@@ -8,4 +8,5 @@ kubernetes
 ingress
 loadbalancer
 dashboard
+delivery
 ```
