@@ -9,6 +9,7 @@ numbered: 4
 
 preface/environ
 installation/index
+operation/index
 note
 ```
 
