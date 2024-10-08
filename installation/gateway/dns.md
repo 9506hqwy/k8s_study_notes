@@ -34,6 +34,7 @@ cat >> /etc/hosts <<EOF
 172.16.0.11  controller
 172.16.0.31  worker01
 172.16.0.32  worker02
+172.16.0.91  registry
 EOF
 ```
 

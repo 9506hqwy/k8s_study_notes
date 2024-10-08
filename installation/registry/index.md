@@ -1,0 +1,6 @@
+# Registry
+
+```{toctree}
+prepare
+registry
+```
