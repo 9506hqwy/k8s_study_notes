@@ -2,4 +2,5 @@
 
 ```{toctree}
 scheduler
+service
 ```
