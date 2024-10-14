@@ -3,4 +3,5 @@
 ```{toctree}
 scheduler
 service
+device_plugin
 ```
