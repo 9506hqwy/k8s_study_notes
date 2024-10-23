@@ -268,3 +268,30 @@ The push refers to repository [registry.home.local/test/hello-world]
 ac28800ec8bb: Pushed
 latest: digest: sha256:d37ada95d47ad12224c205a938129df7a3e52345828b4fa27b03a98825d1e2e7 size: 524
 ```
+
+## コンテナランタイム
+
+ワーカノードに CA 証明書を配置する。
+
+```sh
+mkdir -p /etc/containers/certs.d/registry.home.local
+cp ca.crt /etc/containers/certs.d/registry.home.local/
+```
+
+## Podman
+
+Podman で HTTP を使用してコンテナレジストリに接続する。
+
+```sh
+cat <<EOF >/etc/containers/registries.conf.d/100-registry.home.local.conf
+[[registry]]
+location="registry.home.local"
+insecure=true
+EOF
+```
+
+イメージを作成するときはマニフェスト形式に `docker` を指定する。
+
+```sh
+buildah bud --format=docker ....
+```
