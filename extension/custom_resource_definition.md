@@ -81,6 +81,19 @@ NAME                  AGE
 custom-sample-cr-01   81s
 ```
 
+## 検証
+
+入力に対する値を検証する方法として以下がある。
+
+- OpenAPIV3Schema
+- [Common Expression Language](https://github.com/google/cel-spec)
+- [Dynamic Admission Control](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/)
+- [Validating Admission Policy](https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/)
+
+```{note}
+TODO
+```
+
 ## 参考
 - [CustomResourceDefinition](https://kubernetes.io/docs/reference/kubernetes-api/extend-resources/custom-resource-definition-v1/)
 - [JSON Schema Specification](https://json-schema.org/specification)

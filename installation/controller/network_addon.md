@@ -140,12 +140,18 @@ chmod +x $HOME/.local/bin/kubectl-calico
 ### 環境確認
 
 ```{warning}
-システムを再起動すると構成が変更されたので再確認する。
+- システムを再起動すると構成が変更されたので再確認する。
+- ネットワークアドインのインストールする前後の `kubelet` の引数を確認する。
 ```
 
 Controller Node でネットワーク構成を確認する。
 
 ![Controller ノードの構成](../../_static/image/controller_cluste_calico.png "Controller ノードの構成")
+
+```{note}
+- arp テーブルを確認する(`ip neigh`)。
+- Fowarding Database を確認する。(`bridge fdb show dev vxlan.calico`)
+```
 
 #### ネットワーク名前空間
 
