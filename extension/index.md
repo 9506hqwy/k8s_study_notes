@@ -1,6 +1,7 @@
 # 拡張
 
 ```{toctree}
+client_plugin
 extension_apiserver
 custom_resource_definition
 scheduler
