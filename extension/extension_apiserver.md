@@ -19,19 +19,6 @@ podman push registry.home.local/system/sample-api-server
 
 ## サービスの登録
 
-Kubenertes API Server の認証に必要な情報を取得するため、
-名前空間 `kube-system` にある ConfigMap `extension-apiserver-authentication` を参照する代わりに ConfigMap を複製する。
-
-```sh
-kubectl -n kube-system get configmap extension-apiserver-authentication -o yaml | \
-    sed -e 's/kube-system/default/' | \
-    kubectl apply -f -
-```
-
-```
-configmap/extension-apiserver-authentication created
-```
-
 サービスアカウントを作成する。
 
 ```sh
@@ -50,6 +37,16 @@ kubectl create clusterrolebinding sample-api-server-auth --clusterrole=system:au
 
 ```
 clusterrolebinding.rbac.authorization.k8s.io/sample-api-server-auth created
+```
+
+サービスアカウントにロール `extension-apiserver-authentication-reader` を割り当てる。
+
+```sh
+kubectl create rolebinding sample-api-server-config-reader -n kube-system --role=extension-apiserver-authentication-reader --serviceaccount=default:sample-api-server
+```
+
+```
+rolebinding.rbac.authorization.k8s.io/sample-api-server-config-reader created
 ```
 
 ポッドを作成する。
@@ -77,37 +74,9 @@ spec:
         env:
         - name: RUST_LOG
           value: debug
-        - name: SSL_CERT_FILE
-          value: /opt/certs/client-ca-file.pem
-        - name: ALLOWED_NAMES
-          valueFrom:
-            configMapKeyRef:
-              key: requestheader-allowed-names
-              name: extension-apiserver-authentication
-        - name: GROUP_HEADERS
-          valueFrom:
-            configMapKeyRef:
-              key: requestheader-group-headers
-              name: extension-apiserver-authentication
-        - name: USERNAME_HEADERS
-          valueFrom:
-            configMapKeyRef:
-              key: requestheader-username-headers
-              name: extension-apiserver-authentication
         ports:
         - containerPort: 3000
           protocol: TCP
-        volumeMounts:
-        - name: client-ca-file
-          mountPath: /opt/certs
-      volumes:
-      - name: client-ca-file
-        configMap:
-          name: extension-apiserver-authentication
-          items:
-          - key: requestheader-client-ca-file
-            path: client-ca-file.pem
-            mode: 0444
 ```
 
 ```sh
