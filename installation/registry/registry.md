@@ -131,7 +131,7 @@ cp ca.crt /etc/docker/certs.d/registry.home.local/
 インストーラをダウンロードする。
 
 ```sh
-curl -sSL https://github.com/goharbor/harbor/releases/download/v1.10.19/harbor-online-installer-v1.10.19.tgz \
+curl -sSL https://github.com/goharbor/harbor/releases/download/v2.12.0/harbor-online-installer-v2.12.0.tgz \
     -o harbor-online-installer.tgz
 tar -zxf harbor-online-installer.tgz
 ```
@@ -156,19 +156,28 @@ Note: docker version: 27.3.1
 
 [Step 1]: checking docker-compose is installed ...
 
-Note: docker-compose version: 2.29.6
+Note: Docker Compose version v2.29.7
 
 
 [Step 2]: preparing environment ...
 
 [Step 3]: preparing harbor configs ...
 prepare base dir is set to /root/harbor
-/usr/src/app/utils/configs.py:100: YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated, as the default Loader is unsafe. Please read https://msg.pyyaml.org/load for full details.
-  configs = yaml.load(f)
-/usr/src/app/utils/configs.py:90: YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated, as the default Loader is unsafe. Please read https://msg.pyyaml.org/load for full details.
-  versions = yaml.load(f)
-Clearing the configuration file: /config/log/logrotate.conf
-Clearing the configuration file: /config/log/rsyslog_docker.conf
+Unable to find image 'goharbor/prepare:v2.12.0' locally
+v2.12.0: Pulling from goharbor/prepare
+69f3f4f936bb: Pull complete
+653c57bbe511: Pull complete
+d54cebaef548: Pull complete
+078852956263: Pull complete
+af8b1169f99d: Pull complete
+2f5c2336c48c: Pull complete
+64720024dfda: Pull complete
+3fe468d45fa2: Pull complete
+dbc6d12bbf4c: Pull complete
+b9ee61559eb8: Pull complete
+Digest: sha256:8c3be33b8ecc4226bd29e958d7a0f1eb160fe2db1addaf598cc37306a5eaf748
+Status: Downloaded newer image for goharbor/prepare:v2.12.0
+Generated configuration file: /config/portal/nginx.conf
 Generated configuration file: /config/log/logrotate.conf
 Generated configuration file: /config/log/rsyslog_docker.conf
 Generated configuration file: /config/nginx/nginx.conf
@@ -176,40 +185,40 @@ Generated configuration file: /config/core/env
 Generated configuration file: /config/core/app.conf
 Generated configuration file: /config/registry/config.yml
 Generated configuration file: /config/registryctl/env
+Generated configuration file: /config/registryctl/config.yml
 Generated configuration file: /config/db/env
 Generated configuration file: /config/jobservice/env
 Generated configuration file: /config/jobservice/config.yml
-Generated and saved secret to file: /secret/keys/secretkey
-Generated certificate, key file: /secret/core/private_key.pem, cert file: /secret/registry/root.crt
+loaded secret from file: /data/secret/keys/secretkey
 Generated configuration file: /compose_location/docker-compose.yml
 Clean up the input dir
 
-WARN[0000] /root/harbor/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+
+Note: stopping existing Harbor instance ...
 
 
 [Step 4]: starting Harbor ...
-WARN[0000] /root/harbor/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
-[+] Running 59/33
- ? jobservice Pulled                                                                                                                                                                               10.1s
- ? proxy Pulled                                                                                                                                                                                    67.7s
- ? core Pulled                                                                                                                                                                                     67.7s
- ? registryctl Pulled                                                                                                                                                                              20.0s
- ? portal Pulled                                                                                                                                                                                    7.2s
- ? postgresql Pulled                                                                                                                                                                               67.7s
- ? log Pulled                                                                                                                                                                                      67.7s
- ? redis Pulled                                                                                                                                                                                    19.8s
- ? registry Pulled                                                                                                                                                                                 24.5s
+[+] Running 62/46
+ ? postgresql Pulled                                                               23.4s
+ ? registry Pulled                                                                 53.0s
+ ? core Pulled                                                                     56.2s
+ ? portal Pulled                                                                   27.8s
+ ? log Pulled                                                                      53.0s
+ ? proxy Pulled                                                                    19.5s
+ ? redis Pulled                                                                     9.1s
+ ? registryctl Pulled                                                              53.0s
+ ? jobservice Pulled                                                               53.0s
 [+] Running 10/10
- ? Network harbor_harbor        Created                                                                                                                                                             0.2s
- ? Container harbor-log         Started                                                                                                                                                             0.6s
- ? Container harbor-portal      Started                                                                                                                                                             1.1s
- ? Container harbor-db          Started                                                                                                                                                             1.2s
- ? Container registry           Started                                                                                                                                                             1.1s
- ? Container registryctl        Started                                                                                                                                                             1.1s
- ? Container redis              Started                                                                                                                                                             1.1s
- ? Container harbor-core        Started                                                                                                                                                             1.5s
- ? Container nginx              Started                                                                                                                                                             2.0s
- ? Container harbor-jobservice  Started                                                                                                                                                             2.0s
+ ? Network harbor_harbor        Created                                             0.2s
+ ? Container harbor-log         Started                                             0.5s
+ ? Container registryctl        Started                                             1.1s
+ ? Container registry           Started                                             1.0s
+ ? Container harbor-db          Started                                             0.8s
+ ? Container redis              Started                                             1.1s
+ ? Container harbor-portal      Started                                             1.1s
+ ? Container harbor-core        Started                                             1.5s
+ ? Container harbor-jobservice  Started                                             2.0s
+ ? Container nginx              Started                                             2.0s
 ? ----Harbor has been installed and started successfully.----
 ```
 
@@ -220,16 +229,16 @@ docker ps
 ```
 
 ```
-CONTAINER ID   IMAGE                                  COMMAND                   CREATED         STATUS                   PORTS                                         NAMES
-09b054522640   goharbor/harbor-jobservice:v1.10.19    "/harbor/harbor_jobs…"   4 minutes ago   Up 4 minutes (healthy)                                                 harbor-jobservice
-f2d7f7907bc9   goharbor/nginx-photon:v1.10.19         "nginx -g 'daemon of…"   4 minutes ago   Up 4 minutes (healthy)   0.0.0.0:80->8080/tcp, 0.0.0.0:443->8443/tcp   nginx
-7f83c4ed0a77   goharbor/harbor-core:v1.10.19          "/harbor/harbor_core"     4 minutes ago   Up 4 minutes (healthy)                                                 harbor-core
-a8b1c743e748   goharbor/harbor-portal:v1.10.19        "nginx -g 'daemon of…"   4 minutes ago   Up 4 minutes (healthy)   8080/tcp                                      harbor-portal
-2e6eb172ee84   goharbor/harbor-registryctl:v1.10.19   "/home/harbor/start.…"   4 minutes ago   Up 4 minutes (healthy)                                                 registryctl
-4fbe4ba38548   goharbor/registry-photon:v1.10.19      "/home/harbor/entryp…"   4 minutes ago   Up 4 minutes (healthy)   5000/tcp                                      registry
-de967baac6c6   goharbor/redis-photon:v1.10.19         "redis-server /etc/r…"   4 minutes ago   Up 4 minutes (healthy)   6379/tcp                                      redis
-6a8d77a6986d   goharbor/harbor-db:v1.10.19            "/docker-entrypoint.…"   4 minutes ago   Up 4 minutes (healthy)   5432/tcp                                      harbor-db
-6738e057da26   goharbor/harbor-log:v1.10.19           "/bin/sh -c /usr/loc…"   4 minutes ago   Up 4 minutes (healthy)   127.0.0.1:1514->10514/tcp                     harbor-log
+CONTAINER ID   IMAGE                                 COMMAND                   CREATED          STATUS                    PORTS                                         NAMES
+3d83411ce1f9   goharbor/harbor-jobservice:v2.12.0    "/harbor/entrypoint.…"   29 minutes ago   Up 28 minutes (healthy)                                                 harbor-jobservice
+e6e2681c10bb   goharbor/nginx-photon:v2.12.0         "nginx -g 'daemon of…"   29 minutes ago   Up 29 minutes (healthy)   0.0.0.0:80->8080/tcp, 0.0.0.0:443->8443/tcp   nginx
+3fac8045fd96   goharbor/harbor-core:v2.12.0          "/harbor/entrypoint.…"   29 minutes ago   Up 29 minutes (healthy)                                                 harbor-core
+1259e9ccad40   goharbor/harbor-registryctl:v2.12.0   "/home/harbor/start.…"   29 minutes ago   Up 29 minutes (healthy)                                                 registryctl
+4d10dc72f4fb   goharbor/harbor-portal:v2.12.0        "nginx -g 'daemon of…"   29 minutes ago   Up 29 minutes (healthy)                                                 harbor-portal
+3e895874ab38   goharbor/harbor-db:v2.12.0            "/docker-entrypoint.…"   29 minutes ago   Up 29 minutes (healthy)                                                 harbor-db
+4f60d1159bb4   goharbor/redis-photon:v2.12.0         "redis-server /etc/r…"   29 minutes ago   Up 29 minutes (healthy)                                                 redis
+71c5225e8854   goharbor/registry-photon:v2.12.0      "/home/harbor/entryp…"   29 minutes ago   Up 29 minutes (healthy)                                                 registry
+9d8a91523e59   goharbor/harbor-log:v2.12.0           "/bin/sh -c /usr/loc…"   29 minutes ago   Up 29 minutes (healthy)   127.0.0.1:1514->10514/tcp                     harbor-log
 ```
 
 ブラウザでアクセスして `admin` でログインする。
@@ -290,8 +299,18 @@ insecure=true
 EOF
 ```
 
-イメージを作成するときはマニフェスト形式に `docker` を指定する。
+## Harbor アンインストール
+
+コンテナを削除する。
 
 ```sh
-buildah bud --format=docker ....
+docker-compose down -v
+```
+
+データベースを削除する。
+
+```sh
+rm -rf /data/database
+rm -rf /data/registry
+rm -rf /data/redis
 ```

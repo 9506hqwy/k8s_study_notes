@@ -10,7 +10,7 @@ Kubernetes API Server を拡張してカスタムリソースを制御する仕�
 拡張 API サーバをコンテナイメージとしてコンテナレジストリに登録する。
 
 ```sh
-buildah bud --format=docker -t registry.home.local/system/sample-api-server -f sample-api-server/Dockerfile .
+buildah bud -t registry.home.local/system/sample-api-server -f sample-api-server/Dockerfile .
 ```
 
 ```sh

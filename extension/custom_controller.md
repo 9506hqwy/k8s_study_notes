@@ -14,7 +14,7 @@ Kuberntes API Server と通信してリソースを監視し変化があれば�
 拡張 API サーバをコンテナイメージとしてコンテナレジストリに登録する。
 
 ```sh
-buildah bud --format=docker -t registry.home.local/system/sample-custom-controller -f sample-custom-controller/Dockerfile .
+buildah bud -t registry.home.local/system/sample-custom-controller -f sample-custom-controller/Dockerfile .
 ```
 
 ```sh
