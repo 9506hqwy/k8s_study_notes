@@ -4,4 +4,5 @@
 user_account
 service
 volume
+package_manager
 ```
