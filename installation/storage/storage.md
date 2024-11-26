@@ -226,3 +226,16 @@ targetcli ls /iscsi/iqn.2003-01.org.linux-iscsi.storage.x8664:sn.a6b9465d3f31/tp
 - iqn.1994-05.com.redhat:6c13bfc4535e ............................................................................ [Mapped LUNs: 1]
   o- mapped_lun0 .......................................................................................... [lun0 block/disk01 (rw)]
 ```
+
+## 設定の保存
+
+設定を永続化する。
+
+```sh
+targetcli saveconfig
+```
+
+```
+Last 10 configs saved in /etc/target/backup/.
+Configuration saved to /etc/target/saveconfig.json
+```
