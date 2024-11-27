@@ -9,4 +9,5 @@ ingress
 loadbalancer
 dashboard
 delivery
+monitoring.md
 ```
