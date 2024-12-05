@@ -1,5 +1,7 @@
 # スケジューラ
 
+ポッドをどのノードにデプロイする決める。
+
 ## ログレベルを変更
 
 ログレベルを変更できるロールを作成する。
@@ -194,6 +196,106 @@ deployment.apps/demo-sched created
   - Score プラグイン
 - [DefaultBinder](https://github.com/kubernetes/kubernetes/blob/v1.31.1/pkg/scheduler/framework/plugins/defaultbinder/default_binder.go)
   - Bind プラグイン
+
+## 拡張
+
+スケジューラの拡張は Extender または Plugin を使用する。
+
+動作確認に [k8s-scheduler-extension](https://github.com/9506hqwy/k8s-scheduler-extension) を使用する。
+ポッド名の末尾の数字とノード名の末尾の数字が一致するノードにデプロイする。
+
+### プラグイン
+
+ビルドする。
+
+```sh
+go build ./cmd/index-scheduler
+```
+
+スケジューラの構成ファイルを作成する。
+
+実装したプラグインを有効化する。
+`kubeconfig` は Kubernetes に接続するための構成ファイルのパスを指定する。
+
+```yaml
+# index-scheduler.yaml
+apiVersion: kubescheduler.config.k8s.io/v1
+kind: KubeSchedulerConfiguration
+leaderElection:
+  leaderElect: false
+clientConnection:
+  kubeconfig: /etc/kubernetes/scheduler.conf
+profiles:
+- schedulerName: index-scheduler
+  plugins:
+    filter:
+      enabled:
+      - name: IndexScheduling
+```
+
+スケジューラを起動する。
+デフォルトスケジューラとプラグイン用のスケジューラの2つが起動する。
+
+`authentication-kubeconfig` と `authorization-kubeconfig` は
+リクエストの認証・認可のために必要な情報を取得するための構成ファイルのパスを指定する。
+ポート番号はデフォルトスケジューラと重複しないように指定する。
+
+```sh
+./index-scheduler \
+    --authentication-kubeconfig=/etc/kubernetes/scheduler.conf \
+    --authorization-kubeconfig=/etc/kubernetes/scheduler.conf \
+    --config=/root/index-scheduler.yaml \
+    --secure-port=10260
+```
+
+スケジューラを指定してポッドをデプロイする。
+
+```sh
+cat | kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sample-01
+spec:
+  schedulerName: index-scheduler
+  containers:
+  - name: sample-01
+    image: nginx
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sample-02
+spec:
+  schedulerName: index-scheduler
+  containers:
+  - name: sample-02
+    image: nginx
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sample-03
+spec:
+  schedulerName: index-scheduler
+  containers:
+  - name: sample-03
+    image: nginx
+EOF
+```
+
+ポッドのデプロイ先を確認する。
+
+```sh
+kubectl get pod -o wide
+```
+
+```
+NAME        READY   STATUS    RESTARTS   AGE   IP               NODE                  NOMINATED NODE   READINESS GATES
+sample-01   1/1     Running   0          12s   172.17.255.166   worker01.home.local   <none>           <none>
+sample-02   1/1     Running   0          12s   172.17.51.170    worker02.home.local   <none>           <none>
+sample-03   0/1     Pending   0          12s   <none>           <none>                <none>           <none>
+```
 
 ## 参考
 - [Logging](https://github.com/kubernetes/community/blob/master/contributors/devel/sig-instrumentation/logging.md)
