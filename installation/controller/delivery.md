@@ -10,7 +10,7 @@ Argo CD 用の名前空間を作成する。
 kubectl create namespace argocd
 ```
 
-```
+```text
 namespace/argocd created
 ```
 
@@ -20,7 +20,7 @@ Argo CD を構築する。
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 ```
 
-```
+```text
 customresourcedefinition.apiextensions.k8s.io/applications.argoproj.io created
 customresourcedefinition.apiextensions.k8s.io/applicationsets.argoproj.io created
 customresourcedefinition.apiextensions.k8s.io/appprojects.argoproj.io created
@@ -88,7 +88,7 @@ networkpolicy.networking.k8s.io/argocd-server-network-policy created
 watch kubectl get pods --namespace=argocd
 ```
 
-```
+```text
 NAME                                                READY   STATUS    RESTARTS   AGE
 argocd-application-controller-0                     1/1     Running   0          66s
 argocd-applicationset-controller-5b866bf4f7-qzvqt   1/1     Running   0          67s
@@ -117,7 +117,7 @@ chmod +x $HOME/.local/bin/argocd
 kubectl get all -n argocd -o wide
 ```
 
-```
+```text
 NAME                                                    READY   STATUS    RESTARTS   AGE     IP               NODE                  NOMINATED NODE   READINESS GATES
 pod/argocd-application-controller-0                     1/1     Running   0          2m38s   172.17.255.159   worker01.home.local   <none>           <none>
 pod/argocd-applicationset-controller-5b866bf4f7-qzvqt   1/1     Running   0          2m39s   172.17.51.154    worker02.home.local   <none>           <none>
@@ -165,7 +165,7 @@ statefulset.apps/argocd-application-controller   1/1     2m38s   argocd-applicat
 kubectl -n argocd patch service argocd-server -p '{"spec": {"type": "LoadBalancer"}}'
 ```
 
-```
+```text
 service/argocd-server patched
 ```
 
@@ -175,7 +175,7 @@ service/argocd-server patched
 kubectl -n argocd get service argocd-server
 ```
 
-```
+```text
 NAME            TYPE           CLUSTER-IP     EXTERNAL-IP    PORT(S)                      AGE
 argocd-server   LoadBalancer   10.101.28.50   172.16.0.102   80:31080/TCP,443:30651/TCP   10m
 ```
@@ -196,7 +196,7 @@ admin のパスワードを取得する。
 argocd admin initial-password -n argocd
 ```
 
-```
+```text
 7UGCbCAhWFRPi0N7
 
  This password must be only used for first time login. We strongly recommend you update the password using `argocd account update-password`.

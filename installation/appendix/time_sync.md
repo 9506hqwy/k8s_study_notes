@@ -27,7 +27,7 @@ systemctl restart chronyd
 chronyc sources
 ```
 
-```
+```text
 MS Name/IP address         Stratum Poll Reach LastRx Last sample
 ===============================================================================
 ^? gateway.home.local            0   6     0     -     +0ns[   +0ns] +/-    0ns

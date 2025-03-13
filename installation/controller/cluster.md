@@ -8,7 +8,7 @@
 kubeadm init --control-plane-endpoint=controller.home.local --pod-network-cidr=172.17.0.0/16
 ```
 
-```
+```text
 [init] Using Kubernetes version: v1.31.0
 [preflight] Running pre-flight checks
         [WARNING Firewalld]: firewalld is active, please ensure ports [6443 10250] are open or your cluster may not function correctly
@@ -124,7 +124,7 @@ Controller Node でネットワーク構成を確認する。
 ip netns
 ```
 
-```
+```text
 0a18661a-bf87-4b92-bf3a-02fd92e2f4ca
 19be561a-e22f-4e6d-8562-5abf81ac1183 (id: 0)
 4cfbb0ee-341e-4786-b6b7-3d9804b5979c (id: 1)
@@ -142,7 +142,7 @@ a92692ef-63ca-4f51-ae44-a6d1a9beaaba
 ip -d link show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
 2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
@@ -168,7 +168,7 @@ ip -d link show
 ip netns exec 19be561a-e22f-4e6d-8562-5abf81ac1183 ip -d link show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
 2: eth0@if5: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default
@@ -182,7 +182,7 @@ ip netns exec 19be561a-e22f-4e6d-8562-5abf81ac1183 ip -d link show
 ip netns exec 4cfbb0ee-341e-4786-b6b7-3d9804b5979c ip -d link show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
 2: eth0@if6: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default
@@ -198,7 +198,7 @@ ip netns exec 4cfbb0ee-341e-4786-b6b7-3d9804b5979c ip -d link show
 ip addr show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
     inet 127.0.0.1/8 scope host lo
@@ -227,7 +227,7 @@ ip addr show
 ip netns exec 19be561a-e22f-4e6d-8562-5abf81ac1183 ip addr show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
     inet 127.0.0.1/8 scope host lo
@@ -248,7 +248,7 @@ ip netns exec 19be561a-e22f-4e6d-8562-5abf81ac1183 ip addr show
 ip netns exec 4cfbb0ee-341e-4786-b6b7-3d9804b5979c ip addr show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
     inet 127.0.0.1/8 scope host lo
@@ -271,7 +271,7 @@ ip netns exec 4cfbb0ee-341e-4786-b6b7-3d9804b5979c ip addr show
 ip route show
 ```
 
-```
+```text
 default via 172.16.0.254 dev enp1s0 proto static metric 100
 10.0.0.0/24 dev enp2s0 proto kernel scope link src 10.0.0.11 metric 101
 10.85.0.0/16 dev cni0 proto kernel scope link src 10.85.0.1
@@ -284,7 +284,7 @@ default via 172.16.0.254 dev enp1s0 proto static metric 100
 ip netns exec 19be561a-e22f-4e6d-8562-5abf81ac1183 ip route show
 ```
 
-```
+```text
 default via 10.85.0.1 dev eth0
 10.85.0.0/16 dev eth0 proto kernel scope link src 10.85.0.2
 ```
@@ -295,7 +295,7 @@ default via 10.85.0.1 dev eth0
 ip netns exec 4cfbb0ee-341e-4786-b6b7-3d9804b5979c ip route show
 ```
 
-```
+```text
 default via 10.85.0.1 dev eth0
 10.85.0.0/16 dev eth0 proto kernel scope link src 10.85.0.3
 ```
@@ -308,7 +308,7 @@ default via 10.85.0.1 dev eth0
 nft list ruleset ip
 ```
 
-```
+```text
 table ip mangle {
         chain KUBE-IPTABLES-HINT {
         }
@@ -496,7 +496,7 @@ table ip nat {
 kubectl get all --all-namespaces -o wide
 ```
 
-```
+```text
 NAMESPACE     NAME                                                READY   STATUS    RESTARTS   AGE   IP            NODE                    NOMINATED NODE   READINESS GATES
 kube-system   pod/coredns-7c65d6cfc9-sr5mk                        1/1     Running   0          28m   10.85.0.2     controller.home.local   <none>           <none>
 kube-system   pod/coredns-7c65d6cfc9-zczmd                        1/1     Running   0          28m   10.85.0.3     controller.home.local   <none>           <none>
@@ -526,7 +526,7 @@ kube-system   replicaset.apps/coredns-7c65d6cfc9   2         2         2       2
 kubectl get nodes
 ```
 
-```
+```text
 NAME                    STATUS   ROLES           AGE   VERSION
 controller.home.local   Ready    control-plane   27m   v1.31.1
 ```
@@ -539,7 +539,7 @@ controller.home.local   Ready    control-plane   27m   v1.31.1
 crictl ps -a
 ```
 
-```
+```text
 CONTAINER           IMAGE                                                              CREATED             STATE               NAME                      ATTEMPT             POD ID              POD
 8517fb7aa7f80       ad83b2ca7b09e6162f96f933eecded731cbebf049c78f941fd0ce560a86b6494   28 minutes ago      Running             kube-proxy                0                   a0f9bfca47a19       kube-proxy-7zqsq
 92d23a6b648bf       c69fa2e9cbf5f42dc48af631e956d3f95724c13f91596bc567591790e5e36db6   28 minutes ago      Running             coredns                   0                   457293a70d58c       coredns-7c65d6cfc9-sr5mk
@@ -556,7 +556,7 @@ kube-proxy が属するネットワーク名前空間を確認する。
 ip netns identify $(crictl inspect 8517fb7aa7f80 | jq '.info.pid')
 ```
 
-```
+```text
 8305da93-f5f6-4446-a2ef-1991904aca58
 ```
 
@@ -566,7 +566,7 @@ coredns が属するネットワーク名前空間を確認する。
 ip netns identify $(crictl inspect 92d23a6b648bf | jq '.info.pid')
 ```
 
-```
+```text
 19be561a-e22f-4e6d-8562-5abf81ac1183
 ```
 
@@ -574,7 +574,7 @@ ip netns identify $(crictl inspect 92d23a6b648bf | jq '.info.pid')
 ip netns identify $(crictl inspect f78ec2ba93f77 | jq '.info.pid')
 ```
 
-```
+```text
 4cfbb0ee-341e-4786-b6b7-3d9804b5979c
 ```
 
@@ -584,7 +584,7 @@ etcd が属するネットワーク名前空間を確認する。
 ip netns identify $(crictl inspect a45d43d324275 | jq '.info.pid')
 ```
 
-```
+```text
 8305da93-f5f6-4446-a2ef-1991904aca58
 ```
 
@@ -594,7 +594,7 @@ kube-scheduler が属するネットワーク名前空間を確認する。
 ip netns identify $(crictl inspect 142c67043270c | jq '.info.pid')
 ```
 
-```
+```text
 8305da93-f5f6-4446-a2ef-1991904aca58
 ```
 
@@ -604,7 +604,7 @@ kube-apiserver が属するネットワーク名前空間を確認する。
 ip netns identify $(crictl inspect c84f3fd628818 | jq '.info.pid')
 ```
 
-```
+```text
 8305da93-f5f6-4446-a2ef-1991904aca58
 ```
 
@@ -614,7 +614,7 @@ kube-controller-manager が属するネットワーク名前空間を確認す�
 ip netns identify $(crictl inspect 38a538aefb127 | jq '.info.pid')
 ```
 
-```
+```text
 8305da93-f5f6-4446-a2ef-1991904aca58
 ```
 
@@ -624,7 +624,7 @@ ip netns identify $(crictl inspect 38a538aefb127 | jq '.info.pid')
 crictl images
 ```
 
-```
+```text
 IMAGE                                     TAG                 IMAGE ID            SIZE
 registry.k8s.io/coredns/coredns           v1.11.3             c69fa2e9cbf5f       63.3MB
 registry.k8s.io/etcd                      3.5.15-0            2e96e5913fc06       152MB

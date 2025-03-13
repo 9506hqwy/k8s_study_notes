@@ -20,7 +20,7 @@ MetalLB を構築する。
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
 ```
 
-```
+```text
 namespace/metallb-system created
 customresourcedefinition.apiextensions.k8s.io/bfdprofiles.metallb.io created
 customresourcedefinition.apiextensions.k8s.io/bgpadvertisements.metallb.io created
@@ -53,7 +53,7 @@ validatingwebhookconfiguration.admissionregistration.k8s.io/metallb-webhook-conf
 watch kubectl get pods -n metallb-system
 ```
 
-```
+```text
 NAME                          READY   STATUS    RESTARTS   AGE
 controller-8694df9d9b-4j98j   1/1     Running   0          93s
 speaker-fxd5t                 1/1     Running   0          93s
@@ -71,7 +71,7 @@ speaker-lg7h6                 1/1     Running   0          93s
 kubectl get all -n metallb-system -o wide
 ```
 
-```
+```text
 NAME                              READY   STATUS    RESTARTS   AGE    IP               NODE                    NOMINATED NODE   READINESS GATES
 pod/controller-8694df9d9b-4j98j   1/1     Running   0          8m7s   172.17.255.141   worker01.home.local     <none>           <none>
 pod/speaker-fxd5t                 1/1     Running   0          8m7s   172.16.0.32      worker02.home.local     <none>           <none>
@@ -97,7 +97,7 @@ replicaset.apps/controller-8694df9d9b   1         1         1       8m7s   contr
 kubectl get service -n ingress-nginx
 ```
 
-```
+```text
 NAME                                 TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE
 ingress-nginx-controller             LoadBalancer   10.110.103.111   <pending>     80:32157/TCP,443:31755/TCP   22h
 ingress-nginx-controller-admission   ClusterIP      10.107.109.72    <none>        443/TCP                      22h
@@ -111,7 +111,7 @@ ingress-nginx-controller-admission   ClusterIP      10.107.109.72    <none>     
 crictl ps --name speaker
 ```
 
-```
+```text
 CONTAINER           IMAGE                                                                                             CREATED             STATE               NAME                ATTEMPT             POD ID              POD
 ab264a952ca79       quay.io/metallb/speaker@sha256:c50578d7aaf9147c95e828d6d4a38d817de554cd6f8dd5512790eae48d18129e   12 minutes ago      Running             speaker             0                   64128683419d1       speaker-lg7h6
 ```
@@ -122,7 +122,7 @@ ab264a952ca79       quay.io/metallb/speaker@sha256:c50578d7aaf9147c95e828d6d4a38
 crictl images | grep metal
 ```
 
-```
+```text
 quay.io/metallb/speaker                              v0.14.8             50d3d2d1712d7       120MB
 ```
 
@@ -145,7 +145,7 @@ EOF
 kubectl apply -f metallb_ip_pool.yaml
 ```
 
-```
+```text
 ipaddresspool.metallb.io/public-pool created
 ```
 
@@ -166,7 +166,7 @@ EOF
 kubectl apply -f metallb_ip_adv.yaml
 ```
 
-```
+```text
 l2advertisement.metallb.io/public created
 ```
 
@@ -180,7 +180,7 @@ l2advertisement.metallb.io/public created
 kubectl get service -n ingress-nginx
 ```
 
-```
+```text
 NAME                                 TYPE           CLUSTER-IP       EXTERNAL-IP    PORT(S)                      AGE
 ingress-nginx-controller             LoadBalancer   10.110.103.111   172.16.0.100   80:32157/TCP,443:31755/TCP   23h
 ingress-nginx-controller-admission   ClusterIP      10.107.109.72    <none>         443/TCP                      23h
@@ -190,7 +190,7 @@ ingress-nginx-controller-admission   ClusterIP      10.107.109.72    <none>     
 kubectl describe service ingress-nginx-controller -n ingress-nginx
 ```
 
-```
+```text
 Name:                     ingress-nginx-controller
 Namespace:                ingress-nginx
 Labels:                   app.kubernetes.io/component=controller
@@ -233,7 +233,7 @@ Events:
 kubectl create deployment demo-lb --image=httpd --port=80
 ```
 
-```
+```text
 deployment.apps/demo-lb created
 ```
 
@@ -243,7 +243,7 @@ deployment.apps/demo-lb created
 kubectl get pod -o wide
 ```
 
-```
+```text
 NAME                       READY   STATUS    RESTARTS   AGE   IP               NODE                  NOMINATED NODE   READINESS GATES
 demo-6c87cdc7bf-57f84      1/1     Running   3          22h   172.17.51.139    worker02.home.local   <none>           <none>
 demo-lb-858d8b6884-fq656   1/1     Running   0          79s   172.17.255.142   worker01.home.local   <none>           <none>
@@ -255,7 +255,7 @@ demo-lb-858d8b6884-fq656   1/1     Running   0          79s   172.17.255.142   w
 kubectl expose deployment demo-lb --type=LoadBalancer
 ```
 
-```
+```text
 service/demo-lb exposed
 ```
 
@@ -265,7 +265,7 @@ service/demo-lb exposed
 kubectl get service demo-lb
 ```
 
-```
+```text
 NAME      TYPE           CLUSTER-IP      EXTERNAL-IP    PORT(S)        AGE
 demo-lb   LoadBalancer   10.107.70.254   172.16.0.101   80:31663/TCP   34s
 ```
@@ -276,6 +276,6 @@ demo-lb   LoadBalancer   10.107.70.254   172.16.0.101   80:31663/TCP   34s
 curl http://172.16.0.101
 ```
 
-```
+```text
 <html><body><h1>It works!</h1></body></html>
 ```

@@ -17,7 +17,7 @@ cd kube-prometheus
 kubectl apply --server-side -f manifests/setup
 ```
 
-```
+```text
 customresourcedefinition.apiextensions.k8s.io/alertmanagerconfigs.monitoring.coreos.com serverside-applied
 customresourcedefinition.apiextensions.k8s.io/alertmanagers.monitoring.coreos.com serverside-applied
 customresourcedefinition.apiextensions.k8s.io/podmonitors.monitoring.coreos.com serverside-applied
@@ -40,7 +40,7 @@ kubectl wait \
     --namespace=monitoring
 ```
 
-```
+```text
 customresourcedefinition.apiextensions.k8s.io/alertmanagerconfigs.monitoring.coreos.com condition met
 customresourcedefinition.apiextensions.k8s.io/alertmanagers.monitoring.coreos.com condition met
 customresourcedefinition.apiextensions.k8s.io/apiservers.operator.tigera.io condition met
@@ -102,7 +102,7 @@ Prometheus / Alertmanager / Grafana を構築する。
 kubectl apply -f manifests/
 ```
 
-```
+```text
 alertmanager.monitoring.coreos.com/main created
 networkpolicy.networking.k8s.io/alertmanager-main created
 poddisruptionbudget.policy/alertmanager-main created
@@ -224,7 +224,7 @@ servicemonitor.monitoring.coreos.com/prometheus-operator created
 kubectl -n monitoring get all -o wide
 ```
 
-```
+```text
 NAME                                       READY   STATUS    RESTARTS   AGE     IP               NODE                    NOMINATED NODE   READINESS GATES
 pod/alertmanager-main-0                    2/2     Running   0          2m41s   172.17.255.151   worker01.home.local     <none>           <none>
 pod/alertmanager-main-1                    2/2     Running   0          2m41s   172.17.2.46      controller.home.local   <none>           <none>
@@ -321,7 +321,7 @@ kubectl -n monitoring create ingress \
     --rule="prometheus/*=prometheus-k8s:9090"
 ```
 
-```
+```text
 ingress.networking.k8s.io/prometheus-k8s created
 ```
 
@@ -331,7 +331,7 @@ ingress を確認する。
 kubectl -n monitoring get ingress prometheus-k8s
 ```
 
-```
+```text
 NAME             CLASS   HOSTS        ADDRESS        PORTS   AGE
 prometheus-k8s   nginx   prometheus   172.16.0.100   80      35s
 ```
@@ -367,7 +367,7 @@ kubectl -n monitoring create ingress \
     --rule="grafana/*=grafana:3000"
 ```
 
-```
+```text
 ingress.networking.k8s.io/grafana created
 ```
 
@@ -377,7 +377,7 @@ ingress を確認する。
 kubectl -n monitoring get ingress grafana
 ```
 
-```
+```text
 NAME      CLASS   HOSTS     ADDRESS        PORTS   AGE
 grafana   nginx   grafana   172.16.0.100   80      33s
 ```
@@ -413,7 +413,7 @@ kubectl -n monitoring create ingress \
     --rule="alertmanager/*=alertmanager-main:9093"
 ```
 
-```
+```text
 ingress.networking.k8s.io/alertmanager created
 ```
 
@@ -423,7 +423,7 @@ ingress を確認する。
 kubectl -n monitoring get ingress alertmanager
 ```
 
-```
+```text
 NAME           CLASS   HOSTS          ADDRESS        PORTS   AGE
 alertmanager   nginx   alertmanager   172.16.0.100   80      20s
 ```

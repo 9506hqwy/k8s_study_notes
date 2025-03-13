@@ -10,7 +10,7 @@ Harbor を構築する。
 dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 ```
 
-```
+```text
 repo の追加: https://download.docker.com/linux/centos/docker-ce.repo
 ```
 
@@ -31,7 +31,7 @@ Docker を起動する。
 systemctl enable --now docker
 ```
 
-```
+```text
 Created symlink /etc/systemd/system/multi-user.target.wants/docker.service → /usr/lib/systemd/system/docker.service.
 ```
 
@@ -106,7 +106,7 @@ openssl x509 -req -sha512 \
     -out registry.home.local.crt
 ```
 
-```
+```text
 Certificate request self-signature ok
 subject=C=JP, ST=State, L=Location, O=Home, OU=Personal, CN=registry.home.local
 ```
@@ -149,7 +149,7 @@ tar -zxf harbor-online-installer.tgz
 ./install.sh
 ```
 
-```
+```text
 [Step 0]: checking if docker is installed ...
 
 Note: docker version: 27.3.1
@@ -228,7 +228,7 @@ Note: stopping existing Harbor instance ...
 docker ps
 ```
 
-```
+```text
 CONTAINER ID   IMAGE                                 COMMAND                   CREATED          STATUS                    PORTS                                         NAMES
 3d83411ce1f9   goharbor/harbor-jobservice:v2.12.0    "/harbor/entrypoint.…"   29 minutes ago   Up 28 minutes (healthy)                                                 harbor-jobservice
 e6e2681c10bb   goharbor/nginx-photon:v2.12.0         "nginx -g 'daemon of…"   29 minutes ago   Up 29 minutes (healthy)   0.0.0.0:80->8080/tcp, 0.0.0.0:443->8443/tcp   nginx
@@ -253,7 +253,7 @@ e6e2681c10bb   goharbor/nginx-photon:v2.12.0         "nginx -g 'daemon of…"   
 docker login registry.home.local
 ```
 
-```
+```text
 Username: admin
 Password:
 WARNING! Your password will be stored unencrypted in /root/.docker/config.json.
@@ -271,7 +271,7 @@ docker tag hello-world registry.home.local/test/hello-world
 docker push registry.home.local/test/hello-world
 ```
 
-```
+```text
 Using default tag: latest
 The push refers to repository [registry.home.local/test/hello-world]
 ac28800ec8bb: Pushed

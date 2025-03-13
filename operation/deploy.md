@@ -82,7 +82,7 @@ EOF
 kubectl -n git get pod,svc -o wide
 ```
 
-```
+```text
 NAME                          READY   STATUS    RESTARTS   AGE     IP              NODE                  NOMINATED NODE   READINESS GATES
 pod/gitweb-64c5d4df7b-k6vxt   1/1     Running   0          9m17s   172.17.51.139   worker02.home.local   <none>           <none>
 
@@ -102,7 +102,7 @@ kubectl -n git exec -t gitweb-64c5d4df7b-k6vxt -- /bin/bash -c 'cd /mnt/repos &&
 git clone http://172.16.0.101/gitrepo/manifest.git
 ```
 
-```
+```text
 Cloning into 'manifest'...
 warning: You appear to have cloned an empty repository.
 ```
@@ -173,7 +173,7 @@ Username: admin
 Password:
 ```
 
-```
+```text
 'admin:login' logged in successfully
 Context '172.16.0.102' updated
 ```
@@ -186,7 +186,7 @@ ArgoCD にリポジトリを登録する。
 argocd repo add http://172.16.0.101/gitrepo/manifest.git
 ```
 
-```
+```text
 Repository 'http://172.16.0.101/gitrepo/manifest.git' added
 ```
 
@@ -196,7 +196,7 @@ Repository 'http://172.16.0.101/gitrepo/manifest.git' added
 argocd repo list
 ```
 
-```
+```text
 TYPE  NAME  REPO                                      INSECURE  OCI    LFS    CREDS  STATUS      MESSAGE  PROJECT
 git         http://172.16.0.101/gitrepo/manifest.git  false     false  false  false  Successful
 ```
@@ -214,7 +214,7 @@ argocd app create web \
     --dest-namespace argocd-sample
 ```
 
-```
+```text
 application 'web' created
 ```
 
@@ -224,7 +224,7 @@ application 'web' created
 argocd app list
 ```
 
-```
+```text
 NAME        CLUSTER                         NAMESPACE      PROJECT  STATUS     HEALTH   SYNCPOLICY  CONDITIONS  REPO                                      PATH  TARGET
 argocd/web  https://kubernetes.default.svc  argocd-sample  default  OutOfSync  Missing  <none>      <none>      http://172.16.0.101/gitrepo/manifest.git  web
 ```
@@ -237,7 +237,7 @@ argocd/web  https://kubernetes.default.svc  argocd-sample  default  OutOfSync  M
 argocd app sync web
 ```
 
-```
+```text
 IMESTAMP                  GROUP                    KIND   NAMESPACE                     NAME    STATUS    HEALTH        HOOK  MESSAGE
 2024-11-15T00:26:28+09:00                        Service  argocd-sample                   web  OutOfSync  Missing
 2024-11-15T00:26:28+09:00   apps              Deployment  argocd-sample                   web  OutOfSync  Missing
@@ -280,7 +280,7 @@ networking.k8s.io  Ingress     argocd-sample  web            Synced   Progressin
 argocd app get web
 ```
 
-```
+```text
 Name:               argocd/web
 Project:            default
 Server:             https://kubernetes.default.svc
@@ -307,7 +307,7 @@ networking.k8s.io  Ingress     argocd-sample  web            Synced   Healthy   
 kubectl -n argocd-sample get all -o wide
 ```
 
-```
+```text
 NAME                       READY   STATUS    RESTARTS   AGE     IP              NODE                  NOMINATED NODE   READINESS GATES
 pod/web-6fcfcf5cfb-kcg9c   1/1     Running   0          4m24s   172.17.51.132   worker02.home.local   <none>           <none>
 

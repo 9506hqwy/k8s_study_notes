@@ -56,7 +56,7 @@ Calico の Operator を構築する。
 kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/tigera-operator.yaml
 ```
 
-```
+```text
 namespace/tigera-operator created
 customresourcedefinition.apiextensions.k8s.io/bgpconfigurations.crd.projectcalico.org created
 customresourcedefinition.apiextensions.k8s.io/bgpfilters.crd.projectcalico.org created
@@ -92,7 +92,7 @@ Calico を構築する。
 kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/custom-resources.yaml
 ```
 
-```
+```text
 installation.operator.tigera.io/default created
 apiserver.operator.tigera.io/default created
 ```
@@ -103,7 +103,7 @@ IP Pool の CIDR の既定値が 192.168.0.0/16 のため 172.17.0.0/16 に変�
 kubectl edit installation default
 ```
 
-```
+```text
 installation.operator.tigera.io/default edited
 ```
 
@@ -113,7 +113,7 @@ installation.operator.tigera.io/default edited
 watch kubectl get pods -n calico-system
 ```
 
-```
+```text
 NAME                                      READY   STATUS    RESTARTS   AGE
 calico-kube-controllers-9b679fd48-8kzvc   1/1     Running   0          2m9s
 calico-node-xhj6c                         1/1     Running   0          2m8s
@@ -161,7 +161,7 @@ Controller Node でネットワーク構成を確認する。
 ip netns
 ```
 
-```
+```text
 5826d966-0b4f-4d9f-bfd3-81d2f72b58cd (id: 5)
 9ff894b9-33fa-45fc-bbd8-e2cb4695c073 (id: 4)
 e8fed744-e9f8-4a53-b704-48430a74156e
@@ -186,7 +186,7 @@ a92692ef-63ca-4f51-ae44-a6d1a9beaaba
 ip -d link show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
 2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
@@ -229,7 +229,7 @@ ip -d link show
 ip netns exec 19be561a-e22f-4e6d-8562-5abf81ac1183 ip -d link show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
 2: eth0@if5: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default
@@ -243,7 +243,7 @@ ip netns exec 19be561a-e22f-4e6d-8562-5abf81ac1183 ip -d link show
 ip netns exec 4cfbb0ee-341e-4786-b6b7-3d9804b5979c ip -d link show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
 2: eth0@if6: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default
@@ -257,7 +257,7 @@ ip netns exec 4cfbb0ee-341e-4786-b6b7-3d9804b5979c ip -d link show
 ip netns exec 14906b81-4240-48fc-9102-5ef63f726e6d ip -d link show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
 2: eth0@if7: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default
@@ -271,7 +271,7 @@ ip netns exec 14906b81-4240-48fc-9102-5ef63f726e6d ip -d link show
 ip netns exec 4ac65615-8202-4403-9317-041a07f790af ip -d link show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
 2: eth0@if8: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default
@@ -285,7 +285,7 @@ ip netns exec 4ac65615-8202-4403-9317-041a07f790af ip -d link show
 ip netns exec 9ff894b9-33fa-45fc-bbd8-e2cb4695c073 ip -d link show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
 2: eth0@if12: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP mode DEFAULT group default qlen 1000
@@ -299,7 +299,7 @@ ip netns exec 9ff894b9-33fa-45fc-bbd8-e2cb4695c073 ip -d link show
 ip netns exec 5826d966-0b4f-4d9f-bfd3-81d2f72b58cd ip -d link show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
 2: eth0@if13: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP mode DEFAULT group default qlen 1000
@@ -315,7 +315,7 @@ ip netns exec 5826d966-0b4f-4d9f-bfd3-81d2f72b58cd ip -d link show
 ip addr show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
     inet 127.0.0.1/8 scope host lo
@@ -356,7 +356,7 @@ ip addr show
 ip netns exec 19be561a-e22f-4e6d-8562-5abf81ac1183 ip addr show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
     inet 127.0.0.1/8 scope host lo
@@ -377,7 +377,7 @@ ip netns exec 19be561a-e22f-4e6d-8562-5abf81ac1183 ip addr show
 ip netns exec 4cfbb0ee-341e-4786-b6b7-3d9804b5979c ip addr show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
     inet 127.0.0.1/8 scope host lo
@@ -398,7 +398,7 @@ ip netns exec 4cfbb0ee-341e-4786-b6b7-3d9804b5979c ip addr show
 ip netns exec 14906b81-4240-48fc-9102-5ef63f726e6d ip addr show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
     inet 127.0.0.1/8 scope host lo
@@ -419,7 +419,7 @@ ip netns exec 14906b81-4240-48fc-9102-5ef63f726e6d ip addr show
 ip netns exec 4ac65615-8202-4403-9317-041a07f790af ip addr show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
     inet 127.0.0.1/8 scope host lo
@@ -440,7 +440,7 @@ ip netns exec 4ac65615-8202-4403-9317-041a07f790af ip addr show
 ip netns exec 9ff894b9-33fa-45fc-bbd8-e2cb4695c073 ip addr show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
     inet 127.0.0.1/8 scope host lo
@@ -461,7 +461,7 @@ ip netns exec 9ff894b9-33fa-45fc-bbd8-e2cb4695c073 ip addr show
 ip netns exec 5826d966-0b4f-4d9f-bfd3-81d2f72b58cd ip addr show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
     inet 127.0.0.1/8 scope host lo
@@ -484,7 +484,7 @@ ip netns exec 5826d966-0b4f-4d9f-bfd3-81d2f72b58cd ip addr show
 ip route show
 ```
 
-```
+```text
 default via 172.16.0.254 dev enp1s0 proto static metric 100
 10.0.0.0/24 dev enp2s0 proto kernel scope link src 10.0.0.11 metric 101
 10.85.0.0/16 dev cni0 proto kernel scope link src 10.85.0.1
@@ -500,7 +500,7 @@ blackhole 172.17.2.0/26 proto 80
 ip netns exec 19be561a-e22f-4e6d-8562-5abf81ac1183 ip route show
 ```
 
-```
+```text
 default via 10.85.0.1 dev eth0
 10.85.0.0/16 dev eth0 proto kernel scope link src 10.85.0.2
 ```
@@ -511,7 +511,7 @@ default via 10.85.0.1 dev eth0
 ip netns exec 4cfbb0ee-341e-4786-b6b7-3d9804b5979c ip route show
 ```
 
-```
+```text
 default via 10.85.0.1 dev eth0
 10.85.0.0/16 dev eth0 proto kernel scope link src 10.85.0.3
 ```
@@ -522,7 +522,7 @@ default via 10.85.0.1 dev eth0
 ip netns exec 14906b81-4240-48fc-9102-5ef63f726e6d ip route show
 ```
 
-```
+```text
 default via 10.85.0.1 dev eth0
 10.85.0.0/16 dev eth0 proto kernel scope link src 10.85.0.4
 ```
@@ -533,7 +533,7 @@ default via 10.85.0.1 dev eth0
 ip netns exec 4ac65615-8202-4403-9317-041a07f790af ip route show
 ```
 
-```
+```text
 default via 10.85.0.1 dev eth0
 10.85.0.0/16 dev eth0 proto kernel scope link src 10.85.0.5
 ```
@@ -544,7 +544,7 @@ default via 10.85.0.1 dev eth0
 ip netns exec 9ff894b9-33fa-45fc-bbd8-e2cb4695c073 ip route show
 ```
 
-```
+```text
 default via 169.254.1.1 dev eth0
 169.254.1.1 dev eth0 scope link
 ```
@@ -555,7 +555,7 @@ default via 169.254.1.1 dev eth0
 ip netns exec 5826d966-0b4f-4d9f-bfd3-81d2f72b58cd ip route show
 ```
 
-```
+```text
 default via 169.254.1.1 dev eth0
 169.254.1.1 dev eth0 scope link
 ```
@@ -568,7 +568,7 @@ default via 169.254.1.1 dev eth0
 nft list ruleset ip
 ```
 
-```
+```text
 # Warning: table ip mangle is managed by iptables-nft, do not touch!
 table ip mangle {
         chain KUBE-IPTABLES-HINT {
@@ -1183,7 +1183,7 @@ table ip raw {
 kubectl get all --all-namespaces -o wide
 ```
 
-```
+```text
 NAMESPACE          NAME                                                READY   STATUS    RESTARTS   AGE    IP            NODE                    NOMINATED NODE   READINESS GATES
 calico-apiserver   pod/calico-apiserver-556c4b7b69-h9mng               1/1     Running   0          18m    172.17.2.1    controller.home.local   <none>           <none>
 calico-apiserver   pod/calico-apiserver-556c4b7b69-tdbq5               1/1     Running   0          18m    172.17.2.2    controller.home.local   <none>           <none>
@@ -1235,7 +1235,7 @@ tigera-operator    replicaset.apps/tigera-operator-6847585ccf          1        
 crictl ps -a
 ```
 
-```
+```text
 CONTAINER           IMAGE                                                                                                            CREATED             STATE               NAME                        ATTEMPT             POD ID              POD
 bfbd630515d52       docker.io/calico/apiserver@sha256:97ddbfa56602907922de2af0e1c2cda1052d1abadb72a9568501ca5697e4f487               20 minutes ago      Running             calico-apiserver            0                   927072f54ed0e       calico-apiserver-556c4b7b69-tdbq5
 a2f9acddce6a9       docker.io/calico/apiserver@sha256:97ddbfa56602907922de2af0e1c2cda1052d1abadb72a9568501ca5697e4f487               20 minutes ago      Running             calico-apiserver            0                   497f8f9f6adc5       calico-apiserver-556c4b7b69-h9mng
@@ -1262,7 +1262,7 @@ calico-apiserver が属するネットワーク名前空間を確認する。
 ip netns identify $(crictl inspect bfbd630515d52 | jq '.info.pid')
 ```
 
-```
+```text
 5826d966-0b4f-4d9f-bfd3-81d2f72b58cd
 ```
 
@@ -1270,7 +1270,7 @@ ip netns identify $(crictl inspect bfbd630515d52 | jq '.info.pid')
 ip netns identify $(crictl inspect a2f9acddce6a9 | jq '.info.pid')
 ```
 
-```
+```text
 9ff894b9-33fa-45fc-bbd8-e2cb4695c073
 ```
 
@@ -1280,7 +1280,7 @@ calico-node が属するネットワーク名前空間を確認する。
 ip netns identify $(crictl inspect 30ab39aad824c | jq '.info.pid')
 ```
 
-```
+```text
 8305da93-f5f6-4446-a2ef-1991904aca58
 ```
 
@@ -1290,7 +1290,7 @@ csi-node-driver-registrar が属するネットワーク名前空間を確認す
 ip netns identify $(crictl inspect 5ab903438542f | jq '.info.pid')
 ```
 
-```
+```text
 14906b81-4240-48fc-9102-5ef63f726e6d
 ```
 
@@ -1300,7 +1300,7 @@ calico-typha が属するネットワーク名前空間を確認する。
 ip netns identify $(crictl inspect 3c1530c08352a | jq '.info.pid')
 ```
 
-```
+```text
 8305da93-f5f6-4446-a2ef-1991904aca58
 ```
 
@@ -1310,7 +1310,7 @@ calico-kube-controllers が属するネットワーク名前空間を確認す�
 ip netns identify $(crictl inspect 05a04edbec1db | jq '.info.pid')
 ```
 
-```
+```text
 4ac65615-8202-4403-9317-041a07f790af
 ```
 
@@ -1320,7 +1320,7 @@ calico-csi が属するネットワーク名前空間を確認する。
 ip netns identify $(crictl inspect 0f9c217a10abe | jq '.info.pid')
 ```
 
-```
+```text
 14906b81-4240-48fc-9102-5ef63f726e6d
 ```
 
@@ -1330,7 +1330,7 @@ tigera-operator が属するネットワーク名前空間を確認する。
 ip netns identify $(crictl inspect 009416c6c6fd2 | jq '.info.pid')
 ```
 
-```
+```text
 8305da93-f5f6-4446-a2ef-1991904aca58
 ```
 
@@ -1340,7 +1340,7 @@ ip netns identify $(crictl inspect 009416c6c6fd2 | jq '.info.pid')
 crictl images
 ```
 
-```
+```text
 IMAGE                                     TAG                 IMAGE ID            SIZE
 docker.io/calico/apiserver                v3.28.0             6c07591fd1cfa       97.9MB
 docker.io/calico/cni                      v3.28.0             107014d9f4c89       209MB
@@ -1368,7 +1368,7 @@ registry.k8s.io/pause                     3.10                873ed75102791     
 kubectl calico node status
 ```
 
-```
+```text
 Calico process is running.
 
 IPv4 BGP status
@@ -1389,7 +1389,7 @@ IP プールを確認する。
 kubectl calico ipam show
 ```
 
-```
+```text
 +----------+---------------+-----------+------------+--------------+
 | GROUPING |     CIDR      | IPS TOTAL | IPS IN USE |   IPS FREE   |
 +----------+---------------+-----------+------------+--------------+

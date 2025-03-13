@@ -38,7 +38,7 @@ spec:
 kubectl apply -f pod-with-iscsi.yaml
 ```
 
-```
+```text
 pod/demo-vol-iscsi created
 ```
 
@@ -48,7 +48,7 @@ pod/demo-vol-iscsi created
 kubectl get pods demo-vol-iscsi -o wide
 ```
 
-```
+```text
 NAME             READY   STATUS    RESTARTS   AGE   IP               NODE                  NOMINATED NODE   READINESS GATES
 demo-vol-iscsi   1/1     Running   0          78s   172.17.255.177   worker01.home.local   <none>           <none>
 ```
@@ -59,7 +59,7 @@ demo-vol-iscsi   1/1     Running   0          78s   172.17.255.177   worker01.ho
 iscsiadm --mode node
 ```
 
-```
+```text
 10.0.0.92:3260,1 iqn.2003-01.org.linux-iscsi.storage.x8664:sn.a6b9465d3f31
 ```
 
@@ -69,7 +69,7 @@ iscsiadm --mode node
 lsblk -S
 ```
 
-```
+```text
 NAME HCTL       TYPE VENDOR   MODEL         REV SERIAL                               TRAN
 sda  6:0:0:0    disk LIO-ORG  disk01       4.0  997ecac1-8498-46cb-a765-01c96f4b7642 iscsi
 sr0  0:0:0:0    rom  QEMU     QEMU DVD-ROM 2.5+ QM00001                              sata
@@ -81,7 +81,7 @@ sr0  0:0:0:0    rom  QEMU     QEMU DVD-ROM 2.5+ QM00001                         
 mount | grep sda
 ```
 
-```
+```text
 /dev/sda on /var/lib/kubelet/plugins/kubernetes.io/iscsi/iface-default/10.0.0.92:3260-iqn.2003-01.org.linux-iscsi.storage.x8664:sn.a6b9465d3f31-lun-0 type xfs (rw,relatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,noquota)
 /dev/sda on /var/lib/kubelet/pods/70316ed8-9a87-444f-8bfa-aaac84f6b013/volumes/kubernetes.io~iscsi/iscsi-lun0 type xfs (rw,relatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,noquota)
 ```
@@ -111,7 +111,7 @@ crictl inspect 0a549d82e82b2 | jq '.status.mounts[] | select(.containerPath == "
 kubectl exec demo-vol-iscsi -- df -Th /mnt/iscsi0
 ```
 
-```
+```text
 Filesystem     Type  Size  Used Avail Use% Mounted on
 /dev/sda       xfs   960M   39M  922M   5% /mnt/iscsi0
 ```
@@ -126,7 +126,7 @@ kubectl exec demo-vol-iscsi -- bash -c 'echo test > /mnt/iscsi0/test.txt'
 kubectl exec demo-vol-iscsi -- cat /mnt/iscsi0/test.txt
 ```
 
-```
+```text
 test
 ```
 
@@ -138,7 +138,7 @@ test
 kubectl delete pod demo-vol-iscsi
 ```
 
-```
+```text
 pod "demo-vol-iscsi" deleted
 ```
 
@@ -148,7 +148,7 @@ pod "demo-vol-iscsi" deleted
 iscsiadm --mode node
 ```
 
-```
+```text
 iscsiadm: No records found
 ```
 
@@ -185,7 +185,7 @@ spec:
 kubectl apply -f pv-iscsi-lun0.yaml
 ```
 
-```
+```text
 persistentvolume/pv-iscsi-lun0 created
 ```
 
@@ -195,7 +195,7 @@ PersistentVolume を確認する。
 kubectl get pv -o wide
 ```
 
-```
+```text
 NAME            CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   VOLUMEATTRIBUTESCLASS   REASON   AGE   VOLUMEMODE
 pv-iscsi-lun0   1Gi        RWO            Retain           Available                          <unset>                          19s   Filesystem
 ```
@@ -221,7 +221,7 @@ spec:
 kubectl apply -f pvc-iscsi-1g.yaml
 ```
 
-```
+```text
 persistentvolumeclaim/pvc-iscsi-1g created
 ```
 
@@ -231,7 +231,7 @@ PersistentVolumeClaim を確認する。
 kubectl get pvc -o wide
 ```
 
-```
+```text
 NAME           STATUS   VOLUME          CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE   VOLUMEMODE
 pvc-iscsi-1g   Bound    pv-iscsi-lun0   1Gi        RWO                           <unset>                 5s    Filesystem
 ```
@@ -268,7 +268,7 @@ spec:
 kubectl apply -f pod-with-pvc.yaml
 ```
 
-```
+```text
 pod/demo-vol-pvc created
 ```
 
@@ -278,7 +278,7 @@ pod/demo-vol-pvc created
 kubectl get pods demo-vol-pvc -o wide
 ```
 
-```
+```text
 NAME           READY   STATUS    RESTARTS   AGE   IP               NODE                  NOMINATED NODE   READINESS GATES
 demo-vol-pvc   1/1     Running   0          77s   172.17.255.176   worker01.home.local   <none>           <none>
 ```
@@ -289,7 +289,7 @@ PersistentVolumeClaim を確認する。
 kubectl describe pvc pvc-iscsi-1g
 ```
 
-```
+```text
 Name:          pvc-iscsi-1g
 Namespace:     default
 StorageClass:
@@ -312,7 +312,7 @@ Events:        <none>
 kubectl exec demo-vol-pvc -- df -Th /mnt/iscsi0
 ```
 
-```
+```text
 Filesystem     Type  Size  Used Avail Use% Mounted on
 /dev/sda       xfs   960M   39M  922M   5% /mnt/iscsi0
 ```
@@ -323,6 +323,6 @@ Filesystem     Type  Size  Used Avail Use% Mounted on
 kubectl exec demo-vol-pvc -- cat /mnt/iscsi0/test.txt
 ```
 
-```
+```text
 test
 ```

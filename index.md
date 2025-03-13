@@ -1,4 +1,4 @@
-# Welcome to Kubernetes Study Notes's documentation!
+# Welcome to Kubernetes Study Notes's documentation
 
 ```{toctree}
 ---

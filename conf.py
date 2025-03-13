@@ -16,10 +16,10 @@ release = '0.1.0'
 
 extensions = [
     'myst_parser',
-    'sphinx_rtd_theme',
 ]
 
 exclude_patterns = [
+    '.devcontainer',
     '.mypy_cache',
     '.venv',
     '.vscode',
@@ -27,10 +27,6 @@ exclude_patterns = [
 ]
 
 language = 'ja'
-
-# 図表番号を連番で付ける。
-numfig = True
-numfig_secnum_depth = 0
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

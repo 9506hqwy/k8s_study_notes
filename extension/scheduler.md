@@ -13,7 +13,7 @@ kubectl create clusterrole \
     --non-resource-url=/debug/flags/v
 ```
 
-```
+```text
 clusterrole.rbac.authorization.k8s.io/debug-flag-admin created
 ```
 
@@ -26,7 +26,7 @@ kubectl create clusterrolebinding \
     --serviceaccount=default:default
 ```
 
-```
+```text
 clusterrolebinding.rbac.authorization.k8s.io/debug-flag-admin created
 ```
 
@@ -36,7 +36,7 @@ clusterrolebinding.rbac.authorization.k8s.io/debug-flag-admin created
 kubectl create token default
 ```
 
-```
+```text
 eyJhbGciOiJSUzI1NiIsImtpZCI6IlM...
 ```
 
@@ -46,7 +46,7 @@ eyJhbGciOiJSUzI1NiIsImtpZCI6IlM...
 curl -k -H "Authorization: Bearer $TOKEN" -d 5 -X PUT  https://127.0.0.1:10259/debug/flags/v
 ```
 
-```
+```text
 successfully set klog.logging.verbosity to 5
 ```
 
@@ -69,13 +69,13 @@ kube-scheduler \
 kubectl create deployment demo-sched --image=nginx --port=80
 ```
 
-```
+```text
 deployment.apps/demo-sched created
 ```
 
 `kube-scheduler` に下記のログが出力される。
 
-```
+```text
 [eventhandlers.go:149] "Add event for unscheduled pod" pod="default/demo-sched-86675cbfff-5qr96"
 [scheduling_queue.go:635] "Pod moved to an internal scheduling queue" pod="default/demo-sched-86675cbfff-5qr96" event="PodAdd" queue="Active"
 [schedule_one.go:83] "About to try and schedule pod" pod="default/demo-sched-86675cbfff-5qr96"
@@ -109,7 +109,7 @@ deployment.apps/demo-sched created
       8. ワーカノードを選択する([selectHost](https://github.com/kubernetes/kubernetes/blob/v1.31.1/pkg/scheduler/schedule_one.go#L872-L919))。
          1. ここまでの処理でエラーが発生した場合
          2. `PostFilter` プラグインを実行する([RunPostFilterPlugins](https://github.com/kubernetes/kubernetes/blob/v1.31.1/pkg/scheduler/framework/runtime/framework.go#L908-L951))。
-      9.  キャッシュを更新する([assume](https://github.com/kubernetes/kubernetes/blob/v1.31.1/pkg/scheduler/schedule_one.go#L945-L962))。
+      9. キャッシュを更新する([assume](https://github.com/kubernetes/kubernetes/blob/v1.31.1/pkg/scheduler/schedule_one.go#L945-L962))。
       10. `Reserve` プラグインを実行する([RunReservePluginsReserve](https://github.com/kubernetes/kubernetes/blob/v1.31.1/pkg/scheduler/framework/runtime/framework.go#L1359-L1389))。
       11. `Permit` プラグインを実行する([RunPermitPlugins](https://github.com/kubernetes/kubernetes/blob/v1.31.1/pkg/scheduler/framework/runtime/framework.go#L1443-L1490))。
    6. Binding Cycle([bindingCycle](https://github.com/kubernetes/kubernetes/blob/v1.31.1/pkg/scheduler/schedule_one.go#L264-L332)) ※ 別 goroutine で実行される。
@@ -303,7 +303,7 @@ EOF
 kubectl get pod -o wide
 ```
 
-```
+```text
 NAME        READY   STATUS    RESTARTS   AGE   IP               NODE                  NOMINATED NODE   READINESS GATES
 sample-01   1/1     Running   0          38s   172.17.255.134   worker01.home.local   <none>           <none>
 sample-02   1/1     Running   0          38s   172.17.51.145    worker02.home.local   <none>           <none>
@@ -396,7 +396,7 @@ EOF
 kubectl get pod -o wide
 ```
 
-```
+```text
 NAME        READY   STATUS    RESTARTS   AGE   IP               NODE                  NOMINATED NODE   READINESS GATES
 sample-01   1/1     Running   0          12s   172.17.255.166   worker01.home.local   <none>           <none>
 sample-02   1/1     Running   0          12s   172.17.51.170    worker02.home.local   <none>           <none>

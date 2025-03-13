@@ -10,7 +10,7 @@ kubeadm join controller.home.local:6443 \
     --discovery-token-ca-cert-hash sha256:a9e19ff35745b233a452c780fa4f73fbd6b1e7927ad4dfcd95d17ce40ba7b755
 ```
 
-```
+```text
 [preflight] Running pre-flight checks
         [WARNING FileExisting-socat]: socat not found in system path
         [WARNING Service-Kubelet]: kubelet service is not enabled, please run 'systemctl enable kubelet.service'
@@ -50,7 +50,7 @@ Worker Node でネットワーク構成を確認する。
 ip netns
 ```
 
-```
+```text
 482f2d0f-575e-4e27-8710-a47af2823dd1
 20be9af8-e917-4ab8-a5e9-b515c3804118 (id: 0)
 2abf8663-2a57-4965-9f1b-86b7e37f60e9
@@ -64,7 +64,7 @@ ip netns
 ip -d link show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
 2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
@@ -89,7 +89,7 @@ ip -d link show
 ip netns exec 20be9af8-e917-4ab8-a5e9-b515c3804118 ip -d link show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
 2: eth0@if5: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default
@@ -105,7 +105,7 @@ ip netns exec 20be9af8-e917-4ab8-a5e9-b515c3804118 ip -d link show
 ip addr show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
     inet 127.0.0.1/8 scope host lo
@@ -136,7 +136,7 @@ ip addr show
 ip netns exec 20be9af8-e917-4ab8-a5e9-b515c3804118 ip addr show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
     inet 127.0.0.1/8 scope host lo
@@ -159,7 +159,7 @@ ip netns exec 20be9af8-e917-4ab8-a5e9-b515c3804118 ip addr show
 ip route show
 ```
 
-```
+```text
 default via 172.16.0.254 dev enp1s0 proto static metric 100
 10.0.0.0/24 dev enp2s0 proto kernel scope link src 10.0.0.31 metric 101
 10.85.0.0/16 dev cni0 proto kernel scope link src 10.85.0.1
@@ -174,7 +174,7 @@ blackhole 172.17.255.128/26 proto 80
 ip netns exec 20be9af8-e917-4ab8-a5e9-b515c3804118 ip route show
 ```
 
-```
+```text
 default via 10.85.0.1 dev eth0
 10.85.0.0/16 dev eth0 proto kernel scope link src 10.85.0.2
 ```
@@ -187,7 +187,7 @@ default via 10.85.0.1 dev eth0
 nft list ruleset ip
 ```
 
-```
+```text
 # Warning: table ip mangle is managed by iptables-nft, do not touch!
 table ip mangle {
         chain KUBE-IPTABLES-HINT {
@@ -594,7 +594,7 @@ table ip raw {
 kubectl get all --all-namespaces -o wide
 ```
 
-```
+```text
 NAMESPACE          NAME                                                READY   STATUS    RESTARTS   AGE   IP            NODE                    NOMINATED NODE   READINESS GATES
 calico-apiserver   pod/calico-apiserver-556c4b7b69-h9mng               1/1     Running   1          17h   172.17.2.12   controller.home.local   <none>           <none>
 calico-apiserver   pod/calico-apiserver-556c4b7b69-tdbq5               1/1     Running   1          17h   172.17.2.7    controller.home.local   <none>           <none>
@@ -647,7 +647,7 @@ tigera-operator    replicaset.apps/tigera-operator-6847585ccf          1        
 kubectl get nodes
 ```
 
-```
+```text
 NAME                    STATUS   ROLES           AGE   VERSION
 controller.home.local   Ready    control-plane   19h   v1.31.1
 worker01.home.local     Ready    <none>          22m   v1.31.1
@@ -661,7 +661,7 @@ worker01.home.local     Ready    <none>          22m   v1.31.1
 crictl ps -a
 ```
 
-```
+```text
 CONTAINER           IMAGE                                                                                                            CREATED             STATE               NAME                        ATTEMPT             POD ID              POD
 1e09f4362c597       docker.io/calico/node@sha256:3c0e24adecc39e89780e807400def972deb0ec9de9fbbbaceade072a8c6ae94f                    22 minutes ago      Running             calico-node                 0                   2bbadeecd8d63       calico-node-n84qn
 f8ee675b2a337       docker.io/calico/cni@sha256:7a3a5cf6c79243ba2de9eef8cb20fac7c46ef75b858956b9884b0ce87b9a354d                     22 minutes ago      Exited              install-cni                 0                   2bbadeecd8d63       calico-node-n84qn
@@ -677,7 +677,7 @@ calico-node が属するネットワーク名前空間を確認する。
 ip netns identify $(crictl inspect 1e09f4362c597 | jq '.info.pid')
 ```
 
-```
+```text
 2abf8663-2a57-4965-9f1b-86b7e37f60e9
 ```
 
@@ -687,7 +687,7 @@ csi-node-driver-registrar が属するネットワーク名前空間を確認す
 ip netns identify $(crictl inspect 5e00e077f45c2 | jq '.info.pid')
 ```
 
-```
+```text
 20be9af8-e917-4ab8-a5e9-b515c3804118
 ```
 
@@ -697,7 +697,7 @@ calico-csi が属するネットワーク名前空間を確認する。
 ip netns identify $(crictl inspect 92c3b3a4a6aea | jq '.info.pid')
 ```
 
-```
+```text
 20be9af8-e917-4ab8-a5e9-b515c3804118
 ```
 
@@ -707,7 +707,7 @@ kube-proxy が属するネットワーク名前空間を確認する。
 ip netns identify $(crictl inspect cffa497347532 | jq '.info.pid')
 ```
 
-```
+```text
 2abf8663-2a57-4965-9f1b-86b7e37f60e9
 ```
 
@@ -717,7 +717,7 @@ ip netns identify $(crictl inspect cffa497347532 | jq '.info.pid')
 crictl images
 ```
 
-```
+```text
 IMAGE                                    TAG                 IMAGE ID            SIZE
 docker.io/calico/cni                     v3.28.0             107014d9f4c89       209MB
 docker.io/calico/csi                     v3.28.0             1a094aeaf1521       18.3MB

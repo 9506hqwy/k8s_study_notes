@@ -25,7 +25,7 @@ podman push registry.home.local/system/sample-api-server
 kubectl create serviceaccount sample-api-server
 ```
 
-```
+```text
 serviceaccount/sample-api-server created
 ```
 
@@ -35,7 +35,7 @@ serviceaccount/sample-api-server created
 kubectl create clusterrolebinding sample-api-server-auth --clusterrole=system:auth-delegator --serviceaccount=default:sample-api-server
 ```
 
-```
+```text
 clusterrolebinding.rbac.authorization.k8s.io/sample-api-server-auth created
 ```
 
@@ -45,7 +45,7 @@ clusterrolebinding.rbac.authorization.k8s.io/sample-api-server-auth created
 kubectl create rolebinding sample-api-server-config-reader -n kube-system --role=extension-apiserver-authentication-reader --serviceaccount=default:sample-api-server
 ```
 
-```
+```text
 rolebinding.rbac.authorization.k8s.io/sample-api-server-config-reader created
 ```
 
@@ -83,7 +83,7 @@ spec:
 kubectl apply -f deployment-sample-api-server.yaml
 ```
 
-```
+```text
 deployment.apps/sample-api-server created
 ```
 
@@ -93,7 +93,7 @@ deployment.apps/sample-api-server created
 kubectl get pod -o wide
 ```
 
-```
+```text
 NAME                                READY   STATUS    RESTARTS   AGE   IP              NODE                  NOMINATED NODE   READINESS GATES
 sample-api-server-9f7b777d8-cbt4m   1/1     Running   0          51s   172.17.51.173   worker02.home.local   <none>           <none>
 ```
@@ -104,7 +104,7 @@ sample-api-server-9f7b777d8-cbt4m   1/1     Running   0          51s   172.17.51
 kubectl expose deployment sample-api-server
 ```
 
-```
+```text
 service/sample-api-server exposed
 ```
 
@@ -114,7 +114,7 @@ service/sample-api-server exposed
 kubectl get service sample-api-server -o wide
 ```
 
-```
+```text
 NAME                TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE   SELECTOR
 sample-api-server   ClusterIP   10.99.133.193   <none>        3000/TCP   19s   app=sample-api-server
 ```
@@ -129,7 +129,7 @@ Kubernetes API Server のログレベルを変更する。
 kubectl create token default
 ```
 
-```
+```text
 eyJhbGciOiJSUzI1NiIsImtpZCI6IlM...
 ```
 
@@ -139,7 +139,7 @@ eyJhbGciOiJSUzI1NiIsImtpZCI6IlM...
 curl -k -H "Authorization: Bearer $TOKEN" -d 5 -X PUT  https://controller.home.local:6443/debug/flags/v
 ```
 
-```
+```text
 successfully set klog.logging.verbosity to 5
 ```
 
@@ -171,7 +171,7 @@ APIService を作成する。
 kubectl apply -f v1alpha1.sample-api-server.yaml
 ```
 
-```
+```text
 apiservice.apiregistration.k8s.io/v1alpha1.sample-api-server created
 ```
 
@@ -181,7 +181,7 @@ APIService を確認する。
 kubectl get apiservice v1alpha1.sample-api-server
 ```
 
-```
+```text
 NAME                         SERVICE                     AVAILABLE   AGE
 v1alpha1.sample-api-server   default/sample-api-server   True        8m18s
 ```
@@ -245,7 +245,6 @@ kubectl get --raw '/apis/sample-api-server/v1alpha1/namespaces/default/samples' 
 
 `get` を確認する。
 
-
 ```sh
 kubectl get --raw '/apis/sample-api-server/v1alpha1/namespaces/default/samples/a' | jq
 ```
@@ -269,7 +268,7 @@ kubectl get --raw '/apis/sample-api-server/v1alpha1/namespaces/default/samples/a
 kubectl get samples
 ```
 
-```
+```text
 NAME      AGE
 sample1   <unknown>
 ```
@@ -280,7 +279,7 @@ sample1   <unknown>
 kubectl get samples a
 ```
 
-```
+```text
 NAME   AGE
 a      <unknown>
 ```
@@ -362,7 +361,6 @@ Service リソースに接続して APIService リソースのステータスを
 1. [DefaultBuildHandlerChain](https://github.com/kubernetes/kubernetes/blob/v1.31.1/staging/src/k8s.io/apiserver/pkg/server/config.go#L1002)
    1. [withAuthorization](https://github.com/kubernetes/kubernetes/blob/v1.31.1/staging/src/k8s.io/apiserver/pkg/endpoints/filters/authorization.go#L62-L97)
       - リクエスト受信時に `c.Authorization.Authorizer` が実行される。
-
 
 アグリゲーションレイヤーの起動時に認証設定を行う。
 

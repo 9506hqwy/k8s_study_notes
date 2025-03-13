@@ -61,7 +61,7 @@ EOF
 kubectl get pods -o wide
 ```
 
-```
+```text
 NAME                     READY   STATUS    RESTARTS   AGE   IP               NODE                  NOMINATED NODE   READINESS GATES
 pod-a-6745f849d7-8ptnr   1/1     Running   0          69s   172.17.51.169    worker02.home.local   <none>           <none>
 pod-b-75f6c585bc-7nw42   1/1     Running   0          69s   172.17.255.152   worker01.home.local   <none>           <none>
@@ -101,7 +101,7 @@ spec:
 EOF
 ```
 
-```
+```text
 networkpolicy.networking.k8s.io/deny created
 ```
 
@@ -111,7 +111,7 @@ networkpolicy.networking.k8s.io/deny created
 kubectl get networkpolicy default-deny
 ```
 
-```
+```text
 NAME           POD-SELECTOR   AGE
 default-deny   <none>         22m
 ```
@@ -158,7 +158,7 @@ spec:
 EOF
 ```
 
-```
+```text
 networkpolicy.networking.k8s.io/allow-ab created
 ```
 
@@ -168,7 +168,7 @@ networkpolicy.networking.k8s.io/allow-ab created
 kubectl get networkpolicy allow-ab
 ```
 
-```
+```text
 NAME       POD-SELECTOR   AGE
 allow-ab   app=policy-b   5m31s
 ```
@@ -206,7 +206,7 @@ spec:
 EOF
 ```
 
-```
+```text
 networkpolicy.networking.k8s.io/default-deny configured
 ```
 
@@ -216,7 +216,7 @@ networkpolicy.networking.k8s.io/default-deny configured
 kubectl get networkpolicy default-deny
 ```
 
-```
+```text
 NAME           POD-SELECTOR   AGE
 default-deny   <none>         21m
 ```
@@ -279,7 +279,7 @@ spec:
 EOF
 ```
 
-```
+```text
 networkpolicy.networking.k8s.io/allow-ab unchanged
 networkpolicy.networking.k8s.io/allow-ba created
 ```
@@ -290,7 +290,7 @@ networkpolicy.networking.k8s.io/allow-ba created
 kubectl get networkpolicy allow-ab allow-ba
 ```
 
-```
+```text
 NAME       POD-SELECTOR   AGE
 allow-ab   app=policy-b   13m
 allow-ba   app=policy-a   49s

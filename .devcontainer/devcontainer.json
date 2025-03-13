@@ -1,0 +1,24 @@
+{
+    // Dev Container's Name.
+    "name": "Python 3",
+    // Base Container Image.
+    "image": "mcr.microsoft.com/devcontainers/python:1-3.13-bookworm",
+    // For running using Podman.
+    // https://github.com/microsoft/vscode-remote-release/issues/4443
+    "runArgs": [
+        "--userns=keep-id"
+    ],
+    "securityOpt": [
+        "label=disable",
+        "seccomp=unconfined"
+    ],
+    // Use 'postCreateCommand' to run commands after the container is created.
+    "postCreateCommand": "${containerWorkspaceFolder}/.devcontainer/post-create.sh",
+    // Uncomment to connect as root instead.
+    //"remoteUser": "root",
+    // Use default container `USER`,
+    // because of avoid reject directory creating by container startup user.
+    "containerUser": "vscode",
+    // Expose preview server port.
+    "forwardPorts": [8000]
+}

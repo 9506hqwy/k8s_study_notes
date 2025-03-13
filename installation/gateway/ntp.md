@@ -37,7 +37,7 @@ systemctl restart chronyd
 chronyc sources
 ```
 
-```
+```text
 MS Name/IP address         Stratum Poll Reach LastRx Last sample
 ===============================================================================
 ^? ntp-b3.nict.go.jp             1   6     3     2  -1275us[-1275us] +/-   18ms

@@ -15,7 +15,7 @@
 kubectl create sample -h
 ```
 
-```
+```text
 Usage: kubectl-create-sample [OPTIONS] --spec <SPEC_NAME> <NAME>
 
 Arguments:
@@ -36,7 +36,7 @@ Options:
 kubectl create sample cr01 --spec s
 ```
 
-```
+```text
 sample.sample.custom-controller/cr01 created
 ```
 
@@ -72,6 +72,6 @@ status:
 kubectl delete sample cr01
 ```
 
-```
+```text
 sample.sample.custom-controller "cr01" deleted
 ```

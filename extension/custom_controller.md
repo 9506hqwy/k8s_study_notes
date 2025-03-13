@@ -27,7 +27,7 @@ podman push registry.home.local/system/sample-custom-controller
 crdgen | kubectl apply -f -
 ```
 
-```
+```text
 customresourcedefinition.apiextensions.k8s.io/samples.sample.custom-controller created
 ```
 
@@ -39,7 +39,7 @@ customresourcedefinition.apiextensions.k8s.io/samples.sample.custom-controller c
 kubectl create namespace sample-system
 ```
 
-```
+```text
 namespace/sample-system created
 ```
 
@@ -49,7 +49,7 @@ namespace/sample-system created
 kubectl create serviceaccount sample-custom-controller -n sample-system
 ```
 
-```
+```text
 serviceaccount/sample-custom-controller created
 ```
 
@@ -61,7 +61,7 @@ kubectl create clusterrole sample-custom-controller \
     --verb="get,list,patch,watch"
 ```
 
-```
+```text
 clusterrole.rbac.authorization.k8s.io/sample-custom-controller created
 ```
 
@@ -73,7 +73,7 @@ kubectl create clusterrolebinding sample-custom-controller \
     --serviceaccount=sample-system:sample-custom-controller
 ```
 
-```
+```text
 clusterrolebinding.rbac.authorization.k8s.io/sample-custom-controller created
 ```
 
@@ -108,7 +108,7 @@ spec:
 kubectl apply -f deployment-sample-custom-controller.yaml
 ```
 
-```
+```text
 deployment.apps/sample-custom-controller created
 ```
 
@@ -118,7 +118,7 @@ deployment.apps/sample-custom-controller created
 kubectl -n sample-system get pod -o wide
 ```
 
-```
+```text
 NAME                                        READY   STATUS    RESTARTS   AGE   IP              NODE                  NOMINATED NODE   READINESS GATES
 sample-custom-controller-68855d5c9c-k88nn   1/1     Running   0          26s   172.17.51.154   worker02.home.local   <none>           <none>
 ```
@@ -139,7 +139,7 @@ spec:
 EOF
 ```
 
-```
+```text
 sample.sample.custom-controller/custom-sample-cr-01 created
 ```
 
@@ -172,7 +172,7 @@ status:
 
 コントローラに以下のログが出力される。3 回リソースの変更が呼ばれる。
 
-```
+```text
 [2024-10-27T10:33:30Z INFO  sample_custom_controller] Start custom-sample-cr-01
 [2024-10-27T10:33:30Z INFO  sample_custom_controller] Ok custom-sample-cr-01 Action { requeue_after: None }
 [2024-10-27T10:33:30Z INFO  sample_custom_controller] Start custom-sample-cr-01
@@ -189,13 +189,13 @@ status:
 kubectl delete samples custom-sample-cr-01
 ```
 
-```
+```text
 sample.sample.custom-controller "custom-sample-cr-01" deleted
 ```
 
 コントローラに以下のログが出力される。1 回リソースの変更が呼ばれる。
 
-```
+```text
 [2024-10-27T10:45:30Z INFO  sample_custom_controller] Start custom-sample-cr-01
 [2024-10-27T10:45:30Z INFO  sample_custom_controller] Cleanup custom-sample-cr-01
 [2024-10-27T10:45:30Z INFO  sample_custom_controller] Ok custom-sample-cr-01 Action { requeue_after: None }

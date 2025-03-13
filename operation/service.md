@@ -11,7 +11,7 @@ kubectl create clusterrole \
     --resource=nodes/proxy
 ```
 
-```
+```text
 clusterrole.rbac.authorization.k8s.io/debug-node-proxy created
 ```
 
@@ -24,7 +24,7 @@ kubectl create clusterrolebinding \
     --serviceaccount=default:default
 ```
 
-```
+```text
 clusterrolebinding.rbac.authorization.k8s.io/debug-node-proxy created
 ```
 
@@ -34,7 +34,7 @@ clusterrolebinding.rbac.authorization.k8s.io/debug-node-proxy created
 kubectl create token default
 ```
 
-```
+```text
 eyJhbGciOiJSUzI1NiIsImtpZCI6IlM...
 ```
 
@@ -46,7 +46,7 @@ curl -k -H "Authorization: Bearer $TOKEN" -d 5 -X PUT  https://worker01:10250/de
 curl -k -H "Authorization: Bearer $TOKEN" -d 5 -X PUT  https://worker02:10250/debug/flags/v
 ```
 
-```
+```text
 successfully set klog.logging.verbosity to 5
 ```
 
@@ -58,7 +58,7 @@ kubectl -n kube-system get configmap kube-proxy -o yaml | \
     kubectl apply -f -
 ```
 
-```
+```text
 Warning: resource configmaps/kube-proxy is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by kubectl apply. kubectl apply should only be used on resources created declaratively by either kubectl create --save-config or kubectl apply. The missing annotation will be patched automatically.
 configmap/kube-proxy configured
 ```
@@ -69,7 +69,7 @@ configmap/kube-proxy configured
 kubectl -n kube-system rollout restart daemonset/kube-proxy
 ```
 
-```
+```text
 daemonset.apps/kube-proxy restarted
 ```
 
@@ -87,7 +87,7 @@ ssh worker02 curl -d 5 -X PUT  http://127.0.0.1:10249/debug/flags/v
 kubectl create deployment demo-svc --image=nginx --port=80
 ```
 
-```
+```text
 deployment.apps/demo-svc created
 ```
 
@@ -97,7 +97,7 @@ deployment.apps/demo-svc created
 kubectl get pod -o wide
 ```
 
-```
+```text
 NAME                          READY   STATUS    RESTARTS   AGE     IP               NODE                  NOMINATED NODE   READINESS GATES
 demo-svc-9bf48d8-nhkjq        1/1     Running   0          6m54s   172.17.51.131    worker02.home.local   <none>           <none>
 ```
@@ -108,7 +108,7 @@ demo-svc-9bf48d8-nhkjq        1/1     Running   0          6m54s   172.17.51.131
 kubectl expose deployment demo-svc
 ```
 
-```
+```text
 service/demo-svc exposed
 ```
 
@@ -118,14 +118,14 @@ service/demo-svc exposed
 kubectl get service -o wide
 ```
 
-```
+```text
 NAME         TYPE           CLUSTER-IP      EXTERNAL-IP    PORT(S)        AGE   SELECTOR
 demo-svc     ClusterIP      10.102.24.177   <none>         80/TCP         15s   app=demo-svc
 ```
 
 nftables のルールセットは以下が設定される(`nft list ruleset ip`)。
 
-```
+```text
 chain KUBE-SERVICES {
     meta l4proto tcp ip daddr 10.102.24.177  tcp dport 80 counter packets 0 bytes 0 jump KUBE-SVC-B4ZAZG5KKEIRBPYQ
 }
@@ -147,7 +147,7 @@ chain KUBE-SEP-JP5VNVBXFICNHQNY {
 kubectl port-forward svc/demo-svc 8080:80
 ```
 
-```
+```text
 Forwarding from 127.0.0.1:8080 -> 80
 ```
 
@@ -165,7 +165,7 @@ HTML が返却される。
 kubectl expose deployment demo-svc --name=demo-svc-nodeport --type=NodePort
 ```
 
-```
+```text
 service/demo-svc-nodeport exposed
 ```
 
@@ -175,14 +175,14 @@ service/demo-svc-nodeport exposed
 kubectl get service -o wide
 ```
 
-```
+```text
 NAME                TYPE           CLUSTER-IP      EXTERNAL-IP    PORT(S)        AGE   SELECTOR
 demo-svc-nodeport   NodePort       10.98.22.211    <none>         80:30221/TCP   24s   app=demo-svc
 ```
 
 nftables のルールセットは以下が設定される(`nft list ruleset ip`)。
 
-```
+```text
 chain KUBE-SERVICES {
     meta l4proto tcp ip daddr 10.98.22.211  tcp dport 80 counter packets 0 bytes 0 jump KUBE-SVC-RTTGOT4DPK46RZJC
 }
@@ -225,7 +225,7 @@ HTML が返却される。
 kubectl expose deployment demo-svc --name=demo-svc-lb --type=LoadBalancer
 ```
 
-```
+```text
 service/demo-svc-lb exposed
 ```
 
@@ -235,14 +235,14 @@ service/demo-svc-lb exposed
 kubectl get service -o wide
 ```
 
-```
+```text
 NAME                TYPE           CLUSTER-IP       EXTERNAL-IP    PORT(S)        AGE    SELECTOR
 demo-svc-lb         LoadBalancer   10.100.155.216   172.16.0.103   80:30199/TCP   11s    app=demo-svc
 ```
 
 nftables のルールセットは以下が設定される(`nft list ruleset ip`)。
 
-```
+```text
 chain KUBE-SERVICES {
     meta l4proto tcp ip daddr 172.16.0.103  tcp dport 80 counter packets 0 bytes 0 jump KUBE-EXT-3Y4IBFDS3N4DHOKS
     meta l4proto tcp ip daddr 10.100.155.216  tcp dport 80 counter packets 0 bytes 0 jump KUBE-SVC-3Y4IBFDS3N4DHOKS

@@ -1,0 +1,9 @@
+{
+    "recommendations": [
+        "davidanson.vscode-markdownlint",
+        "editorconfig.editorconfig",
+        "ms-python.python",
+        "swyddfa.esbonio",
+        "yzhang.markdown-all-in-one"
+    ]
+}

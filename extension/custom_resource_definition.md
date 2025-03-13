@@ -35,7 +35,7 @@ spec:
 kubectl apply -f custom-sample-crd.yaml
 ```
 
-```
+```text
 customresourcedefinition.apiextensions.k8s.io/samples.custom.sample.crd created
 ```
 
@@ -45,7 +45,7 @@ customresourcedefinition.apiextensions.k8s.io/samples.custom.sample.crd created
 kubectl get crd samples.custom.sample.crd
 ```
 
-```
+```text
 NAME                        CREATED AT
 samples.custom.sample.crd   2024-10-26T01:21:26Z
 ```
@@ -66,7 +66,7 @@ metadata:
 kubectl apply -f custom-sample-cr-01.yaml
 ```
 
-```
+```text
 sample.custom.sample.crd/custom-sample-cr-01 created
 ```
 
@@ -76,7 +76,7 @@ sample.custom.sample.crd/custom-sample-cr-01 created
 kubectl get sample custom-sample-cr-01
 ```
 
-```
+```text
 NAME                  AGE
 custom-sample-cr-01   81s
 ```
@@ -95,5 +95,6 @@ TODO
 ```
 
 ## 参考
+
 - [CustomResourceDefinition](https://kubernetes.io/docs/reference/kubernetes-api/extend-resources/custom-resource-definition-v1/)
 - [JSON Schema Specification](https://json-schema.org/specification)

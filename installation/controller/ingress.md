@@ -8,7 +8,7 @@ Ingress NGINX Controller を構築する。
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.2/deploy/static/provider/cloud/deploy.yaml
 ```
 
-```
+```text
 namespace/ingress-nginx created
 serviceaccount/ingress-nginx created
 serviceaccount/ingress-nginx-admission created
@@ -53,7 +53,7 @@ image: registry.k8s.io/ingress-nginx/kube-webhook-certgen@sha256:a320a50cc91bd15
 watch kubectl get pods --namespace=ingress-nginx
 ```
 
-```
+```text
 NAME                                       READY   STATUS      RESTARTS   AGE
 ingress-nginx-admission-create-lpfzd       0/1     Completed   0          11s
 ingress-nginx-admission-patch-2jw66        0/1     Completed   0          11s
@@ -92,7 +92,7 @@ firewall-cmd --reload
 ip netns
 ```
 
-```
+```text
 1d17a6ce-da7c-4cae-af8f-4145dcff16cd (id: 2)
 482f2d0f-575e-4e27-8710-a47af2823dd1
 20be9af8-e917-4ab8-a5e9-b515c3804118 (id: 0)
@@ -107,7 +107,7 @@ ip netns
 ip -d link show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
 2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
@@ -135,7 +135,7 @@ ip -d link show
 ip netns exec 1d17a6ce-da7c-4cae-af8f-4145dcff16cd ip -d link show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
 2: eth0@if14: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP mode DEFAULT group default qlen 1000
@@ -151,7 +151,7 @@ ip netns exec 1d17a6ce-da7c-4cae-af8f-4145dcff16cd ip -d link show
 ip addr show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
     inet 127.0.0.1/8 scope host lo
@@ -184,7 +184,7 @@ ip addr show
 ip netns exec 1d17a6ce-da7c-4cae-af8f-4145dcff16cd ip addr show
 ```
 
-```
+```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
     inet 127.0.0.1/8 scope host lo
@@ -207,7 +207,7 @@ ip netns exec 1d17a6ce-da7c-4cae-af8f-4145dcff16cd ip addr show
 ip route show
 ```
 
-```
+```text
 default via 172.16.0.254 dev enp1s0 proto static metric 100
 10.0.0.0/24 dev enp2s0 proto kernel scope link src 10.0.0.31 metric 101
 10.85.0.0/16 dev cni0 proto kernel scope link src 10.85.0.1
@@ -224,7 +224,7 @@ blackhole 172.17.255.128/26 proto 80
 ip netns exec 1d17a6ce-da7c-4cae-af8f-4145dcff16cd ip route show
 ```
 
-```
+```text
 default via 169.254.1.1 dev eth0
 169.254.1.1 dev eth0 scope link
 ```
@@ -237,7 +237,7 @@ default via 169.254.1.1 dev eth0
 nft list ruleset ip
 ```
 
-```
+```text
 # Warning: table ip mangle is managed by iptables-nft, do not touch!
 table ip mangle {
         chain KUBE-IPTABLES-HINT {
@@ -751,7 +751,7 @@ table ip raw {
 kubectl get all -n ingress-nginx -o wide
 ```
 
-```
+```text
 NAME                                           READY   STATUS      RESTARTS   AGE    IP               NODE                  NOMINATED NODE   READINESS GATES
 pod/ingress-nginx-admission-create-lpfzd       0/1     Completed   0          112s   172.17.255.133   worker01.home.local   <none>           <none>
 pod/ingress-nginx-admission-patch-2jw66        0/1     Completed   0          112s   172.17.51.133    worker02.home.local   <none>           <none>
@@ -776,7 +776,7 @@ job.batch/ingress-nginx-admission-patch    Complete   1/1           3s         1
 kubectl describe service ingress-nginx-controller -n ingress-nginx
 ```
 
-```
+```text
 Name:                     ingress-nginx-controller
 Namespace:                ingress-nginx
 Labels:                   app.kubernetes.io/component=controller
@@ -810,7 +810,7 @@ Events:                   <none>
 kubectl describe service ingress-nginx-controller-admission -n ingress-nginx
 ```
 
-```
+```text
 Name:                     ingress-nginx-controller-admission
 Namespace:                ingress-nginx
 Labels:                   app.kubernetes.io/component=controller
@@ -841,7 +841,7 @@ Events:                   <none>
 crictl ps
 ```
 
-```
+```text
 CONTAINER           IMAGE                                                                                                            CREATED             STATE               NAME                        ATTEMPT             POD ID              POD
 681fa7bf5587c       a80c8fd6e52292d38d4e58453f310d612da59d802a3b62f4b88a21c50178f7ab                                                 4 minutes ago       Running             controller                  0                   f657d3658c6c9       ingress-nginx-controller-675fd975d-6xq8z
 1e09f4362c597       docker.io/calico/node@sha256:3c0e24adecc39e89780e807400def972deb0ec9de9fbbbaceade072a8c6ae94f                    2 hours ago         Running             calico-node                 0                   2bbadeecd8d63       calico-node-n84qn
@@ -856,7 +856,7 @@ controller が属するネットワーク名前空間を確認する。
 ip netns identify $(crictl inspect 681fa7bf5587c | jq '.info.pid')
 ```
 
-```
+```text
 1d17a6ce-da7c-4cae-af8f-4145dcff16cd
 ```
 
@@ -866,7 +866,7 @@ ip netns identify $(crictl inspect 681fa7bf5587c | jq '.info.pid')
 crictl images
 ```
 
-```
+```text
 IMAGE                                                TAG                 IMAGE ID            SIZE
 docker.io/calico/cni                                 v3.28.0             107014d9f4c89       209MB
 docker.io/calico/csi                                 v3.28.0             1a094aeaf1521       18.3MB
@@ -887,7 +887,7 @@ registry.k8s.io/pause                                3.10                873ed75
 kubectl create deployment demo --image=httpd --port=80
 ```
 
-```
+```text
 deployment.apps/demo created
 ```
 
@@ -897,7 +897,7 @@ deployment.apps/demo created
 kubectl get pod -o wide
 ```
 
-```
+```text
 NAME                    READY   STATUS    RESTARTS   AGE   IP              NODE                  NOMINATED NODE   READINESS GATES
 demo-6c87cdc7bf-57f84   1/1     Running   0          34s   172.17.51.134   worker02.home.local   <none>           <none>
 ```
@@ -908,7 +908,7 @@ demo-6c87cdc7bf-57f84   1/1     Running   0          34s   172.17.51.134   worke
 kubectl expose deployment demo
 ```
 
-```
+```text
 service/demo exposed
 ```
 
@@ -918,7 +918,7 @@ service/demo exposed
 kubectl get service
 ```
 
-```
+```text
 NAME         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
 demo         ClusterIP   10.104.7.189   <none>        80/TCP    39s
 kubernetes   ClusterIP   10.96.0.1      <none>        443/TCP   21h
@@ -936,7 +936,7 @@ kubectl create ingress demo-localhost --class=nginx --rule="demo.localdev.me/*=d
 error: failed to create ingress: Internal error occurred: failed calling webhook "validate.nginx.ingress.kubernetes.io": failed to call webhook: Post "https://ingress-nginx-controller-admission.ingress-nginx.svc:443/networking/v1/ingresses?timeout=10s": dial tcp 10.107.109.72:443: connect: no route to host
 ```
 
-```
+```text
 ingress.networking.k8s.io/demo-localhost created
 ```
 
@@ -946,7 +946,7 @@ ingress を確認する。
 kubectl get ingress
 ```
 
-```
+```text
 NAME             CLASS   HOSTS              ADDRESS   PORTS   AGE
 demo-localhost   nginx   demo.localdev.me             80      100s
 ```
@@ -957,7 +957,7 @@ demo-localhost   nginx   demo.localdev.me             80      100s
 kubectl port-forward --namespace=ingress-nginx service/ingress-nginx-controller 8080:80
 ```
 
-```
+```text
 Forwarding from 127.0.0.1:8080 -> 80
 ```
 
@@ -967,6 +967,6 @@ Forwarding from 127.0.0.1:8080 -> 80
 curl --resolve demo.localdev.me:8080:127.0.0.1 http://demo.localdev.me:8080
 ```
 
-```
+```text
 <html><body><h1>It works!</h1></body></html>
 ```

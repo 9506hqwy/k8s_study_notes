@@ -10,7 +10,7 @@ Kubernetes はユーザアカウントのリソースは管理していない。
 kubectl create role developer --verb=create --verb=get --verb=list --verb=update --verb=delete --resource=pods
 ```
 
-```
+```text
 role.rbac.authorization.k8s.io/developer created
 ```
 
@@ -18,7 +18,7 @@ role.rbac.authorization.k8s.io/developer created
 kubectl create rolebinding developer-admin --role=developer --user=developer
 ```
 
-```
+```text
 rolebinding.rbac.authorization.k8s.io/developer-admin created
 ```
 
@@ -30,7 +30,7 @@ rolebinding.rbac.authorization.k8s.io/developer-admin created
 kubectl create serviceaccount developer-sa
 ```
 
-```
+```text
 serviceaccount/developer-sa created
 ```
 
@@ -38,7 +38,7 @@ serviceaccount/developer-sa created
 kubectl create rolebinding developer-sa-admin --role=developer --serviceaccount=default:developer-sa
 ```
 
-```
+```text
 rolebinding.rbac.authorization.k8s.io/developer-sa-admin created
 ```
 
@@ -74,7 +74,7 @@ spec:
 EOF
 ```
 
-```
+```text
 certificatesigningrequest.certificates.k8s.io/developer created
 ```
 
@@ -84,7 +84,7 @@ certificatesigningrequest.certificates.k8s.io/developer created
 kubectl get csr
 ```
 
-```
+```text
 NAME        AGE   SIGNERNAME                            REQUESTOR          REQUESTEDDURATION   CONDITION
 developer   44s   kubernetes.io/kube-apiserver-client   kubernetes-admin   <none>              Pending
 ```
@@ -95,7 +95,7 @@ developer   44s   kubernetes.io/kube-apiserver-client   kubernetes-admin   <none
 kubectl certificate approve developer
 ```
 
-```
+```text
 certificatesigningrequest.certificates.k8s.io/developer approved
 ```
 
@@ -105,7 +105,7 @@ certificatesigningrequest.certificates.k8s.io/developer approved
 kubectl get csr
 ```
 
-```
+```text
 NAME        AGE    SIGNERNAME                            REQUESTOR          REQUESTEDDURATION   CONDITION
 developer   3m5s   kubernetes.io/kube-apiserver-client   kubernetes-admin   <none>              Approved,Issued
 ```
@@ -122,7 +122,7 @@ kubeconfig に認証情報を追加する。
 kubectl config set-credentials developer --client-certificate=client.crt --client-key=client.key --embed-certs=true
 ```
 
-```
+```text
 User "developer" set.
 ```
 
@@ -132,7 +132,7 @@ kubeconfig にコンテキストを追加する。
 kubectl config set-context developer --cluster=kubernetes --user=developer
 ```
 
-```
+```text
 Context "developer" created.
 ```
 
@@ -142,7 +142,7 @@ Context "developer" created.
 kubectl config use-context developer
 ```
 
-```
+```text
 Switched to context "developer".
 ```
 
@@ -152,7 +152,7 @@ Switched to context "developer".
 kubectl get pods
 ```
 
-```
+```text
 No resources found in default namespace.
 ```
 
@@ -164,7 +164,7 @@ JSON Web Token を生成する。
 kubectl create token developer-sa
 ```
 
-```
+```text
 eyJhbGciOiJSUzI...
 ```
 
@@ -174,7 +174,7 @@ kubeconfig に認証情報を追加する。
 kubectl config set-credentials developer-sa --token=$TOKEN
 ```
 
-```
+```text
 User "developer-sa" set.
 ```
 
@@ -184,7 +184,7 @@ kubeconfig にコンテキストを追加する。
 kubectl config set-context developer-sa --cluster=kubernetes --user=developer-sa
 ```
 
-```
+```text
 Context "developer-sa" created.
 ```
 
@@ -194,7 +194,7 @@ Context "developer-sa" created.
 kubectl config use-context developer-sa
 ```
 
-```
+```text
 Switched to context "developer-sa".
 ```
 
@@ -204,9 +204,10 @@ Switched to context "developer-sa".
 kubectl get pods
 ```
 
-```
+```text
 No resources found in default namespace.
 ```
 
 ## 参考
+
 - [Certificates and Certificate Signing Requests](https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/)

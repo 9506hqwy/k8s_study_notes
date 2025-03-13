@@ -14,7 +14,8 @@
 ```sh
 RUST_LOG=trace ./sample-device
 ```
-```
+
+```text
 [2024-10-12T02:47:31Z TRACE device_plugin] Starting to listen
 [2024-10-12T02:47:31Z TRACE device_plugin] Registration.register
 [2024-10-12T02:47:31Z TRACE sample_device] DevicePlugin.get_device_plugin_options
@@ -52,13 +53,13 @@ spec:
 kubectl apply -f pod.yaml
 ```
 
-```
+```text
 pod/demo-dp created
 ```
 
 デバイス・プラグインの `allocate` が呼ばれる。
 
-```
+```text
 [2024-10-12T04:10:49Z TRACE sample_device] DevicePlugin.allocate
 ```
 
@@ -68,7 +69,7 @@ pod/demo-dp created
 kubectl get pods demo-dp -o wide
 ```
 
-```
+```text
 NAME      READY   STATUS    RESTARTS   AGE   IP               NODE                  NOMINATED NODE   READINESS GATES
 demo-dp   1/1     Running   0          53s   172.17.255.160   worker01.home.local   <none>           <none>
 ```
@@ -79,7 +80,7 @@ demo-dp   1/1     Running   0          53s   172.17.255.160   worker01.home.loca
 kubectl exec demo-dp -- env | grep SAMPLE
 ```
 
-```
+```text
 SAMPLE_DEVICE2=1
 SAMPLE_DEVICE3=1
 ```
@@ -108,7 +109,7 @@ spec:
 EOF
 ```
 
-```
+```text
 pod/demo-dp-overflow created
 ```
 
@@ -118,7 +119,7 @@ pod/demo-dp-overflow created
 kubectl get pods demo-dp-overflow -o wide
 ```
 
-```
+```text
 NAME               READY   STATUS    RESTARTS   AGE   IP       NODE     NOMINATED NODE   READINESS GATES
 demo-dp-overflow   0/1     Pending   0          22s   <none>   <none>   <none>           <none>
 ```
@@ -139,18 +140,19 @@ crictl stop 03ef3ee8f
 kubectl get pods
 ```
 
-```
+```text
 NAME                          READY   STATUS             RESTARTS   AGE
 demo-dp                       0/1     CrashLoopBackOff   0          26m
 ```
 
 デバイス・プラグインを起動して待つ。
 
-```
+```text
 NAME                          READY   STATUS    RESTARTS        AGE
 demo-dp                       1/1     Running   1 (3m32s ago)   28m
 ```
 
 ## 参考
+
 - [#3573 Add Device Manager to kubelet](https://github.com/kubernetes/enhancements/issues/3573)
 - [Device Plugins](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/)

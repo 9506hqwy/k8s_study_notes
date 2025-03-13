@@ -19,7 +19,7 @@ chmod +x $HOME/.local/bin/helm
 helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
 ```
 
-```
+```text
 "kubernetes-dashboard" has been added to your repositories
 ```
 
@@ -33,7 +33,7 @@ helm upgrade --install \
     --namespace kubernetes-dashboard
 ```
 
-```
+```text
 Release "kubernetes-dashboard" does not exist. Installing it now.
 NAME: kubernetes-dashboard
 LAST DEPLOYED: Mon Sep 30 12:08:53 2024
@@ -65,7 +65,7 @@ Dashboard will be available at:
 watch kubectl get pod -n kubernetes-dashboard
 ```
 
-```
+```text
 NAME                                                    READY   STATUS    RESTARTS   AGE
 kubernetes-dashboard-api-7d9b947756-swswq               1/1     Running   0          86s
 kubernetes-dashboard-auth-648c6bdc7f-4fsg4              1/1     Running   0          86s
@@ -84,7 +84,7 @@ kubernetes-dashboard-web-75cccd6488-tshj2               1/1     Running   0     
 kubectl get all -n kubernetes-dashboard -o wide
 ```
 
-```
+```text
 NAME                                                        READY   STATUS    RESTARTS   AGE     IP               NODE                  NOMINATED NODE   READINESS GATES
 pod/kubernetes-dashboard-api-7d9b947756-swswq               1/1     Running   0          5m44s   172.17.51.142    worker02.home.local   <none>           <none>
 pod/kubernetes-dashboard-auth-648c6bdc7f-4fsg4              1/1     Running   0          5m44s   172.17.255.144   worker01.home.local   <none>           <none>
@@ -123,7 +123,7 @@ replicaset.apps/kubernetes-dashboard-web-75cccd6488               1         1   
 kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
 ```
 
-```
+```text
 Forwarding from 127.0.0.1:8443 -> 8443
 ```
 
@@ -148,7 +148,7 @@ kubectl -n kubernetes-dashboard create ingress \
     --rule="kubernetes-dashboard/*=kubernetes-dashboard-kong-proxy:443"
 ```
 
-```
+```text
 ingress.networking.k8s.io/kubernetes-dashboard created
 ```
 
@@ -158,7 +158,7 @@ ingress を確認する。
 kubectl -n kubernetes-dashboard get ingress
 ```
 
-```
+```text
 NAME                   CLASS   HOSTS                  ADDRESS        PORTS   AGE
 kubernetes-dashboard   nginx   kubernetes-dashboard   172.16.0.100   80      48s
 ```
@@ -179,7 +179,7 @@ HTML が返却される。
 kubectl -n kubernetes-dashboard create serviceaccount admin-user
 ```
 
-```
+```text
 serviceaccount/admin-user created
 ```
 
@@ -189,7 +189,7 @@ serviceaccount/admin-user created
 kubectl create clusterrolebinding admin-user --clusterrole=cluster-admin --serviceaccount=kubernetes-dashboard:admin-user
 ```
 
-```
+```text
 clusterrolebinding.rbac.authorization.k8s.io/admin-user created
 ```
 
@@ -201,7 +201,7 @@ clusterrolebinding.rbac.authorization.k8s.io/admin-user created
 kubectl -n kubernetes-dashboard create token admin-user
 ```
 
-```
+```text
 eyJhbGciOiJSUzI1NiIsImtpZCI6IlM4T...
 ```
 

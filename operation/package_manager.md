@@ -12,7 +12,7 @@
 helm install sample . --set imagePath=registry.home.local/system/sample-api-server
 ```
 
-```
+```text
 NAME: sample
 LAST DEPLOYED: Fri Nov  8 20:11:28 2024
 NAMESPACE: default
@@ -27,7 +27,7 @@ TEST SUITE: None
 helm list
 ```
 
-```
+```text
 NAME    NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                           APP VERSION
 sample  default         1               2024-11-08 20:11:28.654848096 +0900 JST deployed        k8s-sample-api-server-0.2.0
 ```
@@ -49,7 +49,7 @@ Error: openpgp: unsupported feature: public key type: 22
 helm package .
 ```
 
-```
+```text
 Successfully packaged chart and saved it to: /root/projects/k8s-api-server-rs/chart/k8s-sample-api-server-0.2.0.tgz
 ```
 
@@ -59,7 +59,7 @@ Successfully packaged chart and saved it to: /root/projects/k8s-api-server-rs/ch
 helm install sample k8s-sample-api-server-0.2.0.tgz --set imagePath=registry.home.local/system/sample-api-server
 ```
 
-```
+```text
 NAME: sample
 LAST DEPLOYED: Fri Nov  8 22:23:52 2024
 NAMESPACE: default
@@ -76,7 +76,7 @@ TEST SUITE: None
 helm registry login registry.home.local --insecure
 ```
 
-```
+```text
 Username: admin
 Password:
 Login Succeeded
@@ -88,7 +88,7 @@ Login Succeeded
 helm push k8s-sample-api-server-0.2.0.tgz oci://registry.home.local/library --insecure-skip-tls-verify
 ```
 
-```
+```text
 Pushed: registry.home.local/library/k8s-sample-api-server:0.2.0
 Digest: sha256:6a2707c089c1a4418544a52ef9a64f67125ba4b1665e878a3b16ddb5f8fd0dcf
 ```
@@ -102,7 +102,7 @@ helm install sample oci://registry.home.local/library/k8s-sample-api-server \
     --insecure-skip-tls-verify
 ```
 
-```
+```text
 Pulled: registry.home.local/library/k8s-sample-api-server:0.2.0
 Digest: sha256:6a2707c089c1a4418544a52ef9a64f67125ba4b1665e878a3b16ddb5f8fd0dcf
 NAME: sample
@@ -127,7 +127,7 @@ OCI レジストリはリポジトリを登録できない。
 helm uninstall sample
 ```
 
-```
+```text
 release "sample" uninstalled
 ```
 
@@ -312,7 +312,7 @@ metadata:
 helm install --dry-run --generate-name . --set cond=true
 ```
 
-```
+```text
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -327,7 +327,7 @@ metadata:
 helm install --dry-run --generate-name .
 ```
 
-```
+```text
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -687,4 +687,5 @@ metadata:
 ```
 
 ## 参考
+
 - [Helm - The package manager for Kubernetes](https://helm.sh/)

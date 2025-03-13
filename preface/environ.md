@@ -10,11 +10,11 @@
 
 ハードウェア構成を記載する。
 
-|          | Controller Node | Worker Node 1 | Worker Node 2 | Registry | Storage    | Gateway |
-| -------- | --------------- | ------------- | ------------- | -------- | ---------- | ------- |
-| CPU 数   | 4               | 4             | 4             | 2        | 2          | 1       |
-| メモリ   | 8GiB            | 8Gib          | 8GiB          | 4GiB     | 4GiB       | 1GiB    |
-| ディスク | 64GiB           | 64Gib         | 64GiB         | 64GiB    | 16GiB,64GiB| 16GiB   |
+|          | Controller Node | Worker Node 1 | Worker Node 2 | Registry | Storage     | Gateway |
+| -------- | --------------- | ------------- | ------------- | -------- | ----------- | ------- |
+| CPU 数   | 4               | 4             | 4             | 2        | 2           | 1       |
+| メモリ   | 8GiB            | 8Gib          | 8GiB          | 4GiB     | 4GiB        | 1GiB    |
+| ディスク | 64GiB           | 64Gib         | 64GiB         | 64GiB    | 16GiB,64GiB | 16GiB   |
 
 ## ソフトウェア構成図
 
