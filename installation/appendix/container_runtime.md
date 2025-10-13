@@ -25,8 +25,8 @@ firewall-cmd --reload
 インストール対象を指定する。
 
 ```sh
-export KUBERNETES_VERSION=v1.31
-export CRIO_VERSION=v1.31
+export KUBERNETES_VERSION=v1.33
+export CRIO_VERSION=v1.33
 ```
 
 kubernetes パッケージをインストールするためリポジトリを有効化する。
@@ -48,10 +48,10 @@ CRI-O パッケージをインストールするためリポジトリを有効�
 cat > /etc/yum.repos.d/cri-o.repo <<EOF
 [cri-o]
 name=CRI-O
-baseurl=https://pkgs.k8s.io/addons:/cri-o:/stable:/$CRIO_VERSION/rpm/
+baseurl=https://download.opensuse.org/repositories/isv:/cri-o:/stable:/$CRIO_VERSION/rpm/
 enabled=1
 gpgcheck=1
-gpgkey=https://pkgs.k8s.io/addons:/cri-o:/stable:/$CRIO_VERSION/rpm/repodata/repomd.xml.key
+gpgkey=https://download.opensuse.org/repositories/isv:/cri-o:/stable:/$CRIO_VERSION/rpm/repodata/repomd.xml.key
 EOF
 ```
 
@@ -65,6 +65,12 @@ dnf install -y container-selinux
 
 ```sh
 dnf install -y cri-o kubelet kubeadm kubectl
+```
+
+CNI ブリッジプラグインを有効化する。
+
+```sh
+mv /etc/cni/net.d/10-crio-bridge.conflist.disabled /etc/cni/net.d/10-crio-bridge.conflist
 ```
 
 ## 起動
@@ -82,4 +88,5 @@ systemctl enable --now crio
 ```sh
 swapoff -a
 sed -i -e '/swap/d' /etc/fstab
+systemctl mask swap.target
 ```

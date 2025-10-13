@@ -727,3 +727,25 @@ docker.io/calico/pod2daemon-flexvol      v3.28.0             587b28ecfc62e      
 registry.k8s.io/kube-proxy               v1.31.0             ad83b2ca7b09e       92.7MB
 registry.k8s.io/pause                    3.10                873ed75102791       742kB
 ```
+
+### BGP
+
+ペアリングを確認する。
+
+```sh
+kubectl calico node status
+```
+
+```text
+```
+
+### VXLAN
+
+フォワーディングテーブルを確認する。
+
+```sh
+bridge fdb show dev vxlan.calico
+```
+
+```text
+```

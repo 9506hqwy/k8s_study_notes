@@ -5,9 +5,9 @@ prepare
 cluster
 network_addon
 kubernetes
-ingress
 gateway
 loadbalancer
+ingress
 dashboard
 delivery
 monitoring.md

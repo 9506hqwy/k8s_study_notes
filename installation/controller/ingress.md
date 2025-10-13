@@ -5,7 +5,7 @@
 Ingress NGINX Controller を構築する。
 
 ```sh
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.2/deploy/static/provider/cloud/deploy.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.13.3/deploy/static/provider/cloud/deploy.yaml
 ```
 
 ```text
@@ -30,59 +30,20 @@ ingressclass.networking.k8s.io/nginx created
 validatingwebhookconfiguration.admissionregistration.k8s.io/ingress-nginx-admission created
 ```
 
-```{warning}
-2024/9/29 時点で [#8605](https://github.com/cri-o/cri-o/pull/8605) の問題があるため
-*deploy.yaml* をダウンロードして `image` の指定からタグを削除する。
-
-image: registry.k8s.io/ingress-nginx/controller:v1.11.2@sha256:d5f8217feeac4887cb1ed21f27c2674e58be06bd8f5184cacea2a69abaf78dce
-
-  ↓
-
-image: registry.k8s.io/ingress-nginx/controller@sha256:d5f8217feeac4887cb1ed21f27c2674e58be06bd8f5184cacea2a69abaf78dce
-
-image: registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.3@sha256:a320a50cc91bd15fd2d6fa6de58bd98c1bd64b9a6f926ce23a600d87043455a3
-
-  ↓
-
-image: registry.k8s.io/ingress-nginx/kube-webhook-certgen@sha256:a320a50cc91bd15fd2d6fa6de58bd98c1bd64b9a6f926ce23a600d87043455a3
-```
-
 すべての Pod が起動するまで待つ。
 
 ```sh
-watch kubectl get pods --namespace=ingress-nginx
+watch kubectl get pods -n ingress-nginx
 ```
 
 ```text
-NAME                                       READY   STATUS      RESTARTS   AGE
-ingress-nginx-admission-create-lpfzd       0/1     Completed   0          11s
-ingress-nginx-admission-patch-2jw66        0/1     Completed   0          11s
-ingress-nginx-controller-675fd975d-6xq8z   0/1     Running     0          11s
-```
-
-## ファイアウォール
-
-```{warning}
-ここは正しくない。
-```
-
-ファイアウォールを開ける。
-
-```sh
-firewall-cmd --permanent --zone=public --add-port=8443/tcp
-firewall-cmd --permanent --zone=internal --add-port=8443/tcp
-firewall-cmd --reload
-```
-
-ポッドが起動するノードのファイアウォールを開ける。
-
-```sh
-firewall-cmd --permanent --zone=public --add-service=http
-firewall-cmd --permanent --zone=public --add-service=https
-firewall-cmd --reload
+NAME                                       READY   STATUS    RESTARTS   AGE
+ingress-nginx-controller-7f894db6f-kcb92   1/1     Running   0          89s
 ```
 
 ## 環境の確認
+
+Controller Node でネットワーク構成を確認する。
 
 ### ネットワーク名前空間
 
@@ -93,10 +54,26 @@ ip netns
 ```
 
 ```text
-1d17a6ce-da7c-4cae-af8f-4145dcff16cd (id: 2)
-482f2d0f-575e-4e27-8710-a47af2823dd1
-20be9af8-e917-4ab8-a5e9-b515c3804118 (id: 0)
-2abf8663-2a57-4965-9f1b-86b7e37f60e9
+9aff30be-081c-4026-a352-fbac45faf19d
+8bed4c5b-8143-43b6-ac03-a954a9266cf9
+7a76ca1d-6c90-42c3-a2ca-e65ea6467c6d
+295825a4-7a49-4339-b3da-f568dfa228a1
+4e111709-7866-412d-a22f-40218b3826ad
+5d787ef5-0bdb-41d0-8241-c330cca02e2a
+5f3859db-54a2-4161-a2c3-82e9584b261d
+40d96ff5-da8b-44fe-8f07-a6296a84b937
+22c34064-9102-41e8-bc25-000396798604 (id: 0)
+239ffac8-1209-43ea-a2d3-ad19b8d8848a (id: 1)
+4481b8cf-1060-4f55-a40c-3189d75a9654 (id: 2)
+781f764e-3969-44c4-9e3d-13fe5e2bc7c4 (id: 3)
+2b3f4279-9dac-4dc3-a46c-57c622e06df6 (id: 4)
+d63358e4-c916-44cb-a9f6-0e16d885bdab (id: 5)
+018b7903-2187-4cb7-8695-42fc1c70cc6f (id: 6)
+8be1b599-9424-4733-aea4-36b845182d33 (id: 7)
+68d7e324-8071-40f1-a5b1-30ba188dc649 (id: 8)
+874871f4-9c7b-4124-b716-f032f5e83e45 (id: 9)
+f451a269-aa07-4f03-b326-0fe4892baf08
+6af74b50-a213-4f9e-993b-c44052e2d03c (id: 18)
 ```
 
 ### デバイス
@@ -104,43 +81,27 @@ ip netns
 デバイスを確認する。
 
 ```sh
-ip -d link show
+ip -d link show cali1e0fc2b6f3e
 ```
 
 ```text
-1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
-    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
-2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
-    link/ether 52:54:00:cf:af:cd brd ff:ff:ff:ff:ff:ff promiscuity 0  allmulti 0 minmtu 68 maxmtu 65535 addrgenmode none numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 65536 tso_max_segs 65535 gro_max_size 65536 parentbus virtio parentdev virtio0
-3: enp2s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
-    link/ether 52:54:00:9d:d6:e9 brd ff:ff:ff:ff:ff:ff promiscuity 0  allmulti 0 minmtu 68 maxmtu 65535 addrgenmode none numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 65536 tso_max_segs 65535 gro_max_size 65536 parentbus virtio parentdev virtio1
-4: cni0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default qlen 1000
-    link/ether a6:71:b3:c9:b1:b2 brd ff:ff:ff:ff:ff:ff promiscuity 0  allmulti 0 minmtu 68 maxmtu 65535
-    bridge forward_delay 1500 hello_time 200 max_age 2000 ageing_time 30000 stp_state 0 priority 32768 vlan_filtering 0 vlan_protocol 802.1Q bridge_id 8000.a6:71:b3:c9:b1:b2 designated_root 8000.a6:71:b3:c9:b1:b2 root_port 0 root_path_cost 0 topology_change 0 topology_change_detected 0 hello_timer    0.00 tcn_timer    0.00 topology_change_timer    0.00 gc_timer  248.73 vlan_default_pvid 1 vlan_stats_enabled 0 vlan_stats_per_port 0 group_fwd_mask 0 group_address 01:80:c2:00:00:00 mcast_snooping 1 no_linklocal_learn 0 mcast_vlan_snooping 0 mcast_router 1 mcast_query_use_ifaddr 0 mcast_querier 0 mcast_hash_elasticity 16 mcast_hash_max 4096 mcast_last_member_count 2 mcast_startup_query_count 2 mcast_last_member_interval 100 mcast_membership_interval 26000 mcast_querier_interval 25500 mcast_query_interval 12500 mcast_query_response_interval 1000 mcast_startup_query_interval 3125 mcast_stats_enabled 0 mcast_igmp_version 2 mcast_mld_version 1 nf_call_iptables 0 nf_call_ip6tables 0 nf_call_arptables 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
-5: vethaf1ac987@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master cni0 state UP mode DEFAULT group default
-    link/ether c2:a2:1b:1e:b3:a9 brd ff:ff:ff:ff:ff:ff link-netns 20be9af8-e917-4ab8-a5e9-b515c3804118 promiscuity 1  allmulti 1 minmtu 68 maxmtu 65535
-    veth
-    bridge_slave state forwarding priority 32 cost 2 hairpin on guard off root_block off fastleave off learning on flood on port_id 0x8001 port_no 0x1 designated_port 32769 designated_cost 0 designated_bridge 8000.a6:71:b3:c9:b1:b2 designated_root 8000.a6:71:b3:c9:b1:b2 hold_timer    0.00 message_age_timer    0.00 forward_delay_timer    0.00 topology_change_ack 0 config_pending 0 proxy_arp off proxy_arp_wifi off mcast_router 1 mcast_fast_leave off mcast_flood on bcast_flood on mcast_to_unicast off neigh_suppress off group_fwd_mask 0 group_fwd_mask_str 0x0 vlan_tunnel off isolated off locked off mab off addrgenmode eui64 numtxqueues 4 numrxqueues 4 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
-6: vxlan.calico: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
-    link/ether 66:ba:9d:ce:21:bb brd ff:ff:ff:ff:ff:ff promiscuity 0  allmulti 0 minmtu 68 maxmtu 65535
-    vxlan id 4096 local 10.0.0.31 dev enp2s0 srcport 0 0 dstport 4789 nolearning ttl auto ageing 300 udpcsum noudp6zerocsumtx noudp6zerocsumrx addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 65536 tso_max_segs 65535 gro_max_size 65536
-14: cali35a78cc5f0e@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP mode DEFAULT group default qlen 1000
-    link/ether ee:ee:ee:ee:ee:ee brd ff:ff:ff:ff:ff:ff link-netns 1d17a6ce-da7c-4cae-af8f-4145dcff16cd promiscuity 0  allmulti 0 minmtu 68 maxmtu 65535
-    veth addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
+30: cali1e0fc2b6f3e@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP mode DEFAULT group default qlen 1000
+    link/ether ee:ee:ee:ee:ee:ee brd ff:ff:ff:ff:ff:ff link-netns 6af74b50-a213-4f9e-993b-c44052e2d03c promiscuity 0 allmulti 0 minmtu 68 maxmtu 65535
+    veth addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536 gso_ipv4_max_size 65536 gro_ipv4_max_size 65536
 ```
 
 ネットワーク名前空間内のデバイスを確認する。
 
 ```sh
-ip netns exec 1d17a6ce-da7c-4cae-af8f-4145dcff16cd ip -d link show
+ip netns exec 6af74b50-a213-4f9e-993b-c44052e2d03c ip -d link show
 ```
 
 ```text
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
-    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
-2: eth0@if14: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP mode DEFAULT group default qlen 1000
-    link/ether 86:be:62:a3:3c:3b brd ff:ff:ff:ff:ff:ff link-netns 482f2d0f-575e-4e27-8710-a47af2823dd1 promiscuity 0  allmulti 0 minmtu 68 maxmtu 65535
-    veth addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0 allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536 gso_ipv4_max_size 65536 gro_ipv4_max_size 65536
+2: eth0@if30: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP mode DEFAULT group default qlen 1000
+    link/ether 26:0b:35:13:15:c2 brd ff:ff:ff:ff:ff:ff link-netns 9aff30be-081c-4026-a352-fbac45faf19d promiscuity 0 allmulti 0 minmtu 68 maxmtu 65535
+    veth addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536 gso_ipv4_max_size 65536 gro_ipv4_max_size 65536
 ```
 
 ### イーサネット
@@ -148,40 +109,20 @@ ip netns exec 1d17a6ce-da7c-4cae-af8f-4145dcff16cd ip -d link show
 イーサネットの情報を確認する。
 
 ```sh
-ip addr show
+ip addr show cali1e0fc2b6f3e
 ```
 
 ```text
-1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
-    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-    inet 127.0.0.1/8 scope host lo
+30: cali1e0fc2b6f3e@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP group default qlen 1000
+    link/ether ee:ee:ee:ee:ee:ee brd ff:ff:ff:ff:ff:ff link-netns 6af74b50-a213-4f9e-993b-c44052e2d03c
+    inet6 fe80::ecee:eeff:feee:eeee/64 scope link proto kernel_ll
        valid_lft forever preferred_lft forever
-2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
-    link/ether 52:54:00:cf:af:cd brd ff:ff:ff:ff:ff:ff
-    inet 172.16.0.31/24 brd 172.16.0.255 scope global noprefixroute enp1s0
-       valid_lft forever preferred_lft forever
-3: enp2s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
-    link/ether 52:54:00:9d:d6:e9 brd ff:ff:ff:ff:ff:ff
-    inet 10.0.0.31/24 brd 10.0.0.255 scope global noprefixroute enp2s0
-       valid_lft forever preferred_lft forever
-4: cni0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
-    link/ether a6:71:b3:c9:b1:b2 brd ff:ff:ff:ff:ff:ff
-    inet 10.85.0.1/16 brd 10.85.255.255 scope global cni0
-       valid_lft forever preferred_lft forever
-5: vethaf1ac987@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master cni0 state UP group default
-    link/ether c2:a2:1b:1e:b3:a9 brd ff:ff:ff:ff:ff:ff link-netns 20be9af8-e917-4ab8-a5e9-b515c3804118
-6: vxlan.calico: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UNKNOWN group default qlen 1000
-    link/ether 66:ba:9d:ce:21:bb brd ff:ff:ff:ff:ff:ff
-    inet 172.17.255.128/32 scope global vxlan.calico
-       valid_lft forever preferred_lft forever
-14: cali35a78cc5f0e@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP group default qlen 1000
-    link/ether ee:ee:ee:ee:ee:ee brd ff:ff:ff:ff:ff:ff link-netns 1d17a6ce-da7c-4cae-af8f-4145dcff16cd
 ```
 
 ネットワーク名前空間内のイーサネットの情報を確認する。
 
 ```sh
-ip netns exec 1d17a6ce-da7c-4cae-af8f-4145dcff16cd ip addr show
+ip netns exec 6af74b50-a213-4f9e-993b-c44052e2d03c ip addr show
 ```
 
 ```text
@@ -189,13 +130,13 @@ ip netns exec 1d17a6ce-da7c-4cae-af8f-4145dcff16cd ip addr show
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
     inet 127.0.0.1/8 scope host lo
        valid_lft forever preferred_lft forever
-    inet6 ::1/128 scope host
+    inet6 ::1/128 scope host proto kernel_lo
        valid_lft forever preferred_lft forever
-2: eth0@if14: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP group default qlen 1000
-    link/ether 86:be:62:a3:3c:3b brd ff:ff:ff:ff:ff:ff link-netns 482f2d0f-575e-4e27-8710-a47af2823dd1
-    inet 172.17.255.134/32 scope global eth0
+2: eth0@if30: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP group default qlen 1000
+    link/ether 26:0b:35:13:15:c2 brd ff:ff:ff:ff:ff:ff link-netns 9aff30be-081c-4026-a352-fbac45faf19d
+    inet 172.17.2.33/32 scope global eth0
        valid_lft forever preferred_lft forever
-    inet6 fe80::84be:62ff:fea3:3c3b/64 scope link
+    inet6 fe80::240b:35ff:fe13:15c2/64 scope link proto kernel_ll
        valid_lft forever preferred_lft forever
 ```
 
@@ -209,24 +150,63 @@ ip route show
 
 ```text
 default via 172.16.0.254 dev enp1s0 proto static metric 100
-10.0.0.0/24 dev enp2s0 proto kernel scope link src 10.0.0.31 metric 101
-10.85.0.0/16 dev cni0 proto kernel scope link src 10.85.0.1
-172.16.0.0/24 dev enp1s0 proto kernel scope link src 172.16.0.31 metric 100
-172.17.2.0/26 via 10.0.0.11 dev enp2s0 proto 80 onlink
-172.17.51.128/26 via 10.0.0.32 dev enp2s0 proto 80 onlink
-blackhole 172.17.255.128/26 proto 80
-172.17.255.134 dev cali35a78cc5f0e scope link
+10.0.0.0/24 dev enp2s0 proto kernel scope link src 10.0.0.11 metric 101
+172.16.0.0/24 dev enp1s0 proto kernel scope link src 172.16.0.11 metric 100
+blackhole 172.17.2.0/26 proto 80
+172.17.2.10 dev cali672f36e7b7a scope link
+172.17.2.11 dev cali53023bf1b9d scope link
+172.17.2.12 dev cali93ae5b22e23 scope link
+172.17.2.13 dev cali0cd00cf4c0f scope link
+172.17.2.14 dev cali30782974e56 scope link
+172.17.2.15 dev cali41393fe08f0 scope link
+172.17.2.16 dev calif35f658de0d scope link
+172.17.2.17 dev calide6f5a24f1d scope link
+172.17.2.19 dev cali81f8b902e6e scope link
+172.17.2.22 dev cali0817bf63151 scope link
+172.17.2.33 dev cali1e0fc2b6f3e scope link
 ```
 
 ネットワーク名前空間内のルーティングを確認する。
 
 ```sh
-ip netns exec 1d17a6ce-da7c-4cae-af8f-4145dcff16cd ip route show
+ip netns exec 6af74b50-a213-4f9e-993b-c44052e2d03c ip route show
 ```
 
 ```text
 default via 169.254.1.1 dev eth0
 169.254.1.1 dev eth0 scope link
+```
+
+### ARP テーブル
+
+ARP テーブルを確認する。
+
+```sh
+ip neigh
+```
+
+```text
+172.17.2.19 dev cali81f8b902e6e lladdr b6:e5:41:76:9e:08 REACHABLE
+172.16.0.199 dev enp1s0 lladdr fe:54:00:49:41:b8 REACHABLE
+172.17.2.17 dev calide6f5a24f1d lladdr da:2f:c2:fc:35:10 REACHABLE
+172.17.2.16 dev calif35f658de0d lladdr aa:cc:4a:61:51:80 REACHABLE
+172.17.2.14 dev cali30782974e56 lladdr 06:7b:37:72:06:f8 REACHABLE
+172.17.2.15 dev cali41393fe08f0 lladdr 6a:a6:1d:2d:0a:b7 REACHABLE
+172.17.2.22 dev cali0817bf63151 lladdr 0e:d8:ec:61:04:06 REACHABLE
+172.16.0.254 dev enp1s0 lladdr 52:54:00:65:c6:68 REACHABLE
+172.17.2.33 dev cali1e0fc2b6f3e lladdr 26:0b:35:13:15:c2 REACHABLE
+172.17.2.10 dev cali672f36e7b7a lladdr 8a:67:37:08:6e:e1 REACHABLE
+172.17.2.12 dev cali93ae5b22e23 lladdr de:47:01:a6:23:36 REACHABLE
+```
+
+ネットワーク名前空間内の ARP テーブルを確認する。
+
+```sh
+ip netns exec 6af74b50-a213-4f9e-993b-c44052e2d03c ip neigh
+```
+
+```text
+169.254.1.1 dev eth0 lladdr ee:ee:ee:ee:ee:ee REACHABLE
 ```
 
 ### nftables
@@ -249,13 +229,10 @@ table ip mangle {
         chain KUBE-PROXY-CANARY {
         }
 
-        chain cali-to-host-endpoint {
-        }
-
         chain cali-PREROUTING {
-                 ct state related,established counter packets 120818 bytes 141141380 accept
+                 ct state related,established counter packets 12978863 bytes 6051082134 accept
                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 accept
-                 counter packets 2100 bytes 131368 jump cali-from-host-endpoint
+                 counter packets 59479 bytes 3576193 jump cali-from-host-endpoint
                   meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 accept
         }
 
@@ -263,20 +240,23 @@ table ip mangle {
         }
 
         chain cali-POSTROUTING {
-                 meta mark & 0x00010000 == 0x00010000 counter packets 4 bytes 240 return
-                 counter packets 79128 bytes 6856878 meta mark set mark and 0xfff0ffff
-                 ct status dnat counter packets 3535 bytes 1295707 jump cali-to-host-endpoint
+                 meta mark & 0x00010000 == 0x00010000 counter packets 179 bytes 18193 return
+                 counter packets 12916192 bytes 6830047996 meta mark set mark and 0xffe4ffff
+                 ct status dnat counter packets 4148278 bytes 3219327780 jump cali-to-host-endpoint
                   meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+        }
+
+        chain cali-to-host-endpoint {
         }
 
         chain PREROUTING {
                 type filter hook prerouting priority mangle; policy accept;
-                 counter packets 122918 bytes 141272748 jump cali-PREROUTING
+                 counter packets 13038342 bytes 6054658327 jump cali-PREROUTING
         }
 
         chain POSTROUTING {
                 type filter hook postrouting priority mangle; policy accept;
-                 counter packets 79132 bytes 6857118 jump cali-POSTROUTING
+                 counter packets 12916371 bytes 6830066189 jump cali-POSTROUTING
         }
 }
 # Warning: table ip filter is managed by iptables-nft, do not touch!
@@ -287,19 +267,19 @@ table ip filter {
 
         chain OUTPUT {
                 type filter hook output priority filter; policy accept;
-                 counter packets 76345 bytes 5671393 jump cali-OUTPUT
-                ct state new  counter packets 5789 bytes 357522 jump KUBE-PROXY-FIREWALL
-                ct state new  counter packets 5789 bytes 357522 jump KUBE-SERVICES
-                counter packets 148549 bytes 9822880 jump KUBE-FIREWALL
+                 counter packets 12910440 bytes 6829238625 jump cali-OUTPUT
+                ct state new  counter packets 87429 bytes 5286216 jump KUBE-PROXY-FIREWALL
+                ct state new  counter packets 87429 bytes 5286216 jump KUBE-SERVICES
+                counter packets 12957456 bytes 6856425638 jump KUBE-FIREWALL
         }
 
         chain INPUT {
                 type filter hook input priority filter; policy accept;
-                 counter packets 120130 bytes 140086963 jump cali-INPUT
-                ct state new  counter packets 2096 bytes 131128 jump KUBE-PROXY-FIREWALL
-                 counter packets 280565 bytes 382254359 jump KUBE-NODEPORTS
-                ct state new  counter packets 2096 bytes 131128 jump KUBE-EXTERNAL-SERVICES
-                counter packets 302724 bytes 414814143 jump KUBE-FIREWALL
+                 counter packets 13032389 bytes 6053829443 jump cali-INPUT
+                ct state new  counter packets 59751 bytes 3585060 jump KUBE-PROXY-FIREWALL
+                 counter packets 10795859 bytes 5569642955 jump KUBE-NODEPORTS
+                ct state new  counter packets 59751 bytes 3585060 jump KUBE-EXTERNAL-SERVICES
+                counter packets 10802586 bytes 5574784814 jump KUBE-FIREWALL
         }
 
         chain KUBE-KUBELET-CANARY {
@@ -313,18 +293,18 @@ table ip filter {
 
         chain FORWARD {
                 type filter hook forward priority filter; policy accept;
-                 counter packets 2788 bytes 1185785 jump cali-FORWARD
-                ct state new  counter packets 4 bytes 240 jump KUBE-PROXY-FIREWALL
-                 counter packets 4 bytes 240 jump KUBE-FORWARD
-                ct state new  counter packets 4 bytes 240 jump KUBE-SERVICES
-                ct state new  counter packets 4 bytes 240 jump KUBE-EXTERNAL-SERVICES
-                  meta mark & 0x00010000 == 0x00010000 counter packets 4 bytes 240 accept
+                 counter packets 5951 bytes 828780 jump cali-FORWARD
+                ct state new  counter packets 183 bytes 18565 jump KUBE-PROXY-FIREWALL
+                 counter packets 187 bytes 19237 jump KUBE-FORWARD
+                ct state new  counter packets 183 bytes 18565 jump KUBE-SERVICES
+                ct state new  counter packets 183 bytes 18565 jump KUBE-EXTERNAL-SERVICES
+                  meta mark & 0x00010000 == 0x00010000 counter packets 179 bytes 18193 accept
                  counter packets 0 bytes 0 meta mark set mark or 0x10000
         }
 
         chain KUBE-NODEPORTS {
-                meta l4proto tcp  tcp dport 31368 counter packets 0 bytes 0 accept
-                meta l4proto tcp  tcp dport 31368 counter packets 0 bytes 0 accept
+                meta l4proto tcp  tcp dport 31115 counter packets 0 bytes 0 accept
+                meta l4proto tcp  tcp dport 31115 counter packets 0 bytes 0 accept
         }
 
         chain KUBE-SERVICES {
@@ -339,91 +319,169 @@ table ip filter {
         chain KUBE-PROXY-FIREWALL {
         }
 
-        chain cali-INPUT {
-                meta l4proto udp   udp dport 4789 xt match "set" fib daddr type local counter packets 0 bytes 0 accept
-                meta l4proto udp   udp dport 4789 fib daddr type local counter packets 0 bytes 0 drop
-                iifname "cali*"  counter packets 1538 bytes 135792 goto cali-wl-to-host
-                 meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 accept
-                 counter packets 118592 bytes 139951171 meta mark set mark and 0xfff0ffff
-                 counter packets 118592 bytes 139951171 jump cali-from-host-endpoint
-                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 accept
-        }
-
-        chain cali-pri-_og73BH3DuNOZrbBKFW {
-                  counter packets 0 bytes 0
-        }
-
         chain cali-to-hep-forward {
         }
 
-        chain cali-from-hep-forward {
+        chain cali-wl-to-host {
+                 counter packets 2276615 bytes 505489140 jump cali-from-wl-dispatch
+                  counter packets 8 bytes 480 accept
         }
 
-        chain cali-to-wl-dispatch {
-                oifname "cali35a78cc5f0e"  counter packets 444 bytes 154866 goto cali-tw-cali35a78cc5f0e
-                oifname "calia237a32da2c"  counter packets 0 bytes 0 goto cali-tw-calia237a32da2c
+        chain cali-OUTPUT {
+                 meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 accept
+                oifname "cali*"  counter packets 2354151 bytes 1909565649 return
+                meta l4proto udp   udp dport 4789 fib saddr type local xt match "set" counter packets 0 bytes 0 accept
+                 counter packets 10556289 bytes 4919672976 meta mark set mark and 0xffe4ffff
+                 ct status dnat counter packets 8634284 bytes 3600082078 jump cali-to-host-endpoint
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 accept
+        }
+
+        chain cali-pro-_kJqfZpgUe7r2t4A-14 {
+                  counter packets 0 bytes 0 meta mark set mark or 0x10000
+                 meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 log prefix "ARE0|kns.calico-apiserver" group 2 snaplen 80
+        }
+
+        chain cali-pri-kns.calico-system {
+                  counter packets 0 bytes 0 meta mark set mark or 0x10000
+                 meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 log prefix "ARI0|kns.calico-system" group 1 snaplen 80
+        }
+
+        chain cali-pri-_nzzjLvInId1gPHmQz_ {
+                  counter packets 0 bytes 0
+        }
+
+        chain cali-tw-calide6f5a24f1d {
+                 ct state related,established counter packets 0 bytes 0 accept
+                 ct state invalid counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 meta mark set mark and 0xfffcffff
+                  counter packets 0 bytes 0 meta mark set mark and 0xfffdffff
+                 meta mark & 0x00020000 == 0x00000000 counter packets 0 bytes 0 jump cali-pi-_U7WUiLyTu5Vc3j6v19u
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 meta mark & 0x00020000 == 0x00000000 counter packets 0 bytes 0 log prefix "DPI|default" group 1 snaplen 80
+                  meta mark & 0x00020000 == 0x00000000 counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 jump cali-pri-kns.calico-system
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 jump cali-pri-_eY4Bnp6m80Op5FOwqd
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRI" group 1 snaplen 80
                   counter packets 0 bytes 0 drop
         }
 
-        chain cali-pro-kns.calico-system {
-                  counter packets 0 bytes 0 meta mark set mark or 0x10000
+        chain cali-from-wl-dispatch {
+                iifname "cali0*"  counter packets 537 bytes 771521 goto cali-from-wl-dispatch-0
+                iifname "cali1e0fc2b6f3e"  counter packets 608 bytes 68465 goto cali-fw-cali1e0fc2b6f3e
+                iifname "cali30782974e56"  counter packets 226 bytes 40165 goto cali-fw-cali30782974e56
+                iifname "cali41393fe08f0"  counter packets 364 bytes 29008 goto cali-fw-cali41393fe08f0
+                iifname "cali53023bf1b9d"  counter packets 0 bytes 0 goto cali-fw-cali53023bf1b9d
+                iifname "cali672f36e7b7a"  counter packets 572 bytes 73932 goto cali-fw-cali672f36e7b7a
+                iifname "cali81f8b902e6e"  counter packets 4095 bytes 558012 goto cali-fw-cali81f8b902e6e
+                iifname "cali93ae5b22e23"  counter packets 373 bytes 29767 goto cali-fw-cali93ae5b22e23
+                iifname "calide6f5a24f1d"  counter packets 199 bytes 17875 goto cali-fw-calide6f5a24f1d
+                iifname "calif35f658de0d"  counter packets 906 bytes 411451 goto cali-fw-calif35f658de0d
+                  counter packets 0 bytes 0 drop
         }
 
-        chain cali-tw-calia237a32da2c {
+        chain cali-fw-cali0cd00cf4c0f {
+                 ct state related,established counter packets 0 bytes 0 accept
+                 ct state invalid counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 meta mark set mark and 0xfffcffff
+                meta l4proto udp   udp dport 4789 counter packets 0 bytes 0 drop
+                meta l4proto ipv4   counter packets 0 bytes 0 drop
+                  counter packets 0 bytes 0 meta mark set mark and 0xfffdffff
+                 meta mark & 0x00020000 == 0x00000000 counter packets 0 bytes 0 jump cali-po-_YYnSgB46MA1TYU44kJq
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 meta mark & 0x00020000 == 0x00000000 counter packets 0 bytes 0 log prefix "DPE|default" group 2 snaplen 80
+                  meta mark & 0x00020000 == 0x00000000 counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 jump cali-pro-kns.calico-system
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 jump cali-pro-_jtt6i-KVVwZ-74H4ov
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRE" group 2 snaplen 80
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-pro-_ymJUz7yzI6NOKJhG2- {
+                  counter packets 0 bytes 0
+        }
+
+        chain cali-fw-cali93ae5b22e23 {
+                 ct state related,established counter packets 281628 bytes 19129524 accept
+                 ct state invalid counter packets 0 bytes 0 drop
+                 counter packets 10 bytes 976 meta mark set mark and 0xfffcffff
+                meta l4proto udp   udp dport 4789 counter packets 0 bytes 0 drop
+                meta l4proto ipv4   counter packets 0 bytes 0 drop
+                 counter packets 10 bytes 976 jump cali-pro-kns.kube-system
+                  meta mark & 0x00010000 == 0x00010000 counter packets 10 bytes 976 return
+                 counter packets 0 bytes 0 jump cali-pro-_u2Tn2rSoAPffvE7JO6
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRE" group 2 snaplen 80
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-tw-cali30782974e56 {
+                 ct state related,established counter packets 0 bytes 0 accept
+                 ct state invalid counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 meta mark set mark and 0xfffcffff
+                  counter packets 0 bytes 0 meta mark set mark and 0xfffdffff
+                 meta mark & 0x00020000 == 0x00000000 counter packets 0 bytes 0 jump cali-pi-_FDiLImilezd09cpg5ci
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 meta mark & 0x00020000 == 0x00000000 counter packets 0 bytes 0 log prefix "DPI|default" group 1 snaplen 80
+                  meta mark & 0x00020000 == 0x00000000 counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 jump cali-pri-_kJqfZpgUe7r2t4A-14
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 jump cali-pri-_4yi5_iSUAwsU8zMHTk
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRI" group 1 snaplen 80
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-tw-cali672f36e7b7a {
                  ct state related,established counter packets 0 bytes 0 accept
                  ct state invalid counter packets 0 bytes 0 drop
                  counter packets 0 bytes 0 meta mark set mark and 0xfffcffff
                  counter packets 0 bytes 0 jump cali-pri-kns.calico-system
                   meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
-                 counter packets 0 bytes 0 jump cali-pri-_og73BH3DuNOZrbBKFW
+                 counter packets 0 bytes 0 jump cali-pri-_nzzjLvInId1gPHmQz_
                   meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRI" group 1 snaplen 80
                   counter packets 0 bytes 0 drop
         }
 
-        chain cali-pri-kns.calico-system {
-                  counter packets 0 bytes 0 meta mark set mark or 0x10000
+        chain cali-pi-_U7WUiLyTu5Vc3j6v19u {
+                meta l4proto tcp   tcp dport 7443 counter packets 0 bytes 0 meta mark set mark or 0x10000
+                 meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 log prefix "API0|calico-system/knp.default.goldmane" group 1 snaplen 80
         }
 
-        chain cali-FORWARD {
-                 counter packets 2788 bytes 1185785 meta mark set mark and 0xfff1ffff
-                 meta mark & 0x00010000 == 0x00000000 counter packets 2788 bytes 1185785 jump cali-from-hep-forward
-                iifname "cali*"  counter packets 1457 bytes 279091 jump cali-from-wl-dispatch
-                oifname "cali*"  counter packets 1331 bytes 906694 jump cali-to-wl-dispatch
-                 counter packets 4 bytes 240 jump cali-to-hep-forward
-                 counter packets 4 bytes 240 jump cali-cidr-block
+        chain cali-po-_YYnSgB46MA1TYU44kJq {
+                meta l4proto tcp   xt match "set" tcp dport 7443 counter packets 0 bytes 0 meta mark set mark or 0x10000
+                 meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 log prefix "APE0|calico-system/knp.default.whisker" group 2 snaplen 80
+                 meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                meta l4proto tcp  xt match "set" tcp dport 53 counter packets 0 bytes 0 meta mark set mark or 0x10000
+                 meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 log prefix "APE1|calico-system/knp.default.whisker" group 2 snaplen 80
+                 meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                meta l4proto udp  xt match "set" udp dport 53 counter packets 0 bytes 0 meta mark set mark or 0x10000
+                 meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 log prefix "APE2|calico-system/knp.default.whisker" group 2 snaplen 80
         }
 
-        chain cali-wl-to-host {
-                 counter packets 1538 bytes 135792 jump cali-from-wl-dispatch
-                  counter packets 0 bytes 0 accept
-        }
-
-        chain cali-OUTPUT {
-                 meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 accept
-                oifname "cali*"  counter packets 1624 bytes 122634 return
-                meta l4proto udp   udp dport 4789 fib saddr type local xt match "set" counter packets 0 bytes 0 accept
-                 counter packets 74721 bytes 5548759 meta mark set mark and 0xfff0ffff
-                 ct status dnat counter packets 73970 bytes 5438597 jump cali-to-host-endpoint
-                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 accept
-        }
-
-        chain cali-pro-_og73BH3DuNOZrbBKFW {
+        chain cali-pro-_4yi5_iSUAwsU8zMHTk {
                   counter packets 0 bytes 0
         }
 
-        chain cali-from-wl-dispatch {
-                iifname "cali35a78cc5f0e"  counter packets 1112 bytes 157864 goto cali-fw-cali35a78cc5f0e
-                iifname "calia237a32da2c"  counter packets 0 bytes 0 goto cali-fw-calia237a32da2c
+        chain cali-fw-cali41393fe08f0 {
+                 ct state related,established counter packets 281760 bytes 18887854 accept
+                 ct state invalid counter packets 0 bytes 0 drop
+                 counter packets 11 bytes 1095 meta mark set mark and 0xfffcffff
+                meta l4proto udp   udp dport 4789 counter packets 0 bytes 0 drop
+                meta l4proto ipv4   counter packets 0 bytes 0 drop
+                 counter packets 11 bytes 1095 jump cali-pro-kns.kube-system
+                  meta mark & 0x00010000 == 0x00010000 counter packets 11 bytes 1095 return
+                 counter packets 0 bytes 0 jump cali-pro-_u2Tn2rSoAPffvE7JO6
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRE" group 2 snaplen 80
                   counter packets 0 bytes 0 drop
         }
 
-        chain cali-from-host-endpoint {
-        }
-
-        chain cali-to-host-endpoint {
-        }
-
-        chain cali-fw-calia237a32da2c {
+        chain cali-fw-cali53023bf1b9d {
                  ct state related,established counter packets 0 bytes 0 accept
                  ct state invalid counter packets 0 bytes 0 drop
                  counter packets 0 bytes 0 meta mark set mark and 0xfffcffff
@@ -431,39 +489,350 @@ table ip filter {
                 meta l4proto ipv4   counter packets 0 bytes 0 drop
                  counter packets 0 bytes 0 jump cali-pro-kns.calico-system
                   meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
-                 counter packets 0 bytes 0 jump cali-pro-_og73BH3DuNOZrbBKFW
+                 counter packets 0 bytes 0 jump cali-pro-_ymJUz7yzI6NOKJhG2-
                   meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRE" group 2 snaplen 80
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-pro-_nzzjLvInId1gPHmQz_ {
+                  counter packets 0 bytes 0
+        }
+
+        chain cali-pri-_jtt6i-KVVwZ-74H4ov {
+                  counter packets 0 bytes 0
+        }
+
+        chain cali-pi-_FDiLImilezd09cpg5ci {
+                meta l4proto tcp   tcp dport 5443 counter packets 0 bytes 0 meta mark set mark or 0x10000
+                 meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 log prefix "API0|calico-apiserver/knp.default.allow-apiserver" group 1 snaplen 80
+        }
+
+        chain cali-tw-cali41393fe08f0 {
+                 ct state related,established counter packets 15 bytes 2431 accept
+                 ct state invalid counter packets 0 bytes 0 drop
+                 counter packets 66 bytes 7115 meta mark set mark and 0xfffcffff
+                 counter packets 66 bytes 7115 jump cali-pri-kns.kube-system
+                  meta mark & 0x00010000 == 0x00010000 counter packets 66 bytes 7115 return
+                 counter packets 0 bytes 0 jump cali-pri-_u2Tn2rSoAPffvE7JO6
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRI" group 1 snaplen 80
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-fw-cali30782974e56 {
+                 ct state related,established counter packets 10156 bytes 1816063 accept
+                 ct state invalid counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 meta mark set mark and 0xfffcffff
+                meta l4proto udp   udp dport 4789 counter packets 0 bytes 0 drop
+                meta l4proto ipv4   counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 jump cali-pro-_kJqfZpgUe7r2t4A-14
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 jump cali-pro-_4yi5_iSUAwsU8zMHTk
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRE" group 2 snaplen 80
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-pro-kns.kube-system {
+                  counter packets 21 bytes 2071 meta mark set mark or 0x10000
+                 meta mark & 0x00010000 == 0x00010000 counter packets 21 bytes 2071 log prefix "ARE0|kns.kube-system" group 2 snaplen 80
+        }
+
+        chain cali-pro-_u2Tn2rSoAPffvE7JO6 {
+                  counter packets 0 bytes 0
+        }
+
+        chain cali-pro-_eY4Bnp6m80Op5FOwqd {
+                  counter packets 0 bytes 0
+        }
+
+        chain cali-fw-calif35f658de0d {
+                 ct state related,established counter packets 34940 bytes 18000357 accept
+                 ct state invalid counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 meta mark set mark and 0xfffcffff
+                meta l4proto udp   udp dport 4789 counter packets 0 bytes 0 drop
+                meta l4proto ipv4   counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 jump cali-pro-_kJqfZpgUe7r2t4A-14
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 jump cali-pro-_4yi5_iSUAwsU8zMHTk
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRE" group 2 snaplen 80
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-tw-cali0cd00cf4c0f {
+                 ct state related,established counter packets 0 bytes 0 accept
+                 ct state invalid counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 meta mark set mark and 0xfffcffff
+                  counter packets 0 bytes 0 meta mark set mark and 0xfffdffff
+                 meta mark & 0x00020000 == 0x00000000 counter packets 0 bytes 0 jump cali-pi-_YYnSgB46MA1TYU44kJq
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 meta mark & 0x00020000 == 0x00000000 counter packets 0 bytes 0 log prefix "DPI|default" group 1 snaplen 80
+                  meta mark & 0x00020000 == 0x00000000 counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 jump cali-pri-kns.calico-system
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 jump cali-pri-_jtt6i-KVVwZ-74H4ov
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRI" group 1 snaplen 80
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-pri-_kJqfZpgUe7r2t4A-14 {
+                  counter packets 0 bytes 0 meta mark set mark or 0x10000
+                 meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 log prefix "ARI0|kns.calico-apiserver" group 1 snaplen 80
+        }
+
+        chain cali-pri-_4yi5_iSUAwsU8zMHTk {
+                  counter packets 0 bytes 0
+        }
+
+        chain cali-INPUT {
+                meta l4proto udp   udp dport 4789 xt match "set" fib daddr type local counter packets 0 bytes 0 accept
+                meta l4proto udp   udp dport 4789 fib daddr type local counter packets 0 bytes 0 drop
+                iifname "cali*"  counter packets 2276615 bytes 505489140 goto cali-wl-to-host
+                 meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 accept
+                 counter packets 10755774 bytes 5548340303 meta mark set mark and 0xffe4ffff
+                 counter packets 10755774 bytes 5548340303 jump cali-from-host-endpoint
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 accept
+        }
+
+        chain cali-from-host-endpoint {
+        }
+
+        chain cali-pri-_u2Tn2rSoAPffvE7JO6 {
+                  counter packets 0 bytes 0
+        }
+
+        chain cali-tw-cali53023bf1b9d {
+                 ct state related,established counter packets 0 bytes 0 accept
+                 ct state invalid counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 meta mark set mark and 0xfffcffff
+                 counter packets 0 bytes 0 jump cali-pri-kns.calico-system
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 jump cali-pri-_ymJUz7yzI6NOKJhG2-
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRI" group 1 snaplen 80
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-fw-calide6f5a24f1d {
+                 ct state related,established counter packets 9468 bytes 861448 accept
+                 ct state invalid counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 meta mark set mark and 0xfffcffff
+                meta l4proto udp   udp dport 4789 counter packets 0 bytes 0 drop
+                meta l4proto ipv4   counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 jump cali-pro-kns.calico-system
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 jump cali-pro-_eY4Bnp6m80Op5FOwqd
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRE" group 2 snaplen 80
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-to-wl-dispatch {
+                oifname "cali0*"  counter packets 0 bytes 0 goto cali-to-wl-dispatch-0
+                oifname "cali1e0fc2b6f3e"  counter packets 0 bytes 0 goto cali-tw-cali1e0fc2b6f3e
+                oifname "cali30782974e56"  counter packets 0 bytes 0 goto cali-tw-cali30782974e56
+                oifname "cali41393fe08f0"  counter packets 0 bytes 0 goto cali-tw-cali41393fe08f0
+                oifname "cali53023bf1b9d"  counter packets 0 bytes 0 goto cali-tw-cali53023bf1b9d
+                oifname "cali672f36e7b7a"  counter packets 0 bytes 0 goto cali-tw-cali672f36e7b7a
+                oifname "cali81f8b902e6e"  counter packets 0 bytes 0 goto cali-tw-cali81f8b902e6e
+                oifname "cali93ae5b22e23"  counter packets 0 bytes 0 goto cali-tw-cali93ae5b22e23
+                oifname "calide6f5a24f1d"  counter packets 0 bytes 0 goto cali-tw-calide6f5a24f1d
+                oifname "calif35f658de0d"  counter packets 0 bytes 0 goto cali-tw-calif35f658de0d
                   counter packets 0 bytes 0 drop
         }
 
         chain cali-cidr-block {
         }
 
-        chain cali-pro-kns.ingress-nginx {
-                  counter packets 2 bytes 120 meta mark set mark or 0x10000
-        }
-
-        chain cali-pri-kns.ingress-nginx {
-                  counter packets 0 bytes 0 meta mark set mark or 0x10000
-        }
-
-        chain cali-tw-cali35a78cc5f0e {
-                 ct state related,established counter packets 556 bytes 408926 accept
-                 ct state invalid counter packets 0 bytes 0 drop
-                 counter packets 0 bytes 0 meta mark set mark and 0xfffcffff
-                 counter packets 0 bytes 0 jump cali-pri-kns.ingress-nginx
-                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
-                 counter packets 0 bytes 0 jump cali-pri-_WuAV8wMhwxuQO3vuFE
-                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
-                  counter packets 0 bytes 0 drop
-        }
-
-        chain cali-pri-_WuAV8wMhwxuQO3vuFE {
+        chain cali-pro-_jtt6i-KVVwZ-74H4ov {
                   counter packets 0 bytes 0
         }
 
-        chain cali-fw-cali35a78cc5f0e {
-                 ct state related,established counter packets 1242 bytes 171156 accept
+        chain cali-fw-cali672f36e7b7a {
+                 ct state related,established counter packets 292150 bytes 21229710 accept
+                 ct state invalid counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 meta mark set mark and 0xfffcffff
+                meta l4proto udp   udp dport 4789 counter packets 0 bytes 0 drop
+                meta l4proto ipv4   counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 jump cali-pro-kns.calico-system
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 jump cali-pro-_nzzjLvInId1gPHmQz_
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRE" group 2 snaplen 80
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-pri-kns.kube-system {
+                  counter packets 139 bytes 14982 meta mark set mark or 0x10000
+                 meta mark & 0x00010000 == 0x00010000 counter packets 139 bytes 14982 log prefix "ARI0|kns.kube-system" group 1 snaplen 80
+        }
+
+        chain cali-tw-cali93ae5b22e23 {
+                 ct state related,established counter packets 13 bytes 2293 accept
+                 ct state invalid counter packets 0 bytes 0 drop
+                 counter packets 73 bytes 7867 meta mark set mark and 0xfffcffff
+                 counter packets 73 bytes 7867 jump cali-pri-kns.kube-system
+                  meta mark & 0x00010000 == 0x00010000 counter packets 73 bytes 7867 return
+                 counter packets 0 bytes 0 jump cali-pri-_u2Tn2rSoAPffvE7JO6
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRI" group 1 snaplen 80
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-from-hep-forward {
+        }
+
+        chain cali-to-host-endpoint {
+        }
+
+        chain cali-pro-kns.calico-system {
+                  counter packets 0 bytes 0 meta mark set mark or 0x10000
+                 meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 log prefix "ARE0|kns.calico-system" group 2 snaplen 80
+        }
+
+        chain cali-pri-_eY4Bnp6m80Op5FOwqd {
+                  counter packets 0 bytes 0
+        }
+
+        chain cali-tw-calif35f658de0d {
+                 ct state related,established counter packets 0 bytes 0 accept
+                 ct state invalid counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 meta mark set mark and 0xfffcffff
+                  counter packets 0 bytes 0 meta mark set mark and 0xfffdffff
+                 meta mark & 0x00020000 == 0x00000000 counter packets 0 bytes 0 jump cali-pi-_FDiLImilezd09cpg5ci
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 meta mark & 0x00020000 == 0x00000000 counter packets 0 bytes 0 log prefix "DPI|default" group 1 snaplen 80
+                  meta mark & 0x00020000 == 0x00000000 counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 jump cali-pri-_kJqfZpgUe7r2t4A-14
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 jump cali-pri-_4yi5_iSUAwsU8zMHTk
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRI" group 1 snaplen 80
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-FORWARD {
+                 counter packets 5951 bytes 828780 meta mark set mark and 0xffe5ffff
+                 meta mark & 0x00010000 == 0x00000000 counter packets 5951 bytes 828780 jump cali-from-hep-forward
+                iifname "cali*"  counter packets 5893 bytes 814216 jump cali-from-wl-dispatch
+                oifname "cali*"  counter packets 214 bytes 30566 jump cali-to-wl-dispatch
+                 counter packets 179 bytes 18193 jump cali-to-hep-forward
+                 counter packets 179 bytes 18193 jump cali-cidr-block
+        }
+
+        chain cali-pi-_YYnSgB46MA1TYU44kJq {
+                  counter packets 0 bytes 0
+        }
+
+        chain cali-pri-_ymJUz7yzI6NOKJhG2- {
+                  counter packets 0 bytes 0
+        }
+
+        chain cali-tw-cali81f8b902e6e {
+                 ct state related,established counter packets 19 bytes 4751 accept
+                 ct state invalid counter packets 0 bytes 0 drop
+                 counter packets 14 bytes 840 meta mark set mark and 0xfffcffff
+                 counter packets 14 bytes 840 jump cali-pri-kns.nginx-gateway
+                  meta mark & 0x00010000 == 0x00010000 counter packets 14 bytes 840 return
+                 counter packets 0 bytes 0 jump cali-pri-_VZu5ATptS7dSAoXoNk
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRI" group 1 snaplen 80
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-pri-kns.nginx-gateway {
+                  counter packets 14 bytes 840 meta mark set mark or 0x10000
+                 meta mark & 0x00010000 == 0x00010000 counter packets 14 bytes 840 log prefix "ARI0|kns.nginx-gateway" group 1 snaplen 80
+        }
+
+        chain cali-pri-_VZu5ATptS7dSAoXoNk {
+                  counter packets 0 bytes 0
+        }
+
+        chain cali-fw-cali81f8b902e6e {
+                 ct state related,established counter packets 690058 bytes 192769056 accept
+                 ct state invalid counter packets 0 bytes 0 drop
+                 counter packets 17 bytes 1535 meta mark set mark and 0xfffcffff
+                meta l4proto udp   udp dport 4789 counter packets 0 bytes 0 drop
+                meta l4proto ipv4   counter packets 0 bytes 0 drop
+                 counter packets 17 bytes 1535 jump cali-pro-kns.nginx-gateway
+                  meta mark & 0x00010000 == 0x00010000 counter packets 17 bytes 1535 return
+                 counter packets 0 bytes 0 jump cali-pro-_VZu5ATptS7dSAoXoNk
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRE" group 2 snaplen 80
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-pro-kns.nginx-gateway {
+                  counter packets 17 bytes 1535 meta mark set mark or 0x10000
+                 meta mark & 0x00010000 == 0x00010000 counter packets 17 bytes 1535 log prefix "ARE0|kns.nginx-gateway" group 2 snaplen 80
+        }
+
+        chain cali-pro-_VZu5ATptS7dSAoXoNk {
+                  counter packets 0 bytes 0
+        }
+
+        chain cali-fw-cali0817bf63151 {
+                 ct state related,established counter packets 636987 bytes 229297565 accept
+                 ct state invalid counter packets 0 bytes 0 drop
+                 counter packets 1 bytes 60 meta mark set mark and 0xfffcffff
+                meta l4proto udp   udp dport 4789 counter packets 0 bytes 0 drop
+                meta l4proto ipv4   counter packets 0 bytes 0 drop
+                 counter packets 1 bytes 60 jump cali-pro-kns.metallb-system
+                  meta mark & 0x00010000 == 0x00010000 counter packets 1 bytes 60 return
+                 counter packets 0 bytes 0 jump cali-pro-_rfesb_Nv6QzsjWHy5M
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRE" group 2 snaplen 80
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-pro-kns.metallb-system {
+                  counter packets 1 bytes 60 meta mark set mark or 0x10000
+                 meta mark & 0x00010000 == 0x00010000 counter packets 1 bytes 60 log prefix "ARE0|kns.metallb-system" group 2 snaplen 80
+        }
+
+        chain cali-pro-_rfesb_Nv6QzsjWHy5M {
+                  counter packets 0 bytes 0
+        }
+
+        chain cali-to-wl-dispatch-0 {
+                oifname "cali0817bf63151"  counter packets 0 bytes 0 goto cali-tw-cali0817bf63151
+                oifname "cali0cd00cf4c0f"  counter packets 0 bytes 0 goto cali-tw-cali0cd00cf4c0f
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-pri-kns.metallb-system {
+                  counter packets 0 bytes 0 meta mark set mark or 0x10000
+                 meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 log prefix "ARI0|kns.metallb-system" group 1 snaplen 80
+        }
+
+        chain cali-pri-_rfesb_Nv6QzsjWHy5M {
+                  counter packets 0 bytes 0
+        }
+
+        chain cali-from-wl-dispatch-0 {
+                iifname "cali0817bf63151"  counter packets 636988 bytes 229297625 goto cali-fw-cali0817bf63151
+                iifname "cali0cd00cf4c0f"  counter packets 0 bytes 0 goto cali-fw-cali0cd00cf4c0f
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-tw-cali0817bf63151 {
+                 ct state related,established counter packets 0 bytes 0 accept
+                 ct state invalid counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 meta mark set mark and 0xfffcffff
+                 counter packets 0 bytes 0 jump cali-pri-kns.metallb-system
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 jump cali-pri-_rfesb_Nv6QzsjWHy5M
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRI" group 1 snaplen 80
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-fw-cali1e0fc2b6f3e {
+                 ct state related,established counter packets 29244 bytes 2039715 accept
                  ct state invalid counter packets 0 bytes 0 drop
                  counter packets 1 bytes 60 meta mark set mark and 0xfffcffff
                 meta l4proto udp   udp dport 4789 counter packets 0 bytes 0 drop
@@ -472,11 +841,38 @@ table ip filter {
                   meta mark & 0x00010000 == 0x00010000 counter packets 1 bytes 60 return
                  counter packets 0 bytes 0 jump cali-pro-_WuAV8wMhwxuQO3vuFE
                   meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRE" group 2 snaplen 80
                   counter packets 0 bytes 0 drop
         }
 
         chain cali-pro-_WuAV8wMhwxuQO3vuFE {
                   counter packets 0 bytes 0
+        }
+
+        chain cali-tw-cali1e0fc2b6f3e {
+                 ct state related,established counter packets 0 bytes 0 accept
+                 ct state invalid counter packets 0 bytes 0 drop
+                 counter packets 0 bytes 0 meta mark set mark and 0xfffcffff
+                 counter packets 0 bytes 0 jump cali-pri-kns.ingress-nginx
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 jump cali-pri-_WuAV8wMhwxuQO3vuFE
+                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 return
+                 counter packets 0 bytes 0 log prefix "DRI" group 1 snaplen 80
+                  counter packets 0 bytes 0 drop
+        }
+
+        chain cali-pri-_WuAV8wMhwxuQO3vuFE {
+                  counter packets 0 bytes 0
+        }
+
+        chain cali-pro-kns.ingress-nginx {
+                  counter packets 1 bytes 60 meta mark set mark or 0x10000
+                 meta mark & 0x00010000 == 0x00010000 counter packets 1 bytes 60 log prefix "ARE0|kns.ingress-nginx" group 2 snaplen 80
+        }
+
+        chain cali-pri-kns.ingress-nginx {
+                  counter packets 0 bytes 0 meta mark set mark or 0x10000
+                 meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 log prefix "ARI0|kns.ingress-nginx" group 1 snaplen 80
         }
 }
 # Warning: table ip nat is managed by iptables-nft, do not touch!
@@ -484,156 +880,149 @@ table ip nat {
         chain KUBE-KUBELET-CANARY {
         }
 
-        chain CNI-dc86429b457d5c3c87400258 {
-                ip daddr 10.85.0.0/16  counter packets 0 bytes 0 accept
-                ip daddr != 224.0.0.0/4  counter packets 0 bytes 0 masquerade
-        }
-
-        chain POSTROUTING {
-                type nat hook postrouting priority srcnat; policy accept;
-                 counter packets 4979 bytes 304500 jump cali-POSTROUTING
-                 counter packets 5066 bytes 310620 jump KUBE-POSTROUTING
-                ip saddr 10.85.0.2  counter packets 0 bytes 0 jump CNI-dc86429b457d5c3c87400258
-        }
-
         chain KUBE-PROXY-CANARY {
         }
 
         chain KUBE-SERVICES {
-                meta l4proto tcp ip daddr 10.105.183.5  tcp dport 5473 counter packets 0 bytes 0 jump KUBE-SVC-RK657RLKDNVNU64O
-                meta l4proto tcp ip daddr 10.110.103.111  tcp dport 80 counter packets 0 bytes 0 jump KUBE-SVC-CG5I4G2RS3ZVWGLK
-                meta l4proto tcp ip daddr 10.110.103.111  tcp dport 443 counter packets 0 bytes 0 jump KUBE-SVC-EDNDUDH2C75GIR6O
+                meta l4proto tcp ip daddr 10.99.161.198  tcp dport 443 counter packets 0 bytes 0 jump KUBE-SVC-GZ25SP4UFGF7SAVL
+                meta l4proto tcp ip daddr 10.96.0.1  tcp dport 443 counter packets 0 bytes 0 jump KUBE-SVC-NPX46M4PTMTKRN6Y
+                meta l4proto udp ip daddr 10.96.0.10  udp dport 53 counter packets 0 bytes 0 jump KUBE-SVC-TCOU7JCQXEZGVUNU
+                meta l4proto tcp ip daddr 10.111.96.199  tcp dport 443 counter packets 0 bytes 0 jump KUBE-SVC-I24EZXP75AX5E7TU
+                meta l4proto tcp ip daddr 10.107.225.207  tcp dport 7443 counter packets 0 bytes 0 jump KUBE-SVC-RMIM2MJTF3UE534N
+                meta l4proto tcp ip daddr 10.98.161.214  tcp dport 5473 counter packets 0 bytes 0 jump KUBE-SVC-RK657RLKDNVNU64O
+                meta l4proto tcp ip daddr 10.104.39.6  tcp dport 8081 counter packets 0 bytes 0 jump KUBE-SVC-UA7HCJMIMBJJDU4H
+                meta l4proto tcp ip daddr 10.105.48.93  tcp dport 443 counter packets 0 bytes 0 jump KUBE-SVC-SEU3WZYSL6OBXFRO
+                meta l4proto tcp ip daddr 10.105.223.177  tcp dport 443 counter packets 0 bytes 0 jump KUBE-SVC-EDNDUDH2C75GIR6O
+                meta l4proto tcp ip daddr 172.16.0.102  tcp dport 443 counter packets 0 bytes 0 jump KUBE-EXT-EDNDUDH2C75GIR6O
+                meta l4proto tcp ip daddr 10.105.159.37  tcp dport 443 counter packets 0 bytes 0 jump KUBE-SVC-EZYNCFY2F7N6OQA2
                 meta l4proto tcp ip daddr 10.96.0.10  tcp dport 53 counter packets 0 bytes 0 jump KUBE-SVC-ERIFXISQEP7F7OF4
                 meta l4proto tcp ip daddr 10.96.0.10  tcp dport 9153 counter packets 0 bytes 0 jump KUBE-SVC-JD5MR3NA4I4DYORP
-                meta l4proto tcp ip daddr 10.96.0.1  tcp dport 443 counter packets 0 bytes 0 jump KUBE-SVC-NPX46M4PTMTKRN6Y
-                meta l4proto tcp ip daddr 10.107.109.72  tcp dport 443 counter packets 0 bytes 0 jump KUBE-SVC-EZYNCFY2F7N6OQA2
-                meta l4proto udp ip daddr 10.96.0.10  udp dport 53 counter packets 0 bytes 0 jump KUBE-SVC-TCOU7JCQXEZGVUNU
-                meta l4proto tcp ip daddr 10.107.6.141  tcp dport 443 counter packets 0 bytes 0 jump KUBE-SVC-I24EZXP75AX5E7TU
-                 fib daddr type local counter packets 354 bytes 21240 jump KUBE-NODEPORTS
+                meta l4proto tcp ip daddr 10.105.223.177  tcp dport 80 counter packets 0 bytes 0 jump KUBE-SVC-CG5I4G2RS3ZVWGLK
+                meta l4proto tcp ip daddr 172.16.0.102  tcp dport 80 counter packets 0 bytes 0 jump KUBE-EXT-CG5I4G2RS3ZVWGLK
+                 fib daddr type local counter packets 1225 bytes 73500 jump KUBE-NODEPORTS
         }
 
         chain OUTPUT {
                 type nat hook output priority dstnat; policy accept;
-                 counter packets 4976 bytes 304320 jump cali-OUTPUT
-                 counter packets 5067 bytes 310680 jump KUBE-SERVICES
+                 counter packets 84978 bytes 5124200 jump cali-OUTPUT
+                 counter packets 85561 bytes 5162894 jump KUBE-SERVICES
         }
 
         chain PREROUTING {
                 type nat hook prerouting priority dstnat; policy accept;
-                 counter packets 1775 bytes 111868 jump cali-PREROUTING
-                 counter packets 1775 bytes 111868 jump KUBE-SERVICES
+                 counter packets 189 bytes 18793 jump cali-PREROUTING
+                 counter packets 203 bytes 19765 jump KUBE-SERVICES
         }
 
         chain KUBE-POSTROUTING {
-                meta mark & 0x00004000 != 0x00004000 counter packets 542 bytes 32851 return
+                meta mark & 0x00004000 != 0x00004000 counter packets 1861 bytes 111891 return
                 counter packets 0 bytes 0 meta mark set mark xor 0x4000
                  counter packets 0 bytes 0 masquerade fully-random
         }
 
+        chain POSTROUTING {
+                type nat hook postrouting priority srcnat; policy accept;
+                 counter packets 85646 bytes 5172923 jump KUBE-POSTROUTING
+                 counter packets 85028 bytes 5133261 jump cali-POSTROUTING
+        }
+
         chain KUBE-NODEPORTS {
-                meta l4proto tcp  tcp dport 32157 counter packets 0 bytes 0 jump KUBE-EXT-CG5I4G2RS3ZVWGLK
-                meta l4proto tcp  tcp dport 31755 counter packets 0 bytes 0 jump KUBE-EXT-EDNDUDH2C75GIR6O
+                meta l4proto tcp  tcp dport 32727 counter packets 0 bytes 0 jump KUBE-EXT-EDNDUDH2C75GIR6O
+                meta l4proto tcp  tcp dport 32476 counter packets 0 bytes 0 jump KUBE-EXT-CG5I4G2RS3ZVWGLK
         }
 
         chain KUBE-MARK-MASQ {
                 counter packets 0 bytes 0 meta mark set mark or 0x4000
         }
 
-        chain KUBE-SVC-ERIFXISQEP7F7OF4 {
-                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.96.0.10  tcp dport 53 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                 meta random & 2147483647 < 1073741824 counter packets 0 bytes 0 jump KUBE-SEP-DCRLLDICQNJQU5TY
-                 counter packets 0 bytes 0 jump KUBE-SEP-UYUAUFJDNMDWFGGG
-        }
-
-        chain KUBE-SEP-DCRLLDICQNJQU5TY {
-                ip saddr 172.17.2.11  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                meta l4proto tcp   counter packets 0 bytes 0 dnat to 172.17.2.11:53
-        }
-
-        chain KUBE-SEP-UYUAUFJDNMDWFGGG {
-                ip saddr 172.17.2.8  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                meta l4proto tcp   counter packets 0 bytes 0 dnat to 172.17.2.8:53
-        }
-
-        chain KUBE-SVC-JD5MR3NA4I4DYORP {
-                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.96.0.10  tcp dport 9153 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                 meta random & 2147483647 < 1073741824 counter packets 0 bytes 0 jump KUBE-SEP-EMLTEC6V2QXP7WGV
-                 counter packets 0 bytes 0 jump KUBE-SEP-E47ARDV5AWIWVRT7
-        }
-
-        chain KUBE-SEP-EMLTEC6V2QXP7WGV {
-                ip saddr 172.17.2.11  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                meta l4proto tcp   counter packets 0 bytes 0 dnat to 172.17.2.11:9153
-        }
-
-        chain KUBE-SEP-E47ARDV5AWIWVRT7 {
-                ip saddr 172.17.2.8  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                meta l4proto tcp   counter packets 0 bytes 0 dnat to 172.17.2.8:9153
-        }
-
-        chain KUBE-SVC-I24EZXP75AX5E7TU {
-                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.107.6.141  tcp dport 443 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                 meta random & 2147483647 < 1073741824 counter packets 0 bytes 0 jump KUBE-SEP-WUNV64UWFA5Q6SJ3
-                 counter packets 0 bytes 0 jump KUBE-SEP-ONP57SP7HHS6PKBF
-        }
-
-        chain KUBE-SEP-WUNV64UWFA5Q6SJ3 {
-                ip saddr 172.17.2.12  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                meta l4proto tcp   counter packets 0 bytes 0 dnat to 172.17.2.12:5443
-        }
-
-        chain KUBE-SEP-ONP57SP7HHS6PKBF {
-                ip saddr 172.17.2.7  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                meta l4proto tcp   counter packets 0 bytes 0 dnat to 172.17.2.7:5443
-        }
-
-        chain KUBE-SVC-RK657RLKDNVNU64O {
-                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.105.183.5  tcp dport 5473 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                 meta random & 2147483647 < 1073741824 counter packets 0 bytes 0 jump KUBE-SEP-T7B34ACBXBTVP7YI
-                 counter packets 0 bytes 0 jump KUBE-SEP-M7WXUFGNQT6WLJC2
-        }
-
-        chain KUBE-SEP-T7B34ACBXBTVP7YI {
-                ip saddr 172.16.0.11  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                meta l4proto tcp   counter packets 0 bytes 0 dnat to 172.16.0.11:5473
-        }
-
         chain KUBE-SVC-NPX46M4PTMTKRN6Y {
-                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.96.0.1  tcp dport 443 counter packets 31 bytes 1860 jump KUBE-MARK-MASQ
-                 counter packets 35 bytes 2100 jump KUBE-SEP-23Y66C2VAJ3WDEMI
+                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.96.0.1  tcp dport 443 counter packets 16 bytes 960 jump KUBE-MARK-MASQ
+                 counter packets 16 bytes 960 jump KUBE-SEP-23Y66C2VAJ3WDEMI
         }
 
         chain KUBE-SEP-23Y66C2VAJ3WDEMI {
-                ip saddr 172.16.0.11  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                meta l4proto tcp   counter packets 35 bytes 2100 dnat to 172.16.0.11:6443
+                ip saddr 172.16.0.11  counter packets 16 bytes 960 jump KUBE-MARK-MASQ
+                meta l4proto tcp  meta l4proto tcp counter packets 16 bytes 960 dnat to 172.16.0.11:6443
         }
 
         chain KUBE-SVC-TCOU7JCQXEZGVUNU {
                 meta l4proto udp ip saddr != 172.17.0.0/16 ip daddr 10.96.0.10  udp dport 53 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                 meta random & 2147483647 < 1073741824 counter packets 0 bytes 0 jump KUBE-SEP-VK4YBHBORISVZAGF
-                 counter packets 0 bytes 0 jump KUBE-SEP-5YGRFIC6ZA6ASW4V
+                 meta random & 2147483647 < 1073741824 counter packets 0 bytes 0 jump KUBE-SEP-5FL5ISI2YRT6Y7BH
+                 counter packets 0 bytes 0 jump KUBE-SEP-UHAP4MO6KX56B2GW
         }
 
-        chain KUBE-SEP-VK4YBHBORISVZAGF {
-                ip saddr 172.17.2.11  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                meta l4proto udp   counter packets 0 bytes 0 dnat to 172.17.2.11:53
+        chain KUBE-SEP-5FL5ISI2YRT6Y7BH {
+                ip saddr 172.17.2.12  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto udp  meta l4proto udp counter packets 0 bytes 0 dnat to 172.17.2.12:53
         }
 
-        chain KUBE-SEP-5YGRFIC6ZA6ASW4V {
-                ip saddr 172.17.2.8  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                meta l4proto udp   counter packets 0 bytes 0 dnat to 172.17.2.8:53
+        chain KUBE-SVC-ERIFXISQEP7F7OF4 {
+                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.96.0.10  tcp dport 53 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                 meta random & 2147483647 < 1073741824 counter packets 0 bytes 0 jump KUBE-SEP-MOTGC5ZSJDYEK44E
+                 counter packets 0 bytes 0 jump KUBE-SEP-NZCOKNBUF6VLEG7M
+        }
+
+        chain KUBE-SEP-MOTGC5ZSJDYEK44E {
+                ip saddr 172.17.2.12  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto tcp  meta l4proto tcp counter packets 0 bytes 0 dnat to 172.17.2.12:53
+        }
+
+        chain KUBE-SVC-JD5MR3NA4I4DYORP {
+                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.96.0.10  tcp dport 9153 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                 meta random & 2147483647 < 1073741824 counter packets 0 bytes 0 jump KUBE-SEP-YES4TO7LVIGUXIUO
+                 counter packets 0 bytes 0 jump KUBE-SEP-UNOTEOHYEEQBAMPD
+        }
+
+        chain KUBE-SEP-YES4TO7LVIGUXIUO {
+                ip saddr 172.17.2.12  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto tcp  meta l4proto tcp counter packets 0 bytes 0 dnat to 172.17.2.12:9153
+        }
+
+        chain KUBE-SEP-NZCOKNBUF6VLEG7M {
+                ip saddr 172.17.2.15  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto tcp  meta l4proto tcp counter packets 0 bytes 0 dnat to 172.17.2.15:53
+        }
+
+        chain KUBE-SEP-UNOTEOHYEEQBAMPD {
+                ip saddr 172.17.2.15  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto tcp  meta l4proto tcp counter packets 0 bytes 0 dnat to 172.17.2.15:9153
+        }
+
+        chain KUBE-SEP-UHAP4MO6KX56B2GW {
+                ip saddr 172.17.2.15  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto udp  meta l4proto udp counter packets 0 bytes 0 dnat to 172.17.2.15:53
+        }
+
+        chain KUBE-SVC-UA7HCJMIMBJJDU4H {
+                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.104.39.6  tcp dport 8081 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                 counter packets 0 bytes 0 jump KUBE-SEP-V3NSGPAOEZAZASIS
+        }
+
+        chain KUBE-SEP-V3NSGPAOEZAZASIS {
+                ip saddr 172.17.2.13  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto tcp  meta l4proto tcp counter packets 0 bytes 0 dnat to 172.17.2.13:8081
+        }
+
+        chain KUBE-SVC-RK657RLKDNVNU64O {
+                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.98.161.214  tcp dport 5473 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                 counter packets 0 bytes 0 jump KUBE-SEP-T7B34ACBXBTVP7YI
+        }
+
+        chain KUBE-SEP-T7B34ACBXBTVP7YI {
+                ip saddr 172.16.0.11  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto tcp  meta l4proto tcp counter packets 0 bytes 0 dnat to 172.16.0.11:5473
         }
 
         chain cali-PREROUTING {
-                 counter packets 1775 bytes 111868 jump cali-fip-dnat
+                 counter packets 189 bytes 18793 jump cali-fip-dnat
         }
 
         chain cali-fip-dnat {
         }
 
         chain cali-POSTROUTING {
-                 counter packets 4979 bytes 304500 jump cali-fip-snat
-                 counter packets 4979 bytes 304500 jump cali-nat-outgoing
+                 counter packets 85028 bytes 5133261 jump cali-fip-snat
+                 counter packets 85028 bytes 5133261 jump cali-nat-outgoing
                 oifname "vxlan.calico"  fib saddr . oif type != local fib saddr type local counter packets 0 bytes 0 masquerade fully-random
         }
 
@@ -641,47 +1030,57 @@ table ip nat {
         }
 
         chain cali-nat-outgoing {
-                 xt match "set" xt match "set" counter packets 4 bytes 240 masquerade fully-random
+                 xt match "set" xt match "set" counter packets 23 bytes 2191 masquerade fully-random
         }
 
         chain cali-OUTPUT {
-                 counter packets 4976 bytes 304320 jump cali-fip-dnat
+                 counter packets 84978 bytes 5124200 jump cali-fip-dnat
         }
 
-        chain KUBE-SEP-M7WXUFGNQT6WLJC2 {
-                ip saddr 172.16.0.32  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                meta l4proto tcp   counter packets 0 bytes 0 dnat to 172.16.0.32:5473
+        chain KUBE-SVC-RMIM2MJTF3UE534N {
+                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.107.225.207  tcp dport 7443 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                 counter packets 0 bytes 0 jump KUBE-SEP-UZGLWGTNAGZINNAV
         }
 
-        chain KUBE-SVC-EZYNCFY2F7N6OQA2 {
-                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.107.109.72  tcp dport 443 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                 counter packets 0 bytes 0 jump KUBE-SEP-OGJBLRZDJ7AZQUIS
+        chain KUBE-SEP-UZGLWGTNAGZINNAV {
+                ip saddr 172.17.2.17  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto tcp  meta l4proto tcp counter packets 0 bytes 0 dnat to 172.17.2.17:7443
         }
 
-        chain KUBE-SEP-OGJBLRZDJ7AZQUIS {
-                ip saddr 172.17.255.134  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                meta l4proto tcp   counter packets 0 bytes 0 dnat to 172.17.255.134:8443
+        chain KUBE-SVC-I24EZXP75AX5E7TU {
+                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.111.96.199  tcp dport 443 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                 meta random & 2147483647 < 1073741824 counter packets 0 bytes 0 jump KUBE-SEP-ALWVLIDVD2HVXGAQ
+                 counter packets 0 bytes 0 jump KUBE-SEP-GTOCSUPK2KFVQLBE
         }
 
-        chain KUBE-EXT-CG5I4G2RS3ZVWGLK {
-                ip saddr 172.17.0.0/16  counter packets 0 bytes 0 jump KUBE-SVC-CG5I4G2RS3ZVWGLK
-                 fib saddr type local counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                 fib saddr type local counter packets 0 bytes 0 jump KUBE-SVC-CG5I4G2RS3ZVWGLK
-                counter packets 0 bytes 0 jump KUBE-SVL-CG5I4G2RS3ZVWGLK
+        chain KUBE-SEP-GTOCSUPK2KFVQLBE {
+                ip saddr 172.17.2.16  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto tcp  meta l4proto tcp counter packets 0 bytes 0 dnat to 172.17.2.16:5443
         }
 
-        chain KUBE-SVC-CG5I4G2RS3ZVWGLK {
-                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.110.103.111  tcp dport 80 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                 counter packets 0 bytes 0 jump KUBE-SEP-J6AG7Y46UJXOKODM
+        chain KUBE-SEP-ALWVLIDVD2HVXGAQ {
+                ip saddr 172.17.2.14  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto tcp  meta l4proto tcp counter packets 0 bytes 0 dnat to 172.17.2.14:5443
         }
 
-        chain KUBE-SVL-CG5I4G2RS3ZVWGLK {
-                 counter packets 0 bytes 0 jump KUBE-SEP-J6AG7Y46UJXOKODM
+        chain KUBE-SVC-SEU3WZYSL6OBXFRO {
+                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.105.48.93  tcp dport 443 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                 counter packets 0 bytes 0 jump KUBE-SEP-LGHLGACKMLQNACGS
         }
 
-        chain KUBE-SEP-J6AG7Y46UJXOKODM {
-                ip saddr 172.17.255.134  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                meta l4proto tcp   counter packets 0 bytes 0 dnat to 172.17.255.134:80
+        chain KUBE-SEP-LGHLGACKMLQNACGS {
+                ip saddr 172.17.2.19  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto tcp  meta l4proto tcp counter packets 0 bytes 0 dnat to 172.17.2.19:8443
+        }
+
+        chain KUBE-SVC-GZ25SP4UFGF7SAVL {
+                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.99.161.198  tcp dport 443 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                 counter packets 0 bytes 0 jump KUBE-SEP-FHPKWWKTQLUCRSSK
+        }
+
+        chain KUBE-SEP-FHPKWWKTQLUCRSSK {
+                ip saddr 172.17.2.22  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto tcp  meta l4proto tcp counter packets 0 bytes 0 dnat to 172.17.2.22:9443
         }
 
         chain KUBE-EXT-EDNDUDH2C75GIR6O {
@@ -692,27 +1091,59 @@ table ip nat {
         }
 
         chain KUBE-SVC-EDNDUDH2C75GIR6O {
-                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.110.103.111  tcp dport 443 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                 counter packets 0 bytes 0 jump KUBE-SEP-PI7EB3IHGGPMU3WU
+                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.105.223.177  tcp dport 443 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                 counter packets 0 bytes 0 jump KUBE-SEP-K6ZN3TYLR4BB47UR
         }
 
         chain KUBE-SVL-EDNDUDH2C75GIR6O {
-                 counter packets 0 bytes 0 jump KUBE-SEP-PI7EB3IHGGPMU3WU
+                 counter packets 0 bytes 0 jump KUBE-SEP-K6ZN3TYLR4BB47UR
         }
 
-        chain KUBE-SEP-PI7EB3IHGGPMU3WU {
-                ip saddr 172.17.255.134  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
-                meta l4proto tcp   counter packets 0 bytes 0 dnat to 172.17.255.134:443
+        chain KUBE-SEP-K6ZN3TYLR4BB47UR {
+                ip saddr 172.17.2.33  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto tcp  meta l4proto tcp counter packets 0 bytes 0 dnat to 172.17.2.33:443
+        }
+
+        chain KUBE-SVC-EZYNCFY2F7N6OQA2 {
+                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.105.159.37  tcp dport 443 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                 counter packets 0 bytes 0 jump KUBE-SEP-A4G7DTJZT3RGZA5W
+        }
+
+        chain KUBE-SEP-A4G7DTJZT3RGZA5W {
+                ip saddr 172.17.2.33  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto tcp  meta l4proto tcp counter packets 0 bytes 0 dnat to 172.17.2.33:8443
+        }
+
+        chain KUBE-EXT-CG5I4G2RS3ZVWGLK {
+                ip saddr 172.17.0.0/16  counter packets 0 bytes 0 jump KUBE-SVC-CG5I4G2RS3ZVWGLK
+                 fib saddr type local counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                 fib saddr type local counter packets 0 bytes 0 jump KUBE-SVC-CG5I4G2RS3ZVWGLK
+                counter packets 0 bytes 0 jump KUBE-SVL-CG5I4G2RS3ZVWGLK
+        }
+
+        chain KUBE-SVC-CG5I4G2RS3ZVWGLK {
+                meta l4proto tcp ip saddr != 172.17.0.0/16 ip daddr 10.105.223.177  tcp dport 80 counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                 counter packets 0 bytes 0 jump KUBE-SEP-GJW35FPJJQYZOHKJ
+        }
+
+        chain KUBE-SVL-CG5I4G2RS3ZVWGLK {
+                 counter packets 0 bytes 0 jump KUBE-SEP-GJW35FPJJQYZOHKJ
+        }
+
+        chain KUBE-SEP-GJW35FPJJQYZOHKJ {
+                ip saddr 172.17.2.33  counter packets 0 bytes 0 jump KUBE-MARK-MASQ
+                meta l4proto tcp  meta l4proto tcp counter packets 0 bytes 0 dnat to 172.17.2.33:80
         }
 }
 # Warning: table ip raw is managed by iptables-nft, do not touch!
 table ip raw {
         chain cali-PREROUTING {
-                 counter packets 122918 bytes 141272748 meta mark set mark and 0xfff0ffff
-                iifname "cali*"  counter packets 2995 bytes 414883 meta mark set mark or 0x40000
-                 meta mark & 0x00040000 == 0x00040000 counter packets 2995 bytes 414883 jump cali-rpf-skip
-                 meta mark & 0x00040000 == 0x00040000 fib saddr . mark . iif oif 0 counter packets 0 bytes 0 drop
-                 meta mark & 0x00040000 == 0x00000000 counter packets 119923 bytes 140857865 jump cali-from-host-endpoint
+                 counter packets 13038342 bytes 6054658327 meta mark set mark and 0xffe4ffff
+                meta l4proto udp  udp dport 4789 counter packets 0 bytes 0 notrack
+                iifname "cali*"  counter packets 2282508 bytes 506303356 meta mark set mark or 0x80000
+                 meta mark & 0x00080000 == 0x00080000 counter packets 2282508 bytes 506303356 jump cali-rpf-skip
+                 meta mark & 0x00080000 == 0x00080000 fib saddr . mark . iif oif 0 counter packets 0 bytes 0 drop
+                 meta mark & 0x00080000 == 0x00000000 counter packets 10755834 bytes 5548354971 jump cali-from-host-endpoint
                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 accept
         }
 
@@ -723,8 +1154,9 @@ table ip raw {
         }
 
         chain cali-OUTPUT {
-                 counter packets 76345 bytes 5671393 meta mark set mark and 0xfff0ffff
-                 counter packets 76345 bytes 5671393 jump cali-to-host-endpoint
+                 counter packets 12910442 bytes 6829238729 meta mark set mark and 0xffe4ffff
+                 counter packets 12910442 bytes 6829238729 jump cali-to-host-endpoint
+                meta l4proto udp  udp dport 4789 counter packets 0 bytes 0 notrack
                  meta mark & 0x00010000 == 0x00010000 counter packets 0 bytes 0 accept
         }
 
@@ -733,12 +1165,12 @@ table ip raw {
 
         chain PREROUTING {
                 type filter hook prerouting priority raw; policy accept;
-                 counter packets 122918 bytes 141272748 jump cali-PREROUTING
+                 counter packets 13038342 bytes 6054658327 jump cali-PREROUTING
         }
 
         chain OUTPUT {
                 type filter hook output priority raw; policy accept;
-                 counter packets 76345 bytes 5671393 jump cali-OUTPUT
+                 counter packets 12910442 bytes 6829238729 jump cali-OUTPUT
         }
 }
 ```
@@ -752,24 +1184,18 @@ kubectl get all -n ingress-nginx -o wide
 ```
 
 ```text
-NAME                                           READY   STATUS      RESTARTS   AGE    IP               NODE                  NOMINATED NODE   READINESS GATES
-pod/ingress-nginx-admission-create-lpfzd       0/1     Completed   0          112s   172.17.255.133   worker01.home.local   <none>           <none>
-pod/ingress-nginx-admission-patch-2jw66        0/1     Completed   0          112s   172.17.51.133    worker02.home.local   <none>           <none>
-pod/ingress-nginx-controller-675fd975d-6xq8z   1/1     Running     0          112s   172.17.255.134   worker01.home.local   <none>           <none>
+NAME                                           READY   STATUS    RESTARTS   AGE     IP            NODE                    NOMINATED NODE   READINESS GATES
+pod/ingress-nginx-controller-7f894db6f-kcb92   1/1     Running   0          4m33s   172.17.2.33   controller.home.local   <none>           <none>
 
-NAME                                         TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE    SELECTOR
-service/ingress-nginx-controller             LoadBalancer   10.110.103.111   <pending>     80:32157/TCP,443:31755/TCP   112s   app.kubernetes.io/component=controller,app.kubernetes.io/instance=ingress-nginx,app.kubernetes.io/name=ingress-nginx
-service/ingress-nginx-controller-admission   ClusterIP      10.107.109.72    <none>        443/TCP                      112s   app.kubernetes.io/component=controller,app.kubernetes.io/instance=ingress-nginx,app.kubernetes.io/name=ingress-nginx
+NAME                                         TYPE           CLUSTER-IP       EXTERNAL-IP    PORT(S)                      AGE     SELECTOR
+service/ingress-nginx-controller             LoadBalancer   10.105.223.177   172.16.0.102   80:32476/TCP,443:32727/TCP   4m34s   app.kubernetes.io/component=controller,app.kubernetes.io/instance=ingress-nginx,app.kubernetes.io/name=ingress-nginx
+service/ingress-nginx-controller-admission   ClusterIP      10.105.159.37    <none>         443/TCP                      4m34s   app.kubernetes.io/component=controller,app.kubernetes.io/instance=ingress-nginx,app.kubernetes.io/name=ingress-nginx
 
-NAME                                       READY   UP-TO-DATE   AVAILABLE   AGE    CONTAINERS   IMAGES                                                                                                             SELECTOR
-deployment.apps/ingress-nginx-controller   1/1     1            1           112s   controller   registry.k8s.io/ingress-nginx/controller@sha256:d5f8217feeac4887cb1ed21f27c2674e58be06bd8f5184cacea2a69abaf78dce   app.kubernetes.io/component=controller,app.kubernetes.io/instance=ingress-nginx,app.kubernetes.io/name=ingress-nginx
+NAME                                       READY   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS   IMAGES                                                                                                                     SELECTOR
+deployment.apps/ingress-nginx-controller   1/1     1            1           4m34s   controller   registry.k8s.io/ingress-nginx/controller:v1.13.3@sha256:1b044f6dcac3afbb59e05d98463f1dec6f3d3fb99940bc12ca5d80270358e3bd   app.kubernetes.io/component=controller,app.kubernetes.io/instance=ingress-nginx,app.kubernetes.io/name=ingress-nginx
 
-NAME                                                 DESIRED   CURRENT   READY   AGE    CONTAINERS   IMAGES                                                                                                             SELECTOR
-replicaset.apps/ingress-nginx-controller-675fd975d   1         1         1       112s   controller   registry.k8s.io/ingress-nginx/controller@sha256:d5f8217feeac4887cb1ed21f27c2674e58be06bd8f5184cacea2a69abaf78dce   app.kubernetes.io/component=controller,app.kubernetes.io/instance=ingress-nginx,app.kubernetes.io/name=ingress-nginx,pod-template-hash=675fd975d
-
-NAME                                       STATUS     COMPLETIONS   DURATION   AGE    CONTAINERS   IMAGES                                                                                                                       SELECTOR
-job.batch/ingress-nginx-admission-create   Complete   1/1           4s         112s   create       registry.k8s.io/ingress-nginx/kube-webhook-certgen@sha256:a320a50cc91bd15fd2d6fa6de58bd98c1bd64b9a6f926ce23a600d87043455a3   batch.kubernetes.io/controller-uid=281dbc91-b6b9-4d30-bbc8-d025eaefb6b3
-job.batch/ingress-nginx-admission-patch    Complete   1/1           3s         112s   patch        registry.k8s.io/ingress-nginx/kube-webhook-certgen@sha256:a320a50cc91bd15fd2d6fa6de58bd98c1bd64b9a6f926ce23a600d87043455a3   batch.kubernetes.io/controller-uid=19758c72-f6f2-4df1-8fc2-8976853a7b46
+NAME                                                 DESIRED   CURRENT   READY   AGE     CONTAINERS   IMAGES                                                                                                                     SELECTOR
+replicaset.apps/ingress-nginx-controller-7f894db6f   1         1         1       4m34s   controller   registry.k8s.io/ingress-nginx/controller:v1.13.3@sha256:1b044f6dcac3afbb59e05d98463f1dec6f3d3fb99940bc12ca5d80270358e3bd   app.kubernetes.io/component=controller,app.kubernetes.io/instance=ingress-nginx,app.kubernetes.io/name=ingress-nginx,pod-template-hash=7f894db6f
 ```
 
 ```sh
@@ -783,27 +1209,31 @@ Labels:                   app.kubernetes.io/component=controller
                           app.kubernetes.io/instance=ingress-nginx
                           app.kubernetes.io/name=ingress-nginx
                           app.kubernetes.io/part-of=ingress-nginx
-                          app.kubernetes.io/version=1.11.2
-Annotations:              <none>
+                          app.kubernetes.io/version=1.13.3
+Annotations:              metallb.io/ip-allocated-from-pool: public-pool
 Selector:                 app.kubernetes.io/component=controller,app.kubernetes.io/instance=ingress-nginx,app.kubernetes.io/name=ingress-nginx
 Type:                     LoadBalancer
 IP Family Policy:         SingleStack
 IP Families:              IPv4
-IP:                       10.110.103.111
-IPs:                      10.110.103.111
+IP:                       10.105.223.177
+IPs:                      10.105.223.177
+LoadBalancer Ingress:     172.16.0.102 (VIP)
 Port:                     http  80/TCP
 TargetPort:               http/TCP
-NodePort:                 http  32157/TCP
-Endpoints:                172.17.255.134:80
+NodePort:                 http  32476/TCP
+Endpoints:                172.17.2.33:80
 Port:                     https  443/TCP
 TargetPort:               https/TCP
-NodePort:                 https  31755/TCP
-Endpoints:                172.17.255.134:443
+NodePort:                 https  32727/TCP
+Endpoints:                172.17.2.33:443
 Session Affinity:         None
 External Traffic Policy:  Local
 Internal Traffic Policy:  Cluster
-HealthCheck NodePort:     31368
-Events:                   <none>
+HealthCheck NodePort:     31115
+Events:
+  Type    Reason       Age   From                Message
+  ----    ------       ----  ----                -------
+  Normal  IPAllocated  5m1s  metallb-controller  Assigned IP ["172.16.0.102"]
 ```
 
 ```sh
@@ -817,17 +1247,17 @@ Labels:                   app.kubernetes.io/component=controller
                           app.kubernetes.io/instance=ingress-nginx
                           app.kubernetes.io/name=ingress-nginx
                           app.kubernetes.io/part-of=ingress-nginx
-                          app.kubernetes.io/version=1.11.2
+                          app.kubernetes.io/version=1.13.3
 Annotations:              <none>
 Selector:                 app.kubernetes.io/component=controller,app.kubernetes.io/instance=ingress-nginx,app.kubernetes.io/name=ingress-nginx
 Type:                     ClusterIP
 IP Family Policy:         SingleStack
 IP Families:              IPv4
-IP:                       10.107.109.72
-IPs:                      10.107.109.72
+IP:                       10.105.159.37
+IPs:                      10.105.159.37
 Port:                     https-webhook  443/TCP
 TargetPort:               webhook/TCP
-Endpoints:                172.17.255.134:8443
+Endpoints:                172.17.2.33:8443
 Session Affinity:         None
 Internal Traffic Policy:  Cluster
 Events:                   <none>
@@ -838,26 +1268,45 @@ Events:                   <none>
 ワーカノードで確認する。
 
 ```sh
-crictl ps
+crictl ps -a
 ```
 
 ```text
-CONTAINER           IMAGE                                                                                                            CREATED             STATE               NAME                        ATTEMPT             POD ID              POD
-681fa7bf5587c       a80c8fd6e52292d38d4e58453f310d612da59d802a3b62f4b88a21c50178f7ab                                                 4 minutes ago       Running             controller                  0                   f657d3658c6c9       ingress-nginx-controller-675fd975d-6xq8z
-1e09f4362c597       docker.io/calico/node@sha256:3c0e24adecc39e89780e807400def972deb0ec9de9fbbbaceade072a8c6ae94f                    2 hours ago         Running             calico-node                 0                   2bbadeecd8d63       calico-node-n84qn
-5e00e077f45c2       docker.io/calico/node-driver-registrar@sha256:f44b460f2684d33042970a7703c2b3bfa0c026980528e3b582833baf15384486   2 hours ago         Running             csi-node-driver-registrar   0                   5dac55736598c       csi-node-driver-rzkl5
-92c3b3a4a6aea       docker.io/calico/csi@sha256:8375b443b2b51f04eed6d29e889bc4ce7e30d9d88a26608579de22d691473a3f                     2 hours ago         Running             calico-csi                  0                   5dac55736598c       csi-node-driver-rzkl5
-cffa497347532       registry.k8s.io/kube-proxy@sha256:c31eb37ccda83c6c8ee2ee5030a7038b04ecaa393d14cb71f01ab18147366fbf               2 hours ago         Running             kube-proxy                  0                   12711152b28fd       kube-proxy-77ff5
+CONTAINER           IMAGE                                                                                                              CREATED             STATE               NAME                        ATTEMPT             POD ID              POD                                             NAMESPACE
+3a9bb81bff18f       registry.k8s.io/ingress-nginx/controller@sha256:7b4073fc95e078d863c0b0b08deb72e01d2cf629e2156822bcd394fc2bcd8e83   18 minutes ago      Running             controller                  0                   2a31814eff6c5       ingress-nginx-controller-7f894db6f-kcb92        ingress-nginx
+6a9e197a4b8a5       quay.io/metallb/speaker@sha256:7dbe5e4b1ee3be1638b1620e2670649e9900768972060a31d2e809855e31e344                    2 hours ago         Running             speaker                     0                   d04db24e8f2fe       speaker-n7prq                                   metallb-system
+7f31331627784       quay.io/metallb/controller@sha256:9bd30b4ee165ad6bababa6334594d854b8c1037c385af83832fb07a4b2c23212                 2 hours ago         Running             controller                  0                   88e1eacb0618f       controller-58fdf44d87-tgp79                     metallb-system
+35104e7c5aadc       44c116ec3db7fbb99aafe27302134b6de6cced67a71c7d8fd7d7dfa77cfc242f                                                   3 hours ago         Running             nginx-gateway               0                   1e132d225a3c2       nginx-gateway-6477c87c8-xq9vv                   nginx-gateway
+7e86e0b89f60e       a7d029fd8f6be94c26af980675c1650818e1e6e19dbd2f8c13e6e61963f021e8                                                   5 hours ago         Running             goldmane                    2                   b6e6d502bdf37       goldmane-85c8f6d476-qckwz                       calico-system
+a4efeced770df       879f2443aed0573271114108bfec35d3e76419f98282ef796c646d0986c5ba6a                                                   5 hours ago         Running             calico-apiserver            2                   b9a9f507e4213       calico-apiserver-5c49f7b8cd-5thsd               calico-apiserver
+4be35211a40b9       1cf5f116067c67da67f97bff78c4bbc76913f59057c18627b96facaced73ea0b                                                   5 hours ago         Running             coredns                     2                   ed7589b8ee54a       coredns-674b8bbfcf-csznq                        kube-system
+fa2c52c47e221       879f2443aed0573271114108bfec35d3e76419f98282ef796c646d0986c5ba6a                                                   5 hours ago         Running             calico-apiserver            2                   2303f2c3ebed6       calico-apiserver-5c49f7b8cd-cw8rw               calico-apiserver
+2c32eaa41ddbb       7e29b0984d517678aab6ca138482c318989f6f28daf9d3b5dd6e4a5a3115ac16                                                   5 hours ago         Running             whisker-backend             2                   99c18ede38b56       whisker-5cd776c89c-tcqwl                        calico-system
+dabfc11320849       9a4eedeed4a531acefb7f5d0a1b7e3856b1a9a24d9e7d25deef2134d7a734c2d                                                   5 hours ago         Running             whisker                     2                   99c18ede38b56       whisker-5cd776c89c-tcqwl                        calico-system
+427dc8955c1dc       1cf5f116067c67da67f97bff78c4bbc76913f59057c18627b96facaced73ea0b                                                   5 hours ago         Running             coredns                     2                   5c91d08fb137b       coredns-674b8bbfcf-ng4p7                        kube-system
+c883af54c988d       b8f31c4fdaed3fa08af64de3d37d65a4c2ea0d9f6f522cb60d2e0cb424f8dd8a                                                   5 hours ago         Running             csi-node-driver-registrar   2                   c72230aa478c2       csi-node-driver-7dbkx                           calico-system
+c99ee13428df9       666f4e02e75c30547109a06ed75b415a990a970811173aa741379cfaac4d9dd7                                                   5 hours ago         Running             calico-csi                  2                   c72230aa478c2       csi-node-driver-7dbkx                           calico-system
+8b259a4736bf6       df191a54fb79de3c693f8b1b864a1bd3bd14f63b3fff9d5fa4869c471ce3cd37                                                   5 hours ago         Running             calico-kube-controllers     2                   6fb73445c5b3a       calico-kube-controllers-98fbcc856-vgxhq         calico-system
+b0bb7e3a28a19       ce9c4ac0f175f22c56e80844e65379d9ebe1d8a4e2bbb38dc1db0f53a8826f0f                                                   5 hours ago         Running             calico-node                 2                   401470c9b90cf       calico-node-7lw6s                               calico-system
+2d63dd1aa09a5       034822460c2f667e1f4a7679c843cc35ce1bf2c25dec86f04e07fb403df7e458                                                   5 hours ago         Exited              install-cni                 2                   401470c9b90cf       calico-node-7lw6s                               calico-system
+dbbc87a2e095e       4f2b088ed6fdfc6a97ac0650a4ba8171107d6656ce265c592e4c8423fd10e5c4                                                   5 hours ago         Exited              flexvol-driver              2                   401470c9b90cf       calico-node-7lw6s                               calico-system
+5c60b077e08fd       1911afdd8478c6ca3036ff85614050d5d19acc0f0c3f6a5a7b3e34b38dd309c9                                                   5 hours ago         Running             tigera-operator             2                   b00e4ea97c8cd       tigera-operator-755d956888-2l5ks                tigera-operator
+ce2a879a71387       2844ee7bb56c2c194e1f4adafb9e7b60b9ed16aa4d07ab8ad1f019362e2efab3                                                   5 hours ago         Running             kube-proxy                  2                   862ab4aed1086       kube-proxy-xn5ft                                kube-system
+55ad4fde21a9f       1d7bb7b0cce2924d35c7c26f6b6600409ea7c9535074c3d2e517ffbb3a0e0b36                                                   5 hours ago         Running             calico-typha                2                   4d2521ead8ea9       calico-typha-6574bcdfc5-fgdgz                   calico-system
+c64f172909e7e       33b680aadf474b7e5e73957fc00c6af86dd0484c699c8461ba33ee656d1823bf                                                   5 hours ago         Running             kube-scheduler              3                   0246fe2061ab7       kube-scheduler-controller.home.local            kube-system
+4d4ad99f7cadb       8bb43160a0df4d7d34c89d9edbc48735bc2f830771e4b501937338221be0f668                                                   5 hours ago         Running             kube-controller-manager     3                   661ffd4ff1052       kube-controller-manager-controller.home.local   kube-system
+886b87e7b5891       b7335a56022aba291f5df653c01b7ab98d64fb5cab221378617f4a1236e06a62                                                   5 hours ago         Running             kube-apiserver              3                   f17ac77d88354       kube-apiserver-controller.home.local            kube-system
+c75beff2be6a1       499038711c0816eda03a1ad96a8eb0440c005baa6949698223c6176b7f5077e1                                                   5 hours ago         Running             etcd                        3                   0b701b25c64e8       etcd-controller.home.local                      kube-system
 ```
 
 controller が属するネットワーク名前空間を確認する。
 
 ```sh
-ip netns identify $(crictl inspect 681fa7bf5587c | jq '.info.pid')
+ip netns identify $(crictl inspect 3a9bb81bff18f | jq '.info.pid')
 ```
 
 ```text
-1d17a6ce-da7c-4cae-af8f-4145dcff16cd
+6af74b50-a213-4f9e-993b-c44052e2d03c
 ```
 
 コンテナイメージを確認する。
@@ -868,14 +1317,36 @@ crictl images
 
 ```text
 IMAGE                                                TAG                 IMAGE ID            SIZE
-docker.io/calico/cni                                 v3.28.0             107014d9f4c89       209MB
-docker.io/calico/csi                                 v3.28.0             1a094aeaf1521       18.3MB
-docker.io/calico/node-driver-registrar               v3.28.0             0f80feca743f4       23.5MB
-docker.io/calico/node                                v3.28.0             4e42b6f329bc1       355MB
-docker.io/calico/pod2daemon-flexvol                  v3.28.0             587b28ecfc62e       13.4MB
-registry.k8s.io/ingress-nginx/controller             <none>              a80c8fd6e5229       289MB
-registry.k8s.io/ingress-nginx/kube-webhook-certgen   <none>              ce263a8653f9c       55.8MB
-registry.k8s.io/kube-proxy                           v1.31.0             ad83b2ca7b09e       92.7MB
+docker.io/calico/apiserver                           v3.30.3             879f2443aed05       118MB
+docker.io/calico/cni                                 v3.30.3             034822460c2f6       162MB
+docker.io/calico/csi                                 v3.30.3             666f4e02e75c3       20.6MB
+docker.io/calico/goldmane                            v3.30.3             a7d029fd8f6be       151MB
+docker.io/calico/kube-controllers                    v3.30.3             df191a54fb79d       122MB
+docker.io/calico/node-driver-registrar               v3.30.3             b8f31c4fdaed3       33.3MB
+docker.io/calico/node                                v3.30.3             ce9c4ac0f175f       403MB
+docker.io/calico/pod2daemon-flexvol                  v3.30.3             4f2b088ed6fdf       12.1MB
+docker.io/calico/typha                               v3.30.3             1d7bb7b0cce29       85.2MB
+docker.io/calico/whisker-backend                     v3.30.3             7e29b0984d517       75.5MB
+docker.io/calico/whisker                             v3.30.3             9a4eedeed4a53       14.2MB
+docker.io/kubernetesui/dashboard-api                 1.13.0              9e7701f8aae8a       55.5MB
+docker.io/kubernetesui/dashboard-auth                1.3.0               a9de0489eb32f       49.3MB
+docker.io/kubernetesui/dashboard-metrics-scraper     1.2.2               d9cbc9f4053ca       38.9MB
+docker.io/kubernetesui/dashboard-web                 1.7.0               59f642f485d26       193MB
+docker.io/library/httpd                              latest              2416cb32cb59e       120MB
+docker.io/library/kong                               3.8                 9958b1a1a0ac3       382MB
+ghcr.io/nginx/nginx-gateway-fabric/nginx             2.1.4               99119d5762c69       155MB
+ghcr.io/nginx/nginx-gateway-fabric                   2.1.4               44c116ec3db7f       50.8MB
+quay.io/metallb/controller                           v0.15.2             1b258f39a2a12       78.3MB
+quay.io/metallb/speaker                              v0.15.2             1eeb60bd05864       140MB
+quay.io/tigera/operator                              v1.38.6             1911afdd8478c       87.2MB
+registry.k8s.io/coredns/coredns                      v1.12.0             1cf5f116067c6       71.2MB
+registry.k8s.io/etcd                                 3.5.21-0            499038711c081       154MB
+registry.k8s.io/ingress-nginx/controller             <none>              c44d76c3213ea       334MB
+registry.k8s.io/ingress-nginx/kube-webhook-certgen   <none>              08cfe302feafe       43.1MB
+registry.k8s.io/kube-apiserver                       v1.33.5             b7335a56022ab       103MB
+registry.k8s.io/kube-controller-manager              v1.33.5             8bb43160a0df4       95.8MB
+registry.k8s.io/kube-proxy                           v1.33.5             2844ee7bb56c2       99.3MB
+registry.k8s.io/kube-scheduler                       v1.33.5             33b680aadf474       74.6MB
 registry.k8s.io/pause                                3.10                873ed75102791       742kB
 ```
 
@@ -884,11 +1355,11 @@ registry.k8s.io/pause                                3.10                873ed75
 ポッドを作成する。
 
 ```sh
-kubectl create deployment demo --image=httpd --port=80
+kubectl create deployment demo-ingress --image=httpd --port=80
 ```
 
 ```text
-deployment.apps/demo created
+deployment.apps/demo-ingress created
 ```
 
 ポッドを確認する。
@@ -898,18 +1369,18 @@ kubectl get pod -o wide
 ```
 
 ```text
-NAME                    READY   STATUS    RESTARTS   AGE   IP              NODE                  NOMINATED NODE   READINESS GATES
-demo-6c87cdc7bf-57f84   1/1     Running   0          34s   172.17.51.134   worker02.home.local   <none>           <none>
+NAME                            READY   STATUS    RESTARTS   AGE   IP            NODE                    NOMINATED NODE   READINESS GATES
+demo-ingress-69f685c475-xcfph   1/1     Running   0          11s   172.17.2.34   controller.home.local   <none>           <none>
 ```
 
 サービスを作成する。
 
 ```sh
-kubectl expose deployment demo
+kubectl expose deployment demo-ingress
 ```
 
 ```text
-service/demo exposed
+service/demo-ingress exposed
 ```
 
 サービスを確認する。
@@ -919,25 +1390,19 @@ kubectl get service
 ```
 
 ```text
-NAME         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
-demo         ClusterIP   10.104.7.189   <none>        80/TCP    39s
-kubernetes   ClusterIP   10.96.0.1      <none>        443/TCP   21h
+NAME           TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+demo-ingress   ClusterIP   10.96.143.206   <none>        80/TCP    14s
+kubernetes     ClusterIP   10.96.0.1       <none>        443/TCP   5h23m
 ```
 
 ingress を作成する。
 
 ```sh
-kubectl create ingress demo-localhost --class=nginx --rule="demo.localdev.me/*=demo:80"
-```
-
-```{warning}
-下記のエラーが発生するため firewalld を無効化した。
-
-error: failed to create ingress: Internal error occurred: failed calling webhook "validate.nginx.ingress.kubernetes.io": failed to call webhook: Post "https://ingress-nginx-controller-admission.ingress-nginx.svc:443/networking/v1/ingresses?timeout=10s": dial tcp 10.107.109.72:443: connect: no route to host
+kubectl create ingress demo --class=nginx --rule="demo-ingress.localdev.me/*=demo-ingress:80"
 ```
 
 ```text
-ingress.networking.k8s.io/demo-localhost created
+ingress.networking.k8s.io/demo created
 ```
 
 ingress を確認する。
@@ -947,8 +1412,8 @@ kubectl get ingress
 ```
 
 ```text
-NAME             CLASS   HOSTS              ADDRESS   PORTS   AGE
-demo-localhost   nginx   demo.localdev.me             80      100s
+NAME   CLASS   HOSTS                      ADDRESS   PORTS   AGE
+demo   nginx   demo-ingress.localdev.me             80      16s
 ```
 
 フォワーディングする。
@@ -959,12 +1424,13 @@ kubectl port-forward --namespace=ingress-nginx service/ingress-nginx-controller 
 
 ```text
 Forwarding from 127.0.0.1:8080 -> 80
+Forwarding from [::1]:8080 -> 80
 ```
 
 接続確認する。
 
 ```sh
-curl --resolve demo.localdev.me:8080:127.0.0.1 http://demo.localdev.me:8080
+curl --resolve demo-ingress.localdev.me:8080:127.0.0.1 http://demo-ingress.localdev.me:8080
 ```
 
 ```text
