@@ -35,16 +35,13 @@ systemctl enable --now docker
 Created symlink /etc/systemd/system/multi-user.target.wants/docker.service → /usr/lib/systemd/system/docker.service.
 ```
 
-## Docker Compose インストール
+## 自己署名証明書の作成
+
+openssl をインストールする。
 
 ```sh
-curl -sSL https://github.com/docker/compose/releases/download/v2.29.6/docker-compose-linux-x86_64 \
-    -o docker-compose \
-    --output-dir /usr/local/bin
-chmod +x /usr/local/bin/docker-compose
+dnf install -y openssl
 ```
-
-## 自己署名証明書の作成
 
 CA 証明書の秘密鍵を作成する。
 
@@ -126,17 +123,24 @@ cp registry.home.local.key /etc/docker/certs.d/registry.home.local/
 cp ca.crt /etc/docker/certs.d/registry.home.local/
 ```
 
+Docker を再起動する。
+
+```sh
+systemctl restart docker
+```
+
 ## Harbor インストール
 
 インストーラをダウンロードする。
 
 ```sh
-curl -sSL https://github.com/goharbor/harbor/releases/download/v2.12.0/harbor-online-installer-v2.12.0.tgz \
+HARBOR_VERSION=2.14.0
+curl -sSL "https://github.com/goharbor/harbor/releases/download/v${HARBOR_VERSION}/harbor-online-installer-v${HARBOR_VERSION}.tgz" \
     -o harbor-online-installer.tgz
 tar -zxf harbor-online-installer.tgz
 ```
 
-パラメータファイル *harboar.yaml* をもとに *harboar.yml* を作成する。
+パラメータファイル *harbor.yml.tmpl* をもとに *harboar.yml* を作成する。
 下記以外は既定値のままとする。
 
 - `hostname`: FQDN
@@ -146,37 +150,25 @@ tar -zxf harbor-online-installer.tgz
 インストールする。
 
 ```sh
-./install.sh
+./prepare
 ```
 
 ```text
-[Step 0]: checking if docker is installed ...
-
-Note: docker version: 27.3.1
-
-[Step 1]: checking docker-compose is installed ...
-
-Note: Docker Compose version v2.29.7
-
-
-[Step 2]: preparing environment ...
-
-[Step 3]: preparing harbor configs ...
 prepare base dir is set to /root/harbor
-Unable to find image 'goharbor/prepare:v2.12.0' locally
-v2.12.0: Pulling from goharbor/prepare
-69f3f4f936bb: Pull complete
-653c57bbe511: Pull complete
-d54cebaef548: Pull complete
-078852956263: Pull complete
-af8b1169f99d: Pull complete
-2f5c2336c48c: Pull complete
-64720024dfda: Pull complete
-3fe468d45fa2: Pull complete
-dbc6d12bbf4c: Pull complete
-b9ee61559eb8: Pull complete
-Digest: sha256:8c3be33b8ecc4226bd29e958d7a0f1eb160fe2db1addaf598cc37306a5eaf748
-Status: Downloaded newer image for goharbor/prepare:v2.12.0
+Unable to find image 'goharbor/prepare:v2.14.0' locally
+v2.14.0: Pulling from goharbor/prepare
+02edd478168e: Pull complete
+cfdadf0c5f3d: Pull complete
+1b28ecd864ab: Pull complete
+403f4f1d5670: Pull complete
+36ddfdd25509: Pull complete
+5b1565560a7a: Pull complete
+470b5fa53727: Pull complete
+39bea911ca37: Pull complete
+7b9b4146531c: Pull complete
+4f08a495e85c: Pull complete
+Digest: sha256:23f9bcbc86e60336a424d1607b61f5ed97a8402828c3aba5319bf774480da586
+Status: Downloaded newer image for goharbor/prepare:v2.14.0
 Generated configuration file: /config/portal/nginx.conf
 Generated configuration file: /config/log/logrotate.conf
 Generated configuration file: /config/log/rsyslog_docker.conf
@@ -189,37 +181,20 @@ Generated configuration file: /config/registryctl/config.yml
 Generated configuration file: /config/db/env
 Generated configuration file: /config/jobservice/env
 Generated configuration file: /config/jobservice/config.yml
-loaded secret from file: /data/secret/keys/secretkey
+copy /data/secret/tls/harbor_internal_ca.crt to shared trust ca dir as name harbor_internal_ca.crt ...
+ca file /hostfs/data/secret/tls/harbor_internal_ca.crt is not exist
+copy  to shared trust ca dir as name storage_ca_bundle.crt ...
+copy None to shared trust ca dir as name redis_tls_ca.crt ...
+Generated and saved secret to file: /data/secret/keys/secretkey
+Successfully called func: create_root_cert
 Generated configuration file: /compose_location/docker-compose.yml
 Clean up the input dir
+```
 
+コンテナを起動する。
 
-Note: stopping existing Harbor instance ...
-
-
-[Step 4]: starting Harbor ...
-[+] Running 62/46
- ? postgresql Pulled                                                               23.4s
- ? registry Pulled                                                                 53.0s
- ? core Pulled                                                                     56.2s
- ? portal Pulled                                                                   27.8s
- ? log Pulled                                                                      53.0s
- ? proxy Pulled                                                                    19.5s
- ? redis Pulled                                                                     9.1s
- ? registryctl Pulled                                                              53.0s
- ? jobservice Pulled                                                               53.0s
-[+] Running 10/10
- ? Network harbor_harbor        Created                                             0.2s
- ? Container harbor-log         Started                                             0.5s
- ? Container registryctl        Started                                             1.1s
- ? Container registry           Started                                             1.0s
- ? Container harbor-db          Started                                             0.8s
- ? Container redis              Started                                             1.1s
- ? Container harbor-portal      Started                                             1.1s
- ? Container harbor-core        Started                                             1.5s
- ? Container harbor-jobservice  Started                                             2.0s
- ? Container nginx              Started                                             2.0s
-? ----Harbor has been installed and started successfully.----
+```sh
+docker compose up -d
 ```
 
 コンテナが起動していることを確認する。
@@ -229,16 +204,16 @@ docker ps
 ```
 
 ```text
-CONTAINER ID   IMAGE                                 COMMAND                   CREATED          STATUS                    PORTS                                         NAMES
-3d83411ce1f9   goharbor/harbor-jobservice:v2.12.0    "/harbor/entrypoint.…"   29 minutes ago   Up 28 minutes (healthy)                                                 harbor-jobservice
-e6e2681c10bb   goharbor/nginx-photon:v2.12.0         "nginx -g 'daemon of…"   29 minutes ago   Up 29 minutes (healthy)   0.0.0.0:80->8080/tcp, 0.0.0.0:443->8443/tcp   nginx
-3fac8045fd96   goharbor/harbor-core:v2.12.0          "/harbor/entrypoint.…"   29 minutes ago   Up 29 minutes (healthy)                                                 harbor-core
-1259e9ccad40   goharbor/harbor-registryctl:v2.12.0   "/home/harbor/start.…"   29 minutes ago   Up 29 minutes (healthy)                                                 registryctl
-4d10dc72f4fb   goharbor/harbor-portal:v2.12.0        "nginx -g 'daemon of…"   29 minutes ago   Up 29 minutes (healthy)                                                 harbor-portal
-3e895874ab38   goharbor/harbor-db:v2.12.0            "/docker-entrypoint.…"   29 minutes ago   Up 29 minutes (healthy)                                                 harbor-db
-4f60d1159bb4   goharbor/redis-photon:v2.12.0         "redis-server /etc/r…"   29 minutes ago   Up 29 minutes (healthy)                                                 redis
-71c5225e8854   goharbor/registry-photon:v2.12.0      "/home/harbor/entryp…"   29 minutes ago   Up 29 minutes (healthy)                                                 registry
-9d8a91523e59   goharbor/harbor-log:v2.12.0           "/bin/sh -c /usr/loc…"   29 minutes ago   Up 29 minutes (healthy)   127.0.0.1:1514->10514/tcp                     harbor-log
+CONTAINER ID   IMAGE                                 COMMAND                   CREATED              STATUS                        PORTS                                         NAMES
+37846473102b   goharbor/harbor-jobservice:v2.14.0    "/harbor/entrypoint.…"   About a minute ago   Up About a minute (healthy)                                                 harbor-jobservice
+b8dc7c4d78d8   goharbor/nginx-photon:v2.14.0         "nginx -g 'daemon of…"   About a minute ago   Up About a minute (healthy)   0.0.0.0:80->8080/tcp, 0.0.0.0:443->8443/tcp   nginx
+8c87302c85c1   goharbor/harbor-core:v2.14.0          "/harbor/entrypoint.…"   About a minute ago   Up About a minute (healthy)                                                 harbor-core
+345f48447ab8   goharbor/harbor-db:v2.14.0            "/docker-entrypoint.…"   About a minute ago   Up About a minute (healthy)                                                 harbor-db
+063af68598d3   goharbor/harbor-registryctl:v2.14.0   "/home/harbor/start.…"   About a minute ago   Up About a minute (healthy)                                                 registryctl
+94e7a2510ba6   goharbor/harbor-portal:v2.14.0        "nginx -g 'daemon of…"   About a minute ago   Up About a minute (healthy)                                                 harbor-portal
+85e5f5fe470c   goharbor/redis-photon:v2.14.0         "redis-server /etc/r…"   About a minute ago   Up About a minute (healthy)                                                 redis
+40a91335036d   goharbor/registry-photon:v2.14.0      "/home/harbor/entryp…"   About a minute ago   Up About a minute (healthy)                                                 registry
+c4a102cfe8b8   goharbor/harbor-log:v2.14.0           "/bin/sh -c /usr/loc…"   About a minute ago   Up About a minute (healthy)   127.0.0.1:1514->10514/tcp                     harbor-log
 ```
 
 ブラウザでアクセスして `admin` でログインする。
@@ -256,9 +231,10 @@ docker login registry.home.local
 ```text
 Username: admin
 Password:
-WARNING! Your password will be stored unencrypted in /root/.docker/config.json.
+
+WARNING! Your credentials are stored unencrypted in '/root/.docker/config.json'.
 Configure a credential helper to remove this warning. See
-https://docs.docker.com/engine/reference/commandline/login/#credential-stores
+https://docs.docker.com/go/credential-store/
 
 Login Succeeded
 ```
@@ -274,13 +250,13 @@ docker push registry.home.local/test/hello-world
 ```text
 Using default tag: latest
 The push refers to repository [registry.home.local/test/hello-world]
-ac28800ec8bb: Pushed
-latest: digest: sha256:d37ada95d47ad12224c205a938129df7a3e52345828b4fa27b03a98825d1e2e7 size: 524
+53d204b3dc5d: Pushed
+latest: digest: sha256:19459a6bbefb63f83f137f08c1df645f8846e2cd1f44fe209294ebc505e6495e size: 524
 ```
 
 ## コンテナランタイム
 
-ワーカノードに CA 証明書を配置する。
+コントローラノード、ワーカノードに CA 証明書を配置する。
 
 ```sh
 mkdir -p /etc/containers/certs.d/registry.home.local
