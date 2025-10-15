@@ -4,7 +4,7 @@
 
 ## イニシエータのインストール
 
-ワーカノードに iSCSI イニシエータをインストールする。
+コントローラノード、ワーカノードに iSCSI イニシエータをインストールする。
 
 ```sh
 dnf install -y iscsi-initiator-utils
@@ -23,7 +23,7 @@ cat /etc/iscsi/initiatorname.iscsi
 ```
 
 ```text
-InitiatorName=iqn.1994-05.com.redhat:6c13bfc4535e
+InitiatorName=iqn.1994-05.com.redhat:b12f467cd60
 ```
 
 ## ターゲットのインストール
@@ -78,9 +78,9 @@ lvdisplay
   LV Path                /dev/container-volumes/disk01
   LV Name                disk01
   VG Name                container-volumes
-  LV UUID                DgGZXI-jnlr-bHcd-bH7u-e1Mt-V3zt-qXIpUR
+  LV UUID                j88eSk-Fg8z-iLoa-C7Xl-vuDs-OVgE-jnIIpL
   LV Write Access        read/write
-  LV Creation host, time storage.home.local, 2024-10-13 11:40:37 +0900
+  LV Creation host, time storage.home.local, 2025-10-14 20:36:59 +0900
   LV Status              available
   # open                 0
   LV Size                1.00 GiB
@@ -89,7 +89,7 @@ lvdisplay
   Allocation             inherit
   Read ahead sectors     auto
   - currently set to     256
-  Block device           252:0
+  Block device           253:0
 ```
 
 ## ファイアウォールの設定
@@ -135,7 +135,7 @@ targetcli /iscsi create
 ```
 
 ```text
-Created target iqn.2003-01.org.linux-iscsi.storage.x8664:sn.a6b9465d3f31.
+Created target iqn.2003-01.org.linux-iscsi.storage.x8664:sn.82cb03fb05eb.
 Created TPG 1.
 Global pref auto_add_default_portal=true
 Created default portal listening on all IPs (0.0.0.0), port 3260.
@@ -144,11 +144,11 @@ Created default portal listening on all IPs (0.0.0.0), port 3260.
 iSCSI ターゲットを確認する。
 
 ```sh
-targetcli ls /iscsi/iqn.2003-01.org.linux-iscsi.storage.x8664:sn.a6b9465d3f31/
+targetcli ls /iscsi/iqn.2003-01.org.linux-iscsi.storage.x8664:sn.82cb03fb05eb/
 ```
 
 ```text
-o- iqn.2003-01.org.linux-iscsi.storage.x8664:sn.a6b9465d3f31 ............................................................. [TPGs: 1]
+o- iqn.2003-01.org.linux-iscsi.storage.x8664:sn.82cb03fb05eb ............................................................. [TPGs: 1]
   o- tpg1 ................................................................................................... [no-gen-acls, no-auth]
     o- acls .............................................................................................................. [ACLs: 0]
     o- luns .............................................................................................................. [LUNs: 0]
@@ -185,7 +185,7 @@ o- disk01 .......................................................... [/dev/conta
 iSCSI ターゲットにバックストアを追加する。
 
 ```sh
-targetcli /iscsi/iqn.2003-01.org.linux-iscsi.storage.x8664:sn.a6b9465d3f31/tpg1/luns/ create /backstores/block/disk01
+targetcli /iscsi/iqn.2003-01.org.linux-iscsi.storage.x8664:sn.82cb03fb05eb/tpg1/luns/ create /backstores/block/disk01
 ```
 
 ```text
@@ -195,7 +195,7 @@ Created LUN 0.
 iSCSI LUN を確認する。
 
 ```sh
-targetcli ls /iscsi/iqn.2003-01.org.linux-iscsi.storage.x8664:sn.a6b9465d3f31/tpg1/luns
+targetcli ls /iscsi/iqn.2003-01.org.linux-iscsi.storage.x8664:sn.82cb03fb05eb/tpg1/luns
 ```
 
 ```text
@@ -208,22 +208,22 @@ o- luns ........................................................................
 iSCSI ACL を作成する。
 
 ```sh
-targetcli /iscsi/iqn.2003-01.org.linux-iscsi.storage.x8664:sn.a6b9465d3f31/tpg1/acls create iqn.1994-05.com.redhat:6c13bfc4535e
+targetcli /iscsi/iqn.2003-01.org.linux-iscsi.storage.x8664:sn.82cb03fb05eb/tpg1/acls create iqn.1994-05.com.redhat:b12f467cd60
 ```
 
 ```text
-Created Node ACL for iqn.1994-05.com.redhat:6c13bfc4535e
+Created Node ACL for iqn.1994-05.com.redhat:b12f467cd60
 Created mapped LUN 0.
 ```
 
 iSCSI ACL を確認する。
 
 ```sh
-targetcli ls /iscsi/iqn.2003-01.org.linux-iscsi.storage.x8664:sn.a6b9465d3f31/tpg1/acls/iqn.1994-05.com.redhat:6c13bfc4535e
+targetcli ls /iscsi/iqn.2003-01.org.linux-iscsi.storage.x8664:sn.82cb03fb05eb/tpg1/acls/iqn.1994-05.com.redhat:b12f467cd60
 ```
 
 ```text
-- iqn.1994-05.com.redhat:6c13bfc4535e ............................................................................ [Mapped LUNs: 1]
+o- iqn.1994-05.com.redhat:b12f467cd60 ............................................................................. [Mapped LUNs: 1]
   o- mapped_lun0 .......................................................................................... [lun0 block/disk01 (rw)]
 ```
 
@@ -236,6 +236,5 @@ targetcli saveconfig
 ```
 
 ```text
-Last 10 configs saved in /etc/target/backup/.
 Configuration saved to /etc/target/saveconfig.json
 ```
