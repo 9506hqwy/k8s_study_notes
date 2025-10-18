@@ -57,7 +57,7 @@ ClusterRole を作成する。
 
 ```sh
 kubectl create clusterrole sample-custom-controller \
-    --resource="samples,samples/status" \
+    --resource="sample.sample.custom-controller,sample.sample.custom-controller/status" \
     --verb="get,list,patch,watch"
 ```
 
@@ -77,10 +77,20 @@ kubectl create clusterrolebinding sample-custom-controller \
 clusterrolebinding.rbac.authorization.k8s.io/sample-custom-controller created
 ```
 
+サービスアカウントに権限が付与されているか確認する。
+
+```sh
+kubectl auth can-i get samples --as=system:serviceaccount:sample-system:sample-custom-controller
+```
+
+```text
+yes
+```
+
 Deployment を作成する。
 
-```yaml
-# deployment-sample-custom-controller.yaml
+```sh
+cat | kubectl apply -f - <<EOF
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -102,10 +112,7 @@ spec:
         env:
         - name: RUST_LOG
           value: info
-```
-
-```sh
-kubectl apply -f deployment-sample-custom-controller.yaml
+EOF
 ```
 
 ```text
@@ -119,8 +126,8 @@ kubectl -n sample-system get pod -o wide
 ```
 
 ```text
-NAME                                        READY   STATUS    RESTARTS   AGE   IP              NODE                  NOMINATED NODE   READINESS GATES
-sample-custom-controller-68855d5c9c-k88nn   1/1     Running   0          26s   172.17.51.154   worker02.home.local   <none>           <none>
+NAME                                        READY   STATUS    RESTARTS   AGE   IP               NODE                  NOMINATED NODE   READINESS GATES
+sample-custom-controller-7c4fb47889-hzvdm   1/1     Running   0          7s    172.17.255.137   worker01.home.local   <none>           <none>
 ```
 
 ## 動作確認
@@ -146,7 +153,7 @@ sample.sample.custom-controller/custom-sample-cr-01 created
 リソースを確認する。`status.check` がコントローラで更新されている。
 
 ```sh
-kubectl get samples custom-sample-cr-01 -o yaml
+kubectl get sample.sample.custom-controller custom-sample-cr-01 -o yaml
 ```
 
 ```yaml
@@ -156,14 +163,14 @@ metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
       {"apiVersion":"sample.custom-controller/v1alpha1","kind":"Sample","metadata":{"annotations":{},"name":"custom-sample-cr-01","namespace":"default"},"spec":{"name":"sample-01"}}
-  creationTimestamp: "2024-10-27T10:33:30Z"
+  creationTimestamp: "2025-10-15T11:45:54Z"
   finalizers:
   - sample-custom-controller/v1alpha1
   generation: 1
   name: custom-sample-cr-01
   namespace: default
-  resourceVersion: "542107"
-  uid: 72d643c8-4d71-43d1-93b7-0baac3e12ab4
+  resourceVersion: "307671"
+  uid: 97b78f6a-cd74-4e07-b4a2-650303dc0c62
 spec:
   name: sample-01
 status:
@@ -186,7 +193,7 @@ status:
 リソースを削除する。
 
 ```sh
-kubectl delete samples custom-sample-cr-01
+kubectl delete sample.sample.custom-controller custom-sample-cr-01
 ```
 
 ```text
@@ -199,4 +206,10 @@ sample.sample.custom-controller "custom-sample-cr-01" deleted
 [2024-10-27T10:45:30Z INFO  sample_custom_controller] Start custom-sample-cr-01
 [2024-10-27T10:45:30Z INFO  sample_custom_controller] Cleanup custom-sample-cr-01
 [2024-10-27T10:45:30Z INFO  sample_custom_controller] Ok custom-sample-cr-01 Action { requeue_after: None }
+```
+
+リソースの削除が失敗する場合は下記のコマンドを実行する。
+
+```sh
+kubectl patch sample.sample.custom-controller custom-sample-cr-01 -p '{"metadata":{"finalizers":[]}}' --type=merge
 ```

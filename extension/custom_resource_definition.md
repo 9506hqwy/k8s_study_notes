@@ -9,8 +9,8 @@ Kubernetes のカスタムリソースを定義する仕組み。
 `metadata.name` は `spec.names.plural`.`spec.group` とする必要がある。
 `spec.versions.name.schema.openAPIV3Schema` も必須になる。
 
-```yaml
-# custom-sample-crd.yaml
+```sh
+cat | kubectl apply -f - <<EOF
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -29,10 +29,7 @@ spec:
       schema:
         openAPIV3Schema:
           type: object
-```
-
-```sh
-kubectl apply -f custom-sample-crd.yaml
+EOF
 ```
 
 ```text
@@ -47,23 +44,20 @@ kubectl get crd samples.custom.sample.crd
 
 ```text
 NAME                        CREATED AT
-samples.custom.sample.crd   2024-10-26T01:21:26Z
+samples.custom.sample.crd   2025-10-15T09:57:13Z
 ```
 
 ## カスタムリソースの作成
 
 カスタムリソースを作成する。
 
-```yaml
-# custom-sample-cr-01.yaml
+```sh
+cat | kubectl apply -f - <<EOF
 apiVersion: custom.sample.crd/v1alpha1
 kind: Sample
 metadata:
   name: custom-sample-cr-01
-```
-
-```sh
-kubectl apply -f custom-sample-cr-01.yaml
+EOF
 ```
 
 ```text
@@ -78,7 +72,7 @@ kubectl get sample custom-sample-cr-01
 
 ```text
 NAME                  AGE
-custom-sample-cr-01   81s
+custom-sample-cr-01   15s
 ```
 
 ## 検証

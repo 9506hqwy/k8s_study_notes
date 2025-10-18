@@ -16,20 +16,20 @@ RUST_LOG=trace ./sample-device
 ```
 
 ```text
-[2024-10-12T02:47:31Z TRACE device_plugin] Starting to listen
-[2024-10-12T02:47:31Z TRACE device_plugin] Registration.register
-[2024-10-12T02:47:31Z TRACE sample_device] DevicePlugin.get_device_plugin_options
-[2024-10-12T02:47:31Z TRACE sample_device] DevicePlugin.list_and_watch
-[2024-10-12T02:47:31Z TRACE sample_device] DevicePlugin.list_and_watch.start
-[2024-10-12T02:47:31Z TRACE sample_device] DevicePlugin.list_and_watch.send
+[2025-10-18T01:27:13Z TRACE device_plugin] Starting to listen
+[2025-10-18T01:27:13Z TRACE device_plugin] Registration.register
+[2025-10-18T01:27:13Z TRACE sample_device] DevicePlugin.get_device_plugin_options
+[2025-10-18T01:27:13Z TRACE sample_device] DevicePlugin.list_and_watch
+[2025-10-18T01:27:13Z TRACE sample_device] DevicePlugin.list_and_watch.start
+[2025-10-18T01:27:13Z TRACE sample_device] DevicePlugin.list_and_watch.send
 ```
 
 ## ポッドのデプロイ
 
 デバイス・プラグインが制御するデバイスを指定してポッドをデプロイする。
 
-```yaml
-# pod.yaml
+```sh
+cat | kubectl apply -f - <<EOF
 apiVersion: v1
 kind: Pod
 metadata:
@@ -45,12 +45,7 @@ spec:
     resources:
       limits:
         demo/sample-device: 2
-```
-
-デプロイする。
-
-```sh
-kubectl apply -f pod.yaml
+EOF
 ```
 
 ```text
@@ -60,7 +55,7 @@ pod/demo-dp created
 デバイス・プラグインの `allocate` が呼ばれる。
 
 ```text
-[2024-10-12T04:10:49Z TRACE sample_device] DevicePlugin.allocate
+[2025-10-18T01:28:11Z TRACE sample_device] DevicePlugin.allocate
 ```
 
 ポッドを確認する。
@@ -70,8 +65,8 @@ kubectl get pods demo-dp -o wide
 ```
 
 ```text
-NAME      READY   STATUS    RESTARTS   AGE   IP               NODE                  NOMINATED NODE   READINESS GATES
-demo-dp   1/1     Running   0          53s   172.17.255.160   worker01.home.local   <none>           <none>
+NAME      READY   STATUS    RESTARTS   AGE   IP              NODE                  NOMINATED NODE   READINESS GATES
+demo-dp   1/1     Running   0          34s   172.17.51.138   worker02.home.local   <none>           <none>
 ```
 
 2 つのデバイスが割り当てられていることを確認する。
@@ -81,8 +76,8 @@ kubectl exec demo-dp -- env | grep SAMPLE
 ```
 
 ```text
-SAMPLE_DEVICE2=1
-SAMPLE_DEVICE3=1
+SAMPLE_DEVICE1=1
+SAMPLE_DEVICE4=1
 ```
 
 ## デバイスがない場合
@@ -121,35 +116,51 @@ kubectl get pods demo-dp-overflow -o wide
 
 ```text
 NAME               READY   STATUS    RESTARTS   AGE   IP       NODE     NOMINATED NODE   READINESS GATES
-demo-dp-overflow   0/1     Pending   0          22s   <none>   <none>   <none>           <none>
+demo-dp-overflow   0/1     Pending   0          11s   <none>   <none>   <none>           <none>
 ```
 
 `Pending` のままリソース待ちになる。
 
 ## デバイス・プラグインが起動していない場合
 
-デバイス・プラグインを停止してコンテナを停止する。
+デバイス・プラグインを停止してポッドをデプロイする。
 
 ```sh
-crictl stop 03ef3ee8f
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo-dp-not-service
+  namespace: default
+spec:
+  containers:
+  - image: nginx
+    name: nginx
+    ports:
+    - containerPort: 80
+      protocol: TCP
+    resources:
+      limits:
+        demo/sample-device: 1
+EOF
 ```
 
 ポッドを確認する。
 
 ```sh
-kubectl get pods
+kubectl get pod demo-dp-not-service -o wide
 ```
 
 ```text
-NAME                          READY   STATUS             RESTARTS   AGE
-demo-dp                       0/1     CrashLoopBackOff   0          26m
+NAME                  READY   STATUS    RESTARTS   AGE   IP       NODE     NOMINATED NODE   READINESS GATES
+demo-dp-not-service   0/1     Pending   0          20s   <none>   <none>   <none>           <none>
 ```
 
 デバイス・プラグインを起動して待つ。
 
 ```text
-NAME                          READY   STATUS    RESTARTS        AGE
-demo-dp                       1/1     Running   1 (3m32s ago)   28m
+NAME                  READY   STATUS    RESTARTS   AGE   IP              NODE                  NOMINATED NODE   READINESS GATES
+demo-dp-not-service   1/1     Running   0          59s   172.17.51.139   worker02.home.local   <none>           <none>
 ```
 
 ## 参考

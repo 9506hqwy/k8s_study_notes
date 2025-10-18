@@ -221,7 +221,7 @@ go build ./cmd/index-extender
 デフォルトスケジューラをビルドする。
 
 ```sh
-git clone --depth 1 -b v1.31.3 https://github.com/kubernetes/kubernetes.git
+git clone --depth 1 -b v1.33.5 https://github.com/kubernetes/kubernetes.git
 cd kubernetes
 go build ./cmd/kube-scheduler/
 ```
@@ -305,9 +305,9 @@ kubectl get pod -o wide
 
 ```text
 NAME        READY   STATUS    RESTARTS   AGE   IP               NODE                  NOMINATED NODE   READINESS GATES
-sample-01   1/1     Running   0          38s   172.17.255.134   worker01.home.local   <none>           <none>
-sample-02   1/1     Running   0          38s   172.17.51.145    worker02.home.local   <none>           <none>
-sample-03   0/1     Pending   0          38s   <none>           <none>                <none>           <none>
+sample-01   1/1     Running   0          61s   172.17.255.160   worker01.home.local   <none>           <none>
+sample-02   1/1     Running   0          61s   172.17.51.145    worker02.home.local   <none>           <none>
+sample-03   0/1     Pending   0          61s   <none>           <none>                <none>           <none>
 ```
 
 ### Plugin
@@ -398,9 +398,9 @@ kubectl get pod -o wide
 
 ```text
 NAME        READY   STATUS    RESTARTS   AGE   IP               NODE                  NOMINATED NODE   READINESS GATES
-sample-01   1/1     Running   0          12s   172.17.255.166   worker01.home.local   <none>           <none>
-sample-02   1/1     Running   0          12s   172.17.51.170    worker02.home.local   <none>           <none>
-sample-03   0/1     Pending   0          12s   <none>           <none>                <none>           <none>
+sample-01   1/1     Running   0          7s    172.17.255.161   worker01.home.local   <none>           <none>
+sample-02   1/1     Running   0          7s    172.17.51.146    worker02.home.local   <none>           <none>
+sample-03   0/1     Pending   0          7s    <none>           <none>                <none>           <none>
 ```
 
 ## 参考

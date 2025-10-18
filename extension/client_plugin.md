@@ -50,14 +50,14 @@ kubectl get sample cr01 -o yaml
 apiVersion: sample.custom-controller/v1alpha1
 kind: Sample
 metadata:
-  creationTimestamp: "2024-11-04T10:41:35Z"
+  creationTimestamp: "2025-10-16T09:58:07Z"
   finalizers:
   - sample-custom-controller/v1alpha1
   generation: 1
   name: cr01
   namespace: default
-  resourceVersion: "576152"
-  uid: 4113194e-2f86-4447-aebf-9bdfd1f843fa
+  resourceVersion: "322970"
+  uid: c1f62f09-371a-4b2a-b9cf-32199ac7a9fc
 spec:
   name: s
 status:

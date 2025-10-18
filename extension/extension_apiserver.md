@@ -19,10 +19,20 @@ podman push registry.home.local/system/sample-api-server
 
 ## サービスの登録
 
+名前空間を作成する。
+
+```sh
+kubectl create namespace sample-system
+```
+
+```text
+namespace/sample-system created
+```
+
 サービスアカウントを作成する。
 
 ```sh
-kubectl create serviceaccount sample-api-server
+kubectl create serviceaccount sample-api-server -n sample-system
 ```
 
 ```text
@@ -32,7 +42,9 @@ serviceaccount/sample-api-server created
 サービスアカウントにクラスタロール `system:auth-delegator` を割り当てる。
 
 ```sh
-kubectl create clusterrolebinding sample-api-server-auth --clusterrole=system:auth-delegator --serviceaccount=default:sample-api-server
+kubectl create clusterrolebinding sample-api-server-auth \
+    --clusterrole=system:auth-delegator \
+    --serviceaccount=sample-system:sample-api-server
 ```
 
 ```text
@@ -42,7 +54,10 @@ clusterrolebinding.rbac.authorization.k8s.io/sample-api-server-auth created
 サービスアカウントにロール `extension-apiserver-authentication-reader` を割り当てる。
 
 ```sh
-kubectl create rolebinding sample-api-server-config-reader -n kube-system --role=extension-apiserver-authentication-reader --serviceaccount=default:sample-api-server
+kubectl create rolebinding sample-api-server-config-reader \
+    -n kube-system \
+    --role=extension-apiserver-authentication-reader \
+    --serviceaccount=sample-system:sample-api-server
 ```
 
 ```text
@@ -51,13 +66,13 @@ rolebinding.rbac.authorization.k8s.io/sample-api-server-config-reader created
 
 ポッドを作成する。
 
-```yaml
-# deployment-sample-api-server.yaml
+```sh
+cat | kubectl apply -f - <<EOF
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sample-api-server
-  namespace: default
+  namespace: sample-system
 spec:
   selector:
     matchLabels:
@@ -77,10 +92,7 @@ spec:
         ports:
         - containerPort: 3000
           protocol: TCP
-```
-
-```sh
-kubectl apply -f deployment-sample-api-server.yaml
+EOF
 ```
 
 ```text
@@ -90,18 +102,18 @@ deployment.apps/sample-api-server created
 ポッドを確認する。
 
 ```sh
-kubectl get pod -o wide
+kubectl -n sample-system get pod -o wide
 ```
 
 ```text
-NAME                                READY   STATUS    RESTARTS   AGE   IP              NODE                  NOMINATED NODE   READINESS GATES
-sample-api-server-9f7b777d8-cbt4m   1/1     Running   0          51s   172.17.51.173   worker02.home.local   <none>           <none>
+NAME                                 READY   STATUS    RESTARTS   AGE   IP               NODE                  NOMINATED NODE   READINESS GATES
+sample-api-server-57cf8c89dd-9wxch   1/1     Running   0          16s   172.17.255.150   worker01.home.local   <none>           <none>
 ```
 
 サービスを作成する。
 
 ```sh
-kubectl expose deployment sample-api-server
+kubectl -n sample-system expose deployment sample-api-server
 ```
 
 ```text
@@ -111,12 +123,12 @@ service/sample-api-server exposed
 サービスを確認する。
 
 ```sh
-kubectl get service sample-api-server -o wide
+kubectl -n sample-system get service sample-api-server -o wide
 ```
 
 ```text
-NAME                TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE   SELECTOR
-sample-api-server   ClusterIP   10.99.133.193   <none>        3000/TCP   19s   app=sample-api-server
+NAME                TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE   SELECTOR
+sample-api-server   ClusterIP   10.108.235.177   <none>        3000/TCP   16s   app=sample-api-server
 ```
 
 ## ログレベルを変更
@@ -147,8 +159,8 @@ successfully set klog.logging.verbosity to 5
 
 サービスを APIService として登録する。
 
-```yaml
-# v1alpha1.sample-api-server.yaml
+```sh
+cat | kubectl apply -f - <<EOF
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
 metadata:
@@ -160,15 +172,10 @@ spec:
   insecureSkipTLSVerify: true
   service:
     name: sample-api-server
-    namespace: default
+    namespace: sample-system
     port: 3000
   version: v1alpha1
-```
-
-APIService を作成する。
-
-```sh
-kubectl apply -f v1alpha1.sample-api-server.yaml
+EOF
 ```
 
 ```text
@@ -182,8 +189,8 @@ kubectl get apiservice v1alpha1.sample-api-server
 ```
 
 ```text
-NAME                         SERVICE                     AVAILABLE   AGE
-v1alpha1.sample-api-server   default/sample-api-server   True        8m18s
+NAME                         SERVICE                           AVAILABLE   AGE
+v1alpha1.sample-api-server   sample-system/sample-api-server   True        14s
 ```
 
 ## 動作確認
@@ -224,6 +231,10 @@ kubectl get --raw '/apis/sample-api-server/v1alpha1/namespaces/default/samples' 
 ```json
 {
   "apiVersion": "sample-api-server/v1alpha1",
+  "kind": "SampleList",
+  "metadata": {
+    "resourceVersion": "1"
+  },
   "items": [
     {
       "apiVersion": "sample-api-server/v1alpha1",
@@ -235,11 +246,7 @@ kubectl get --raw '/apis/sample-api-server/v1alpha1/namespaces/default/samples' 
         "name": "default"
       }
     }
-  ],
-  "kind": "SampleList",
-  "metadata": {
-    "resourceVersion": "1"
-  }
+  ]
 }
 ```
 
