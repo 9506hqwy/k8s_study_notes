@@ -21,7 +21,15 @@ vxlan は enp2s0 がローカル IP アドレスになるので internal を開�
 ```
 
 ```sh
+firewall-cmd --permanent --zone=internal --add-port=179/tcp
 firewall-cmd --permanent --zone=internal --add-port=4789/udp
+
+firewall-cmd --permanent --new-policy forwarding
+firewall-cmd --permanent --policy forwarding --add-ingress-zone internal
+firewall-cmd --permanent --policy forwarding --add-egress-zone trusted
+firewall-cmd --permanent --policy forwarding --set-priority 100
+firewall-cmd --permanent --policy forwarding --set-target ACCEPT
+
 firewall-cmd --reload
 ```
 
