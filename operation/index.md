@@ -8,4 +8,5 @@ network_policy
 volume
 package_manager
 deploy
+function
 ```

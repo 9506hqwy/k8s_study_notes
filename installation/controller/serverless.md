@@ -436,6 +436,134 @@ eventing-webhook   ClusterIP   10.102.220.220   <none>        443/TCP           
 job-sink           ClusterIP   10.102.246.19    <none>        80/TCP,443/TCP,9092/TCP   100s
 ```
 
+インメモリチャネルを構築する。
+
+```{note}
+インメモリチャネルは非プロフダクション用
+```
+
+```sh
+kubectl apply -f https://github.com/knative/eventing/releases/download/knative-v1.19.6/in-memory-channel.yaml
+```
+
+```text
+serviceaccount/imc-controller created
+clusterrolebinding.rbac.authorization.k8s.io/imc-controller created
+rolebinding.rbac.authorization.k8s.io/imc-controller created
+clusterrolebinding.rbac.authorization.k8s.io/imc-controller-resolver created
+serviceaccount/imc-dispatcher created
+clusterrolebinding.rbac.authorization.k8s.io/imc-dispatcher created
+rolebinding.rbac.authorization.k8s.io/imc-dispatcher-tls-role-binding created
+role.rbac.authorization.k8s.io/imc-dispatcher-tls-role created
+configmap/config-imc-event-dispatcher created
+deployment.apps/imc-controller created
+service/inmemorychannel-webhook created
+service/imc-dispatcher created
+deployment.apps/imc-dispatcher created
+customresourcedefinition.apiextensions.k8s.io/inmemorychannels.messaging.knative.dev created
+clusterrole.rbac.authorization.k8s.io/imc-addressable-resolver created
+clusterrole.rbac.authorization.k8s.io/imc-channelable-manipulator created
+clusterrole.rbac.authorization.k8s.io/imc-controller created
+clusterrole.rbac.authorization.k8s.io/imc-subscriber created
+clusterrole.rbac.authorization.k8s.io/imc-dispatcher created
+role.rbac.authorization.k8s.io/knative-inmemorychannel-webhook created
+mutatingwebhookconfiguration.admissionregistration.k8s.io/inmemorychannel.eventing.knative.dev created
+validatingwebhookconfiguration.admissionregistration.k8s.io/validation.inmemorychannel.eventing.knative.dev created
+secret/inmemorychannel-webhook-certs created
+```
+
+すべてのポッドが起動するまで待つ。
+
+```sh
+watch kubectl -n knative-eventing get pod
+```
+
+```text
+NAME                                  READY   STATUS    RESTARTS   AGE
+eventing-controller-ff8cfd969-gxrxk   1/1     Running   1          27h
+eventing-webhook-75f4bfcf4-xzc4g      1/1     Running   1          27h
+imc-controller-c6878df48-zthn8        1/1     Running   0          73s
+imc-dispatcher-7c86568d45-bt24b       1/1     Running   0          73s
+job-sink-584876b655-t5vrn             1/1     Running   1          27h
+```
+
+サービスを確認する。
+
+```sh
+kubectl -n knative-eventing get service
+```
+
+```text
+NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                     AGE
+eventing-webhook          ClusterIP   10.102.220.220   <none>        443/TCP                     27h
+imc-dispatcher            ClusterIP   10.99.189.168    <none>        80/TCP,443/TCP,9090/TCP     2m59s
+inmemorychannel-webhook   ClusterIP   10.98.218.146    <none>        443/TCP,9090/TCP,8008/TCP   2m59s
+job-sink                  ClusterIP   10.102.246.19    <none>        80/TCP,443/TCP,9092/TCP     27h
+```
+
+マルチテナントブローカを構築する。
+
+```sh
+kubectl apply -f https://github.com/knative/eventing/releases/download/knative-v1.19.6/mt-channel-broker.yaml
+```
+
+```text
+clusterrole.rbac.authorization.k8s.io/knative-eventing-mt-channel-broker-controller created
+clusterrole.rbac.authorization.k8s.io/knative-eventing-mt-broker-filter created
+role.rbac.authorization.k8s.io/mt-broker-filter created
+serviceaccount/mt-broker-filter created
+clusterrole.rbac.authorization.k8s.io/knative-eventing-mt-broker-ingress created
+role.rbac.authorization.k8s.io/mt-broker-ingress created
+serviceaccount/mt-broker-ingress-oidc created
+serviceaccount/mt-broker-ingress created
+clusterrolebinding.rbac.authorization.k8s.io/eventing-mt-channel-broker-controller created
+clusterrolebinding.rbac.authorization.k8s.io/knative-eventing-mt-broker-filter created
+rolebinding.rbac.authorization.k8s.io/mt-broker-filter created
+clusterrolebinding.rbac.authorization.k8s.io/knative-eventing-mt-broker-ingress created
+rolebinding.rbac.authorization.k8s.io/mt-broker-ingress created
+deployment.apps/mt-broker-filter created
+service/broker-filter created
+deployment.apps/mt-broker-ingress created
+service/broker-ingress created
+deployment.apps/mt-broker-controller created
+horizontalpodautoscaler.autoscaling/broker-ingress-hpa created
+horizontalpodautoscaler.autoscaling/broker-filter-hpa created
+```
+
+すべてのポッドが起動するまで待つ。
+
+```sh
+watch kubectl -n knative-eventing get pod
+```
+
+```text
+NAME                                   READY   STATUS    RESTARTS   AGE
+eventing-controller-ff8cfd969-gxrxk    1/1     Running   1          27h
+eventing-webhook-75f4bfcf4-xzc4g       1/1     Running   1          27h
+imc-controller-c6878df48-zthn8         1/1     Running   0          10m
+imc-dispatcher-7c86568d45-bt24b        1/1     Running   0          10m
+job-sink-584876b655-t5vrn              1/1     Running   1          27h
+mt-broker-controller-9fb9645c4-njj4p   1/1     Running   0          39s
+mt-broker-filter-7fb5cffc6b-cvtnf      1/1     Running   0          39s
+mt-broker-ingress-796dc65ccd-wk5cb     1/1     Running   0          39s
+```
+
+サービスを確認する。
+
+```sh
+kubectl -n knative-eventing get service
+```
+
+```text
+NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                     AGE
+broker-filter             ClusterIP   10.100.207.118   <none>        80/TCP,443/TCP,9092/TCP     95s
+broker-ingress            ClusterIP   10.104.165.15    <none>        80/TCP,443/TCP,9092/TCP     95s
+eventing-webhook          ClusterIP   10.102.220.220   <none>        443/TCP                     27h
+imc-dispatcher            ClusterIP   10.99.189.168    <none>        80/TCP,443/TCP,9090/TCP     11m
+inmemorychannel-webhook   ClusterIP   10.98.218.146    <none>        443/TCP,9090/TCP,8008/TCP   11m
+job-sink                  ClusterIP   10.102.246.19    <none>        80/TCP,443/TCP,9092/TCP     27h
+```
+
 ## 動作確認
 
 ```{note}
