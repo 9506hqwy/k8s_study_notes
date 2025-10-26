@@ -3,4 +3,5 @@
 ```{toctree}
 time_sync
 container_runtime
+k0s
 ```
