@@ -275,6 +275,38 @@ insecure=true
 EOF
 ```
 
+## Harbor の自動起動
+
+マシンの起動時に Harbor の自動起動を設定する。
+
+```sh
+cat > /etc/systemd/system/harbor.service <<EOF
+[Unit]
+Description=Harbor Container Registry
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/docker compose up
+ExecStop=/bin/kill -INT ${MAINPID}
+Restart=always
+WorkingDirectory=/root/harbor
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+マシン起動時の自動起動設定とサービスを起動する。
+
+```sh
+systemctl enable --now harbor
+```
+
+```text
+Created symlink '/etc/systemd/system/multi-user.target.wants/harbor.service' → '/etc/systemd/system/harbor.service'.
+```
+
 ## Harbor アンインストール
 
 コンテナを削除する。
