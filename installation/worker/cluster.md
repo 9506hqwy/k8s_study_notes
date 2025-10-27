@@ -43,6 +43,10 @@ systemctl enable kubelet
 
 [ロードバランサ](../controller/loadbalancer.md) のファイアウォールを設定する。
 
+## 仮想マシン
+
+[仮想マシン](../controller/vm.md) の仮想化をインストールする。
+
 ## 環境確認
 
 Worker Node を再起動後に Worker Node でネットワーク構成を確認する。

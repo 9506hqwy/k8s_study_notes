@@ -12,4 +12,5 @@ dashboard
 delivery
 monitoring
 serverless
+vm
 ```
