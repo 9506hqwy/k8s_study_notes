@@ -9,4 +9,5 @@ volume
 package_manager
 deploy
 function
+vm
 ```
