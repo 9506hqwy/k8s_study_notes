@@ -1,5 +1,166 @@
 # 仮想マシン
 
+## SSH 接続
+
+接続元で SSH 鍵を作成する。
+
+```sh
+ssh-keygen -t ed25519
+```
+
+SSH 鍵をシークレットに登録する。
+
+```sh
+kubectl create secret generic my-keys --from-file="$HOME/.ssh/id_ed25519.pub"
+```
+
+```text
+secret/my-keys created
+```
+
+作成したシークレットを指定して仮想マシンをデプロイする。
+
+```sh
+cat | kubectl apply -f - <<EOF
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: vm-ssh
+spec:
+  runStrategy: Halted
+  template:
+    spec:
+      accessCredentials:
+      - sshPublicKey:
+          propagationMethod:
+            qemuGuestAgent:
+              users:
+              - centos
+          source:
+            secret:
+              secretName: my-keys
+      domain:
+        devices:
+          disks:
+            - name: osdisk
+              disk:
+                bus: virtio
+            - name: cloudinitdisk
+              disk:
+                bus: virtio
+          interfaces:
+          - name: default
+            masquerade: {}
+            model: virtio
+        resources:
+          requests:
+            memory: 2048M
+      networks:
+      - name: default
+        pod: {}
+      volumes:
+        - name: osdisk
+          containerDisk:
+            image: quay.io/containerdisks/centos-stream:9
+        - name: cloudinitdisk
+          cloudInitNoCloud:
+            userData: |-
+              #cloud-config
+              user: centos
+              runcmd:
+                - [ setsebool, -P, 'virt_qemu_ga_manage_ssh', 'on' ]
+EOF
+```
+
+```text
+virtualmachine.kubevirt.io/vm-ssh created
+```
+
+仮想マシンを確認する。
+
+```sh
+kubectl get vm
+```
+
+```text
+NAME     AGE   STATUS    READY
+vm-ssh   33s   Stopped   False
+```
+
+仮想マシンを起動する。
+
+```sh
+kubectl virt start vm-ssh
+```
+
+```text
+VM vm-ssh was scheduled to start
+```
+
+仮想マシンのインスタンスを確認する。
+
+```sh
+kubectl get vmi -o wide
+```
+
+```text
+NAME     AGE     PHASE     IP              NODENAME              READY   LIVE-MIGRATABLE   PAUSED
+vm-ssh   2m15s   Running   172.17.51.166   worker02.home.local   True    True
+```
+
+SSH で接続する。
+
+```sh
+kubectl virt ssh -i "$HOME/.ssh/id_ed25519" -l centos vm/vm-ssh
+```
+
+```text
+The authenticity of host 'vm.vm-ssh.default (<no hostip for proxy command>)' can't be established.
+ED25519 key fingerprint is SHA256:ZO9wvNp3Qe8UYQu0iRtptb4Ll0f5Kkcq7LrmaFS3oFg.
+This key is not known by any other names.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added 'vm.vm-ssh.default' (ED25519) to the list of known hosts.
+[centos@vm-ssh ~]$
+```
+
+サービスとして公開する。
+
+```sh
+kubectl virt expose vm vm-ssh --name vm-ssh-22 --port 20022 --target-port 22 --type LoadBalancer
+```
+
+```text
+Service vm-ssh-22 successfully created for vm vm-ssh
+```
+
+サービスを確認する。
+
+```sh
+kubectl get service vm-ssh-22
+```
+
+```text
+NAME        TYPE           CLUSTER-IP    EXTERNAL-IP    PORT(S)           AGE
+vm-ssh-22   LoadBalancer   10.109.92.7   172.16.0.101   20022:30469/TCP   10s
+```
+
+接続確認する。
+
+```sh
+ssh -i "$HOME/.ssh/id_ed25519" -p 20022 centos@172.16.0.101
+```
+
+```text
+The authenticity of host '[172.16.0.101]:20022 ([172.16.0.101]:20022)' can't be established.
+ED25519 key fingerprint is SHA256:ZO9wvNp3Qe8UYQu0iRtptb4Ll0f5Kkcq7LrmaFS3oFg.
+This host key is known by the following other names/addresses:
+    ~/.ssh/known_hosts:1: vm.vm-ssh.default
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added '[172.16.0.101]:20022' (ED25519) to the list of known hosts.
+Last login: Wed Oct 29 07:04:00 2025 from 172.17.2.39
+[centos@vm-ssh ~]$
+```
+
 ## 永続化ストレージ
 
 PersistentVolume は下記とする。
