@@ -161,6 +161,197 @@ Last login: Wed Oct 29 07:04:00 2025 from 172.17.2.39
 [centos@vm-ssh ~]$
 ```
 
+## ネットワーク
+
+### ポート
+
+公開するポートを指定する。
+
+公開するポート番号を指定して仮想マシンをデプロイする。
+
+```sh
+cat | kubectl apply -f - <<EOF
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: vm-http
+spec:
+  runStrategy: Halted
+  template:
+    spec:
+      domain:
+        devices:
+          disks:
+            - name: osdisk
+              disk:
+                bus: virtio
+            - name: cloudinitdisk
+              disk:
+                bus: virtio
+          interfaces:
+          - name: default
+            masquerade: {}
+            model: virtio
+            ports:
+              - name: http
+                port: 80
+        resources:
+          requests:
+            memory: 2048M
+      networks:
+      - name: default
+        pod: {}
+      volumes:
+        - name: osdisk
+          containerDisk:
+            image: quay.io/containerdisks/centos-stream:9
+        - name: cloudinitdisk
+          cloudInitNoCloud:
+            userData: |-
+              #cloud-config
+              packages:
+                - nginx
+              runcmd:
+                - [ systemctl, enable, --now, nginx ]
+EOF
+```
+
+```text
+virtualmachine.kubevirt.io/vm-http created
+```
+
+仮想マシンを確認する。
+
+```sh
+kubectl get vm
+```
+
+```text
+NAME      AGE   STATUS    READY
+vm-http   29s   Stopped   False
+```
+
+仮想マシンを起動する。
+
+```sh
+kubectl virt start vm-http
+```
+
+```text
+VM vm-http was scheduled to start
+```
+
+仮想マシンのインスタンスを確認する。
+
+```sh
+kubectl get vmi -o wide
+```
+
+```text
+NAME      AGE   PHASE     IP    NODENAME              READY   LIVE-MIGRATABLE   PAUSED
+vm-http   76s   Running         worker02.home.local   True    True
+```
+
+サービスとして公開する。
+
+```sh
+kubectl virt expose vm vm-http --name vm-http-80 --port 20080 --target-port 80 --type LoadBalancer
+```
+
+```text
+Service vm-http-80 successfully created for vm vm-http
+```
+
+サービスを確認する。
+
+```sh
+kubectl get service vm-http-80
+```
+
+```text
+NAME         TYPE           CLUSTER-IP     EXTERNAL-IP    PORT(S)           AGE
+vm-http-80   LoadBalancer   10.107.15.76   172.16.0.101   20080:31333/TCP   15s
+```
+
+接続確認する。
+
+```sh
+curl -s http://172.16.0.101:20080
+```
+
+HTML が返却される。
+
+SSH 接続はできない。
+
+```sh
+kubectl virt ssh vm/vm-http
+```
+
+```text
+Internal error occurred: dialing VM: dial tcp 172.17.51.181:22: connect: connection refused
+Connection closed by UNKNOWN port 65535
+exit status 255
+```
+
+### ネットワークポリシー
+
+アクセス制御を指定する。
+
+すべての接続を拒否する。
+
+```sh
+cat | kubectl apply -f - <<EOF
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: deny-all
+spec:
+  podSelector: {}
+  ingress: []
+EOF
+```
+
+```text
+networkpolicy.networking.k8s.io/deny-all created
+```
+
+接続を確認する。
+
+```sh
+curl -s --connect-timeout 5 http://172.16.0.101:20080
+```
+
+タイムアウトが発生する。
+
+HTTP の接続を許可する。
+
+```sh
+cat | kubectl apply -f - <<EOF
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-http
+spec:
+  podSelector: {}
+  ingress:
+  - ports:
+    - protocol: TCP
+      port: 80
+EOF
+```
+
+```text
+networkpolicy.networking.k8s.io/allow-http created
+```
+
+接続を確認する。
+
+```sh
+curl -s http://172.16.0.101:20080
+```
+
+HTML が返却される。
+
 ## 永続化ストレージ
 
 PersistentVolume は下記とする。
