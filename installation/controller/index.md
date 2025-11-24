@@ -5,7 +5,8 @@ prepare
 cluster
 network_addon
 kubernetes
-gateway
+gateway_calico
+gateway_nginx
 loadbalancer
 ingress
 dashboard

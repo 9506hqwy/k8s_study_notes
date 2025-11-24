@@ -1,8 +1,8 @@
-# Gateway
+# Gateway (Nginx Gateway Fabric)
 
 ## インストール
 
-Ingress Gateway Fabric を構築する。
+Nginx Gateway Fabric を構築する。
 
 git をインストールする。
 
