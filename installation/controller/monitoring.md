@@ -402,3 +402,23 @@ curl --resolve alertmanager:80:172.16.0.100 http://alertmanager/
 ```
 
 HTML が返却される。
+
+## その他
+
+削除するときに下記のエラーが発生する場合がある。
+
+```text
+Discovery failed for some groups, 1 failing: unable to retrieve the complete list of server APIs: metrics.k8s.io/v1beta1: stale GroupVersion discovery: metrics.k8s.io/v1beta1
+```
+
+apiservices を削除する。
+
+```sh
+kubectl delete apiservices v1beta1.metrics.k8s.io
+```
+
+```text
+apiservice.apiregistration.k8s.io "v1beta1.metrics.k8s.io" deleted
+```
+
+see [Unable to retrieve the complete list of server APIs: metrics.k8s.io/v1beta1](https://github.com/prometheus-operator/kube-prometheus/issues/275).

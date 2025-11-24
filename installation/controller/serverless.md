@@ -688,3 +688,29 @@ curl http://hello.default.knative.home.local
 ```text
 "GET / HTTP/1.1\r\nHost: hello.default.knative.home.local\r\nAccept: */*\r\nForwarded: for=172.17.255.167;proto=http\r\nK-Proxy-Request: activator\r\nUser-Agent: curl/8.12.1\r\nX-Forwarded-For: 172.17.255.167, 172.17.51.148\r\nX-Forwarded-Proto: http\r\nX-Request-Id: 6d82eb23-c244-434a-868f-8fb80ba7a89a\r\n\r\n"
 ```
+
+## その他
+
+削除するときに下記のエラーが発生する場合がある。
+
+```text
+Failed to delete all resource types, 1 remaining: Internal error occurred: failed calling webhook "validation.webhook.serving.knative.dev": failed to call webhook: Post "https://webhook.knative-serving.svc:443/resource-validation?timeout=10s": service "webhook" not found
+```
+
+webhook を削除する。
+
+```sh
+kubectl -n knative-serving delete validatingwebhookconfiguration.admissionregistration.k8s.io config.webhook.serving.knative.dev
+```
+
+```text
+validatingwebhookconfiguration.admissionregistration.k8s.io "config.webhook.serving.knative.dev" deleted
+```
+
+```sh
+kubectl -n knative-serving delete validatingwebhookconfiguration.admissionregistration.k8s.io validation.webhook.serving.knative.dev
+```
+
+```text
+validatingwebhookconfiguration.admissionregistration.k8s.io "validation.webhook.serving.knative.dev" deleted
+```
