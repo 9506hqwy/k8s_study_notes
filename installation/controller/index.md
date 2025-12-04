@@ -10,6 +10,7 @@ gateway_nginx
 loadbalancer
 ingress
 dashboard
+integration.md
 delivery
 monitoring
 serverless
