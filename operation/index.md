@@ -7,6 +7,7 @@ service
 network_policy
 volume
 package_manager
+build
 deploy
 function
 vm
